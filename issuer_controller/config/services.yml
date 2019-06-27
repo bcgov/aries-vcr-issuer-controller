@@ -1,0 +1,120 @@
+# Documentation: https://github.com/bcgov/von-agent-template/tree/master/von-x-agent/config
+
+issuers:
+  ian-ville:
+    name: ian-cille
+    abbreviation: ian-ville
+    url: https://www.ian-ville.ca/ian-ville-info-page
+    email: info@ian-ville.ca
+    logo_path: ../assets/img/ian-ville-logo.jpg
+    endpoint: $ENDPOINT_URL
+
+    connection:
+      type: TheOrgBook
+      api_url: $TOB_API_URL
+      sign_target: false
+
+    wallet:
+      name: ${POSTGRESQL_WALLET_NAME:-myorg_issuer}
+      seed: $WALLET_SEED_VONX
+      type: $WALLET_TYPE
+      params:
+        storage_config:
+          url: "$POSTGRESQL_WALLET_HOST:$POSTGRESQL_WALLET_PORT"
+      access_creds:
+        key: $WALLET_ENCRYPTION_KEY
+        storage_credentials:
+          account: $POSTGRESQL_WALLET_USER
+          password: $POSTGRESQL_WALLET_PASSWORD
+          admin_account: ${POSTGRESQL_WALLET_ADMIN_USER:-postgres}
+          admin_password: $POSTGRESQL_WALLET_ADMIN_PASSWORD
+        key_derivation_method: ARGON2I_MOD
+
+    credential_types:
+    - description: Permit
+      schema: ian-permit.ian-ville
+      issuer_url: $APPLICATION_URL/ian-ville/ian-permit
+      depends_on:
+        - greenlight_registration
+      credential:
+        effective_date:
+          input: effective_date
+          from: claim
+
+      # topic identifies the id of the subject of the credential from the foundational credential
+      # in BC Gov deployment type is always "registration" as it is from BC Registries
+      topic:
+        source_id:
+          input: corp_num
+          from: claim
+        type:
+          input: registration
+          from: value
+
+      mapping:
+        # "attribute" defines a generic field in the TOB model
+        # "value" identifies where to derive the data value (typically it comes from the claim)
+        # "type" - if "value" - is the name of the attribute
+        # "format" is an optional data format (default text)
+        - model: attribute
+          fields:
+            type:
+              input: permit_issued_date
+              from: value
+            format:
+              input: datetime
+              from: value
+            value:
+              input: permit_issued_date
+              from: claim
+        - model: attribute
+          fields:
+            type:
+              input: permit_type
+              from: value
+            value:
+              input: permit_type
+              from: claim
+        - model: attribute
+          fields:
+            type:
+              input: permit_status
+              from: value
+            value:
+              input: permit_status
+              from: claim
+        - model: attribute
+          fields:
+            type:
+              input: effective_date
+              from: value
+            format:
+              input: datetime
+              from: value
+            value:
+              input: effective_date
+              from: claim
+
+verifiers:
+  bctob:
+    name: BC OrgBook
+    connection:
+      type: TheOrgBook
+      api_url: $TOB_API_URL
+    wallet:
+      seed: "tob-verifier-wallet-000000000001"
+
+proof_requests:
+  greenlight_registration:
+    version: '1.0.0'
+    schemas:
+      - key:
+          did: 6qnvgJtqwK44D8LFYnV5Yf
+          name: Registered Corporation
+          version: '1.0.3'
+        attributes:
+          - corp_num
+          - legal_name
+
+
+### eof ###

@@ -8,7 +8,7 @@ import os
 import time
 
 
-def custom_call():
+def custom_call(app):
     # read configuration files
     alias = 'Demo issuer'
     seed = '00000000000000000000000000000001'
@@ -35,7 +35,7 @@ def custom_call():
         response.raise_for_status()
         did = response.json()
         print("Registered did", did)
-        #time.sleep(3)
+        app.config['DID'] = did['did']
 
     # register our schema(s) and credential definition(s)
     schema_request = {"schema_name": schema_name, "schema_version": schema_version, "attributes": schema_attrs}
@@ -43,29 +43,14 @@ def custom_call():
     response.raise_for_status()
     schema_id = response.json()
     print("Registered schema", schema_id)
-    #time.sleep(3)
+    app.config['SCHEMA_' + schema_name + '_' + schema_version] = schema_id['schema_id']
 
     cred_def_request = {"schema_id": schema_id['schema_id']}
     response = requests.post(agent_admin_url+'/credential-definitions', json.dumps(cred_def_request))
     response.raise_for_status()
     credential_definition_id = response.json()
     print("Registered credential definition", credential_definition_id)
-    #time.sleep(3)
-
-    # register our schema(s) and credential definition(s)
-    schema_request = {"schema_name": schema_name, "schema_version": schema_version, "attributes": schema_attrs}
-    response = requests.post(agent_admin_url+'/schemas', json.dumps(schema_request))
-    response.raise_for_status()
-    schema_id = response.json()
-    print("Registered schema", schema_id)
-    #time.sleep(3)
-
-    cred_def_request = {"schema_id": schema_id['schema_id']}
-    response = requests.post(agent_admin_url+'/credential-definitions', json.dumps(cred_def_request))
-    response.raise_for_status()
-    credential_definition_id = response.json()
-    print("Registered credential definition", credential_definition_id)
-    #time.sleep(3)
+    app.config['CRED_DEF_' + schema_name + '_' + schema_version] = credential_definition_id['credential_definition_id']
 
     # check if we have a TOB connection
     response = requests.get(agent_admin_url+'/connections')
@@ -96,6 +81,7 @@ def custom_call():
 
     # register ourselves (issuer, schema(s), cred def(s)) with TOB
     tob_connection_id = tob_connection['connection_id']
+    app.config['TOB_CONNECTION'] = tob_connection['connection_id']
     issuer_request = {
         "connection_id": tob_connection_id,
         "issuer_registration": {
@@ -226,7 +212,7 @@ def custom_call():
 
 class CustomServer(Server):
     def __call__(self, app, *args, **kwargs):
-        custom_call()
+        custom_call(app)
         #Hint: Here you could manipulate app
         return Server.__call__(self, app, *args, **kwargs)
 

@@ -1,0 +1,72 @@
+# Documentation: https://github.com/bcgov/von-agent-template/tree/master/von-x-agent/config
+
+forms:
+  ian-permit:
+
+    # URL for the Web form - becomes <server>/<path> e.g. http://localhost:5000/ian-ville/ian-permit
+    path: /ian-ville/ian-permit
+  
+    # type is always "issue-credential"
+    type: issue-credential
+  
+    schema_name: ian-permit.ian-ville
+    page_title: ian-cille Permits
+    title: Application for ian-permit
+  
+    # Templates are defined in von-x-agent/templates
+    template: bcgov.index.html
+  
+    description: >
+      ian-cille issues ian-permit credentials to organizations to authorize those organizations to be able to do something.
+  
+    explanation: Use the form below to apply for a ian-permit for your organization.
+
+    proof_request:
+      id: greenlight_registration
+      connection_id: bctob
+
+    #js_includes:
+    #  - src: js/bc_registries.js
+
+    # "fields" are displayed on the UI for the user to enter values
+    fields:
+      - name: corp_num
+        label: Corp Num
+        type: text
+        required: true
+
+      - name: legal_name
+        label: Legal Name
+        type: text
+        required: true
+
+      - name: permit_type
+        label: Permit Type requested
+        type: select
+        options:
+          - Limited Use Authorization
+          - Unlimited Use Authorization
+        required: true
+
+      - name: effective_date
+        label: Effective Date
+        type: date
+        required: true
+
+    # "mapping" identifies attributes that are auto-populated
+    mapping:
+      attributes:
+        - name: permit_id
+          from: helper
+          source: uuid
+
+        - name: permit_issued_date
+          from: helper
+          source: now_iso
+
+        - name: permit_status
+          from: literal
+          source: ACT
+
+
+### eof ###
