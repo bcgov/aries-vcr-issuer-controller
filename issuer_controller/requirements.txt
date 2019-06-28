@@ -1,4 +1,4 @@
 flask
 flask_script
 requests
-
+pyyaml

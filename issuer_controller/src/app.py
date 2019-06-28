@@ -6,10 +6,22 @@ import requests
 import json
 import os
 import time
+import yaml
+
+import config
 
 
 def custom_call(app):
     # read configuration files
+    config_root = os.environ.get('CONFIG_ROOT', '../config')
+    with open(config_root + "/settings.yml", 'r') as stream:
+        config_settings = yaml.safe_load(stream)
+    with open(config_root + "/schemas.yml", 'r') as stream:
+        config_schemas = yaml.safe_load(stream)
+    with open(config_root + "/services.yml", 'r') as stream:
+        config_services = yaml.safe_load(stream)
+
+    # other sample data
     alias = 'Demo issuer'
     seed = '00000000000000000000000000000001'
     schema_name = 'ian-permit.ian-ville'
@@ -182,7 +194,7 @@ def custom_call(app):
             "issuer": {
                 "name": alias,
                 "abbreviation": alias,
-                "did": did['did'],
+                "did": app.config['DID'],
                 "email": "info@ian-ville.ca",
                 "endpoint": "http://192.168.65.3:5001",
                 "label": alias,
@@ -215,6 +227,11 @@ class CustomServer(Server):
         custom_call(app)
         #Hint: Here you could manipulate app
         return Server.__call__(self, app, *args, **kwargs)
+
+
+# Load application settings (environment)
+config_root = os.environ.get('CONFIG_ROOT', '../config')
+ENV = config.load_settings(config_root=config_root)
 
 app = Flask(__name__)
 manager = Manager(app)
