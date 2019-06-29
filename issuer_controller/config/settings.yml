@@ -9,7 +9,6 @@ default:
 
   #INDY_GENESIS_URL: http://localhost:9000/genesis
 
-  LEDGER_PROTOCOL_VERSION: "1.6"
   AUTO_REGISTER_DID: true
 
 ### eof ###
