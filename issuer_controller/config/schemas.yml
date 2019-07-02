@@ -52,7 +52,7 @@
   path: /ian-ville/ian-permit
   attributes:
     - corp_num
-    - legal_name
+    - entity_name
     - permit_id
     - permit_type
     - permit_issued_date

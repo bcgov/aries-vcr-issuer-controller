@@ -57,6 +57,8 @@ services:
     networks:
       - orgbook
       - myorg
+    ports:
+      - ${AGENT_WEBHOOK_PORT}:${AGENT_WEBHOOK_PORT}
     depends_on:
       - myorg-agent
       - myorg-wallet-db
