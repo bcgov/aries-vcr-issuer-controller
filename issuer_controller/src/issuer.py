@@ -1,4 +1,4 @@
-from flask import jsonify, abort, request, make_response, request
+from flask import jsonify, abort, request, make_response
 
 import requests
 import json
@@ -213,7 +213,6 @@ def startup_init(ENV):
         response.raise_for_status()
         cred_data = response.json()
         print("Sent offer", cred_data['credential_exchange_id'], cred_data['connection_id'], cred_data['state'], cred_data['credential_definition_id'])
-        time.sleep(5)
 
     pass
 
@@ -229,30 +228,30 @@ TOPIC_ISSUER_REGISTRATION = "issuer_registration"
 def handle_connections(state, message):
     # TODO auto-accept?
     print("handle_connections()", state)
-    return Response(state)
+    return jsonify({'message': state})
 
 def handle_credentials(state, message):
     # TODO auto-respond to proof requests
     print("handle_credentials()", state)
-    return Response(some_data)
+    return jsonify({'message': state})
 
 def handle_presentations(state, message):
     # TODO auto-respond to proof requests
     print("handle_presentations()", state)
-    return Response(some_data)
+    return jsonify({'message': state})
 
 def handle_get_active_menu(message):
     # TODO add/update issuer info?
     print("handle_get_active_menu()", message)
-    return Response("")
+    return jsonify({'message': state})
 
 def handle_perform_menu_action(message):
     # TODO add/update issuer info?
     print("handle_perform_menu_action()", message)
-    return Response("")
+    return jsonify({'message': state})
 
 def handle_register_issuer(message):
     # TODO add/update issuer info?
     print("handle_register_issuer()", message)
-    return Response("")
+    return jsonify({'message': state})
 

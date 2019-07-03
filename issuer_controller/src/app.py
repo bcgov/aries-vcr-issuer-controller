@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from flask import Flask, jsonify, abort, request, make_response, request
+from flask import Flask, jsonify, abort, request, make_response
 from flask_script import Manager, Server
 
 import requests
@@ -92,7 +92,7 @@ def agent_callback(topic):
 
     else:
         print("Callback: topic=", topic, ", message=", message)
-        abort(Response("Invalid topic: " + topic))
+        abort(400, {'message': 'Invalid topic: ' + topic})
 
 
 if __name__ == '__main__':
