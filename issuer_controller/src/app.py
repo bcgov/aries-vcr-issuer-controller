@@ -61,7 +61,7 @@ def submit_credential():
     return jsonify({})
 
 
-@app.route('/api/agent-cb/<topic>', methods=['POST'])
+@app.route('/api/agent-cb/topic/<topic>/', methods=['POST'])
 def agent_callback(topic):
     """
     Main callback for aries agent.  Dispatches calls based on the supplied topic.

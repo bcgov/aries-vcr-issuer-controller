@@ -54,11 +54,12 @@ services:
       AGENT_ADMIN_URL: http://myorg-agent:${AGENT_ADMIN_PORT}
       TOB_AGENT_ADMIN_URL: http://tob-agent:${TOB_AGENT_ADMIN_PORT}
       TOB_CONNECTION_NAME: tob-agent
+      WEBHOOK_PORT: ${WEBHOOK_PORT}
     networks:
       - orgbook
       - myorg
     ports:
-      - ${AGENT_WEBHOOK_PORT}:${AGENT_WEBHOOK_PORT}
+      - ${WEBHOOK_PORT}:${WEBHOOK_PORT}
     depends_on:
       - myorg-agent
       - myorg-wallet-db
@@ -81,7 +82,7 @@ services:
       - WALLET_ENCRYPTION_KEY=${WALLET_ENCRYPTION_KEY}
       - WALLET_SEED_VONX=${WALLET_SEED_VONX:-}
       - ISSUER_WALLET_DID=${ISSUER_WALLET_DID}
-      - WEBHOOK_URL=${WEBHOOK_HOST}/callback
+      - WEBHOOK_URL=${WEBHOOK_HOST}/api/agent-cb
       - AGENT_IN_PORT_1=${AGENT_IN_PORT_1}
       - AGENT_IN_PORT_2=${AGENT_IN_PORT_2}
       - AGENT_IN_PORT_3=${AGENT_IN_PORT_3}
