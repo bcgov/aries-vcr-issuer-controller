@@ -333,7 +333,7 @@ def handle_send_credential(cred_input):
         thread = SendCredentialThread(credential_definition_id, cred_offer, agent_admin_url+'/credential_exchange/send')
         #thread = threading.Thread(target=send_one_credential, args=(credential_definition_id, cred_offer, agent_admin_url+'/credential_exchange/send',))
         thread.start()
-        #thread.join()
-        #cred_responses.append(thread.cred_response)
+        thread.join()
+        cred_responses.append(thread.cred_response)
 
     return jsonify(cred_responses)
