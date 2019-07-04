@@ -24,42 +24,10 @@ def startup_init(ENV):
     print("schemas.yml -->", json.dumps(config_schemas))
     print("services.yml -->", json.dumps(config_services))
 
-    # other sample data
-    sample_credentials = [
-        {
-            "schema": "ian-registration.ian-ville",
-            "version": "1.0.0",
-            "attributes": {
-                "corp_num": "ABC12345",
-                "registration_date": "2018-01-01", 
-                "entity_name": "Ima Permit",
-                "entity_name_effective": "2018-01-01", 
-                "entity_status": "OK", 
-                "entity_status_effective": "2019-01-01",
-                "entity_type": "ABC", 
-                "registered_jurisdiction": "BC", 
-                "effective_date": "2019-01-01",
-                "expiry_date": ""
-            }
-        },
-        {
-            "schema": "ian-permit.ian-ville",
-            "version": "1.0.0",
-            "attributes": {
-                "permit_id": str(uuid.uuid4()),
-                "entity_name": "Ima Permit",
-                "corp_num": "ABC12345",
-                "permit_issued_date": "2018-01-01", 
-                "permit_type": "ABC", 
-                "permit_status": "OK", 
-                "effective_date": "2019-01-01"
-            }
-        }
-    ]
-
     agent_admin_url = ENV.get('AGENT_ADMIN_URL')
     if not agent_admin_url:
         raise RuntimeError("Error AGENT_ADMIN_URL is not specified, can't connect to Agent.")
+    app_config['AGENT_ADMIN_URL'] = agent_admin_url
 
     # ensure DID is registered
     ledger_url = ENV.get('LEDGER_URL')
@@ -149,7 +117,7 @@ def startup_init(ENV):
                     "email": issuer_info['email'],
                     "endpoint": issuer_info['endpoint'],
                     "label": "tbd",
-                    "logo_path": issuer_info['logo_path'],
+                    "logo_path": None,  # TODO logo base 64
                     "url": issuer_info['url']
                 }
         credential_types = []
@@ -161,27 +129,37 @@ def startup_init(ENV):
                         "schema": schema_name,
                         "topic": credential_type['topic'],
                         "version": schema_info['version'],
-                        "cardinality_fields": {},
-                        "category_labels": {},
-                        "claim_descriptions": {},
-                        "claim_labels": {},
+                        #"cardinality_fields": {},  # TODO cardinality
+                        #"category_labels": {},  # TODO what is this?
+                        #"claim_descriptions": {},
+                        #"claim_labels": {},
                         "credential": credential_type['credential'],
                         "credential_def_id": app_config['schemas']['CRED_DEF_' + schema_name + '_' + schema_info['version']],
                         "description": schema_info['description'],
                         "endpoint": credential_type['issuer_url'],
-                        "logo_b64": issuer_info['logo_path'],
+                        "logo_b64": None,  # TODO logo base 64
                         "mapping": credential_type['mapping'],
                         "visible_fields": []
                     }
 
             # config for each attribute
             if isinstance(schema_info['attributes'], dict):
+                credential_type_info['claim_labels'] = {}
+                credential_type_info['claim_descriptions'] = {}
                 # each element is a dict
                 for attr, desc in schema_info['attributes'].items():
-                    if 'label_en' in desc:
-                        credential_type_info['claim_labels'][attr] = desc['label_en']
-                    if 'description_en' in desc:
-                        credential_type_info['claim_descriptions'][attr] = desc['description_en']
+                    for key, value in desc.items():
+                        if '_' in key:
+                            claim_label = None
+                            label_lang = key.split('_', 1)
+                            if label_lang[0] == 'label':
+                                claim_label = 'claim_labels'
+                            elif label_lang[0] == 'description':
+                                claim_label = 'claim_descriptions'
+                            if claim_label:
+                                if not attr in credential_type_info[claim_label]:
+                                    credential_type_info[claim_label][attr] = {}
+                                credential_type_info[claim_label][attr][label_lang[1]] = value
             if 'cardinality_fields' in credential_type:
                 credential_type_info['cardinality_fields'] = credential_type['cardinality_fields']
 
@@ -201,18 +179,7 @@ def startup_init(ENV):
         issuer_data = response.json()
         print("Registered issuer", issuer_name)
 
-    # let's send a credential!
-    for sample_credential in sample_credentials:
-        credential_definition_id = app_config['schemas']['CRED_DEF_' + sample_credential['schema'] + '_' + sample_credential['version']]
-        cred_offer = {
-            "connection_id": app_config['TOB_CONNECTION'],
-            "credential_definition_id": credential_definition_id,
-            "credential_values": sample_credential['attributes']
-        }
-        response = requests.post(agent_admin_url+'/credential_exchange/send', json.dumps(cred_offer))
-        response.raise_for_status()
-        cred_data = response.json()
-        print("Sent offer", cred_data['credential_exchange_id'], cred_data['connection_id'], cred_data['state'], cred_data['credential_definition_id'])
+    # TODO flag as "synced"
 
     pass
 
@@ -243,15 +210,71 @@ def handle_presentations(state, message):
 def handle_get_active_menu(message):
     # TODO add/update issuer info?
     print("handle_get_active_menu()", message)
-    return jsonify({'message': state})
+    return jsonify({})
 
 def handle_perform_menu_action(message):
     # TODO add/update issuer info?
     print("handle_perform_menu_action()", message)
-    return jsonify({'message': state})
+    return jsonify({})
 
 def handle_register_issuer(message):
     # TODO add/update issuer info?
     print("handle_register_issuer()", message)
-    return jsonify({'message': state})
+    return jsonify({})
 
+
+# other sample data
+sample_credentials = [
+    {
+        "schema": "ian-registration.ian-ville",
+        "version": "1.0.0",
+        "attributes": {
+            "corp_num": "ABC12345",
+            "registration_date": "2018-01-01", 
+            "entity_name": "Ima Permit",
+            "entity_name_effective": "2018-01-01", 
+            "entity_status": "ACT", 
+            "entity_status_effective": "2019-01-01",
+            "entity_type": "ABC", 
+            "registered_jurisdiction": "BC", 
+            "effective_date": "2019-01-01",
+            "expiry_date": ""
+        }
+    },
+    {
+        "schema": "ian-permit.ian-ville",
+        "version": "1.0.0",
+        "attributes": {
+            "permit_id": str(uuid.uuid4()),
+            "entity_name": "Ima Permit",
+            "corp_num": "ABC12345",
+            "permit_issued_date": "2018-01-01", 
+            "permit_type": "ABC", 
+            "permit_status": "OK", 
+            "effective_date": "2019-01-01"
+        }
+    }
+]
+
+def handle_send_credential(cred_input):
+    # construct and send the credential
+    print("Received credentials", cred_input)
+
+    agent_admin_url = app_config['AGENT_ADMIN_URL']
+
+    # let's send a credential!
+    for sample_credential in cred_input:
+        credential_definition_id = app_config['schemas']['CRED_DEF_' + sample_credential['schema'] + '_' + sample_credential['version']]
+        cred_offer = {
+            "connection_id": app_config['TOB_CONNECTION'],
+            "credential_definition_id": credential_definition_id,
+            "credential_values": sample_credential['attributes']
+        }
+        response = requests.post(agent_admin_url+'/credential_exchange/send', json.dumps(cred_offer))
+        response.raise_for_status()
+        cred_data = response.json()
+        print("Sent offer", cred_data['credential_exchange_id'], cred_data['connection_id'], cred_data['state'], cred_data['credential_definition_id'])
+
+    # TODO wait for confirmation from the agent, which will include the wallet id of the saved credential
+
+    return jsonify({})

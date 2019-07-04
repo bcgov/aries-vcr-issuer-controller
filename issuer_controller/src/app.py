@@ -45,23 +45,10 @@ def submit_credential():
 
     cred_input = request.json
 
-    # construct and send the credential
-    # TODO look up the cred_def_id based on the supplied schema and version
-    cred_offer = {
-        "connection_id": tob_connection_id,
-        "credential_definition_id": credential_definition_id['credential_definition_id'],
-        "credential_values": cred_input
-    }
-    response = requests.post(agent_admin_url+'/credential_exchange/send', json.dumps(cred_offer))
-    response.raise_for_status()
-    cred_data = response.json()
-
-    # TODO wait for confirmation from the agent, which will include the wallet id of the saved credential
-
-    return jsonify({})
+    return issuer.handle_send_credential(cred_input)
 
 
-@app.route('/api/agent-cb/topic/<topic>/', methods=['POST'])
+@app.route('/api/agentcb/topic/<topic>/', methods=['POST'])
 def agent_callback(topic):
     """
     Main callback for aries agent.  Dispatches calls based on the supplied topic.

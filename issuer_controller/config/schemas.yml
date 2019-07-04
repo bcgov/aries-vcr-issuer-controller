@@ -5,6 +5,16 @@
   description: The ian-permit credential issued by ian-cille
   path: /ian-ville/ian-registration
   attributes:
+    #- corp_num
+    #- registration_date
+    #- entity_name
+    #- entity_name_effective
+    #- entity_status
+    #- entity_status_effective
+    #- entity_type
+    #- registered_jurisdiction
+    #- effective_date
+    #- expiry_date
     corp_num:
       label_en: Registration ID
       description_en: Registration/Incorporation Number or Identifying Number
