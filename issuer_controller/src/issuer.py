@@ -7,6 +7,7 @@ import time
 import yaml
 import config
 import uuid
+import threading
 
 
 # list of cred defs per schema name/version
@@ -21,8 +22,8 @@ def startup_init(ENV):
     config_schemas = config.load_config(config_root + "/schemas.yml", env=ENV)
     config_services = config.load_config(config_root + "/services.yml", env=ENV)
 
-    print("schemas.yml -->", json.dumps(config_schemas))
-    print("services.yml -->", json.dumps(config_services))
+    #print("schemas.yml -->", json.dumps(config_schemas))
+    #print("services.yml -->", json.dumps(config_services))
 
     agent_admin_url = ENV.get('AGENT_ADMIN_URL')
     if not agent_admin_url:
@@ -131,8 +132,6 @@ def startup_init(ENV):
                         "version": schema_info['version'],
                         #"cardinality_fields": {},  # TODO cardinality
                         #"category_labels": {},  # TODO what is this?
-                        #"claim_descriptions": {},
-                        #"claim_labels": {},
                         "credential": credential_type['credential'],
                         "credential_def_id": app_config['schemas']['CRED_DEF_' + schema_name + '_' + schema_info['version']],
                         "description": schema_info['description'],
@@ -172,7 +171,7 @@ def startup_init(ENV):
                 "issuer": issuer_config
             }
         }
-        print("Registering issuer", json.dumps(issuer_request))
+        #print("Registering issuer", json.dumps(issuer_request))
 
         response = requests.post(agent_admin_url+'/issuer_registration/send', json.dumps(issuer_request))
         response.raise_for_status()
@@ -182,6 +181,43 @@ def startup_init(ENV):
     # TODO flag as "synced"
 
     pass
+
+
+credential_lock = threading.Lock()
+credential_requests = {}
+credential_responses = {}
+
+def add_credential_request(cred_exch_id):
+    credential_lock.acquire()
+    try:
+        result_available = threading.Event()
+        credential_requests[cred_exch_id] = result_available
+        return result_available
+    finally:
+        credential_lock.release()
+
+def add_credential_response(cred_exch_id, response):
+    credential_lock.acquire()
+    try:
+        credential_responses[cred_exch_id] = response
+        if cred_exch_id in credential_requests:
+            result_available = credential_requests[cred_exch_id]
+            result_available.set()
+            del credential_requests[cred_exch_id]
+    finally:
+        credential_lock.release()
+
+def get_credential_response(cred_exch_id):
+    credential_lock.acquire()
+    try:
+        if cred_exch_id in credential_responses:
+            response = credential_responses[cred_exch_id]
+            del credential_responses[cred_exch_id]
+            return response
+        else:
+            return None
+    finally:
+        credential_lock.release()
 
 
 TOPIC_CONNECTIONS = "connections"
@@ -199,7 +235,10 @@ def handle_connections(state, message):
 
 def handle_credentials(state, message):
     # TODO auto-respond to proof requests
-    print("handle_credentials()", state)
+    print("handle_credentials()", state, message['credential_exchange_id'])
+    if state == 'issued':
+        response = {'success': True, 'result': message['credential_exchange_id'], 'served_by': message['thread_id']}
+        add_credential_response(message['credential_exchange_id'], response)
     return jsonify({'message': state})
 
 def handle_presentations(state, message):
@@ -219,7 +258,7 @@ def handle_perform_menu_action(message):
 
 def handle_register_issuer(message):
     # TODO add/update issuer info?
-    print("handle_register_issuer()", message)
+    print("handle_register_issuer()")
     return jsonify({})
 
 
@@ -256,6 +295,25 @@ sample_credentials = [
     }
 ]
 
+class SendCredentialThread(threading.Thread):
+    def __init__(self, credential_definition_id, cred_offer, url):
+        threading.Thread.__init__(self)
+        self.credential_definition_id = credential_definition_id
+        self.cred_offer = cred_offer
+        self.url = url
+
+    def run(self):
+        response = requests.post(self.url, json.dumps(self.cred_offer))
+        response.raise_for_status()
+        cred_data = response.json()
+        result_available = add_credential_request(cred_data['credential_exchange_id'])
+        print("Sent offer", cred_data['credential_exchange_id'], cred_data['connection_id'], cred_data['state'], cred_data['credential_definition_id'])
+
+        # wait for confirmation from the agent, which will include the credential exchange id
+        result_available.wait()
+        self.cred_response = get_credential_response(cred_data['credential_exchange_id'])
+        print("Got response", self.cred_response)
+
 def handle_send_credential(cred_input):
     # construct and send the credential
     print("Received credentials", cred_input)
@@ -263,18 +321,19 @@ def handle_send_credential(cred_input):
     agent_admin_url = app_config['AGENT_ADMIN_URL']
 
     # let's send a credential!
-    for sample_credential in cred_input:
-        credential_definition_id = app_config['schemas']['CRED_DEF_' + sample_credential['schema'] + '_' + sample_credential['version']]
+    cred_responses = []
+    for credential in cred_input:
+        cred_def_key = 'CRED_DEF_' + credential['schema'] + '_' + credential['version']
+        credential_definition_id = app_config['schemas'][cred_def_key]
         cred_offer = {
             "connection_id": app_config['TOB_CONNECTION'],
             "credential_definition_id": credential_definition_id,
-            "credential_values": sample_credential['attributes']
+            "credential_values": credential['attributes']
         }
-        response = requests.post(agent_admin_url+'/credential_exchange/send', json.dumps(cred_offer))
-        response.raise_for_status()
-        cred_data = response.json()
-        print("Sent offer", cred_data['credential_exchange_id'], cred_data['connection_id'], cred_data['state'], cred_data['credential_definition_id'])
+        thread = SendCredentialThread(credential_definition_id, cred_offer, agent_admin_url+'/credential_exchange/send')
+        #thread = threading.Thread(target=send_one_credential, args=(credential_definition_id, cred_offer, agent_admin_url+'/credential_exchange/send',))
+        thread.start()
+        #thread.join()
+        #cred_responses.append(thread.cred_response)
 
-    # TODO wait for confirmation from the agent, which will include the wallet id of the saved credential
-
-    return jsonify({})
+    return jsonify(cred_responses)
