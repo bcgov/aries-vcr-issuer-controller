@@ -15,80 +15,16 @@ issuers:
       sign_target: false
 
     credential_types:
-    - description: Permit
-      schema: ian-permit.ian-ville
-      issuer_url: $APPLICATION_URL/ian-ville/ian-permit
-      depends_on:
-        - greenlight_registration
-      credential:
-        effective_date:
-          input: effective_date
-          from: claim
-
-      # topic identifies the id of the subject of the credential from the foundational credential
-      # in BC Gov deployment type is always "registration" as it is from BC Registries
-      topic:
-        source_id:
-          input: corp_num
-          from: claim
-        type:
-          input: registration
-          from: value
-
-      mapping:
-        # "attribute" defines a generic field in the TOB model
-        # "value" identifies where to derive the data value (typically it comes from the claim)
-        # "type" - if "value" - is the name of the attribute
-        # "format" is an optional data format (default text)
-        - model: attribute
-          fields:
-            type:
-              input: permit_issued_date
-              from: value
-            format:
-              input: datetime
-              from: value
-            value:
-              input: permit_issued_date
-              from: claim
-        - model: attribute
-          fields:
-            type:
-              input: permit_type
-              from: value
-            value:
-              input: permit_type
-              from: claim
-        - model: attribute
-          fields:
-            type:
-              input: permit_status
-              from: value
-            value:
-              input: permit_status
-              from: claim
-        - model: attribute
-          fields:
-            type:
-              input: effective_date
-              from: value
-            format:
-              input: datetime
-              from: value
-            value:
-              input: effective_date
-              from: claim
-
-    - description: Registration
+    - description: The ian-permit credential issued by ian-cille
       schema: ian-registration.ian-ville
-      issuer_url: $APPLICATION_URL/ian-ville/ian-registration
+      issuer_url: $ENDPOINT_URL/ian-ville/ian-registration
       credential:
         effective_date:
           input: effective_date
           from: claim
-
-      # topic identifies the id of the subject of the credential from the foundational credential
-      # in BC Gov deployment type is always "registration" as it is from BC Registries
+        revoked_date:
+          input: expiry_date
+          from: claim
       topic:
         source_id:
           input: corp_num
@@ -96,99 +32,201 @@ issuers:
         type:
           input: registration
           from: value
-
       mapping:
-        # "attribute" defines a generic field in the TOB model
-        # "value" identifies where to derive the data value (typically it comes from the claim)
-        # "type" - if "value" - is the name of the attribute
-        # "format" is an optional data format (default text)
-        - model: name
-          fields:
-            type:
-              input: entity_name
-              from: value
-            text:
-              input: entity_name
-              from: claim
-        - model: attribute
-          fields:
-            type:
-              input: entity_name_effective
-              from: value
-            format:
-              input: datetime
-              from: value
-            value:
-              input: entity_name_effective
-              from: claim
-        - model: attribute
-          fields:
-            type:
-              input: registration_date
-              from: value
-            format:
-              input: datetime
-              from: value
-            value:
-              input: registration_date
-              from: claim
-        - model: attribute
-          fields:
-            type:
-              input: entity_status
-              from: value
-            value:
-              input: entity_status
-              from: claim
-        - model: attribute
-          fields:
-            type:
-              input: entity_status_effective
-              from: value
-            format:
-              input: datetime
-              from: value
-            value:
-              input: entity_status_effective
-              from: claim
-        - model: attribute
-          fields:
-            type:
-              input: entity_type
-              from: value
-            value:
-              input: entity_type
-              from: claim
-        - model: attribute
-          fields:
-            type:
-              input: registered_jurisdiction
-              from: value
-            value:
-              input: registered_jurisdiction
-              from: claim
-        - model: attribute
-          fields:
-            type:
-              input: effective_date
-              from: value
-            format:
-              input: datetime
-              from: value
-            value:
-              input: effective_date
-              from: claim
-        - model: attribute
-          fields:
-            type:
-              input: expiry_date
-              from: value
-            format:
-              input: datetime
-              from: value
-            value:
-              input: expiry_date
-              from: claim
+      - model: attribute
+        fields:
+          type:
+            input: corp_num
+            from: value
+          value:
+            input: corp_num
+            from: claim
+      - model: attribute
+        fields:
+          type:
+            input: registration_date
+            from: value
+          format:
+            input: datetime
+            from: value
+          value:
+            input: registration_date
+            from: claim
+      - model: name
+        fields:
+          text:
+            input: entity_name
+            from: claim
+          type:
+            input: entity_name
+            from: value
+      - model: attribute
+        fields:
+          type:
+            input: entity_name_effective
+            from: value
+          format:
+            input: datetime
+            from: value
+          value:
+            input: entity_name_effective
+            from: claim
+      - model: address
+        fields:
+          addressee:
+            input: addressee
+            from: claim
+          civic_address:
+            input: address_line_1
+            from: claim
+          city:
+            input: city
+            from: claim
+          province:
+            input: province
+            from: claim
+          postal_code:
+            input: postal_code
+            from: claim
+          country:
+            input: country
+            from: claim
+      - model: attribute
+        fields:
+          type:
+            input: entity_status
+            from: value
+          value:
+            input: entity_status
+            from: claim
+      - model: attribute
+        fields:
+          type:
+            input: entity_status_effective
+            from: value
+          format:
+            input: datetime
+            from: value
+          value:
+            input: entity_status_effective
+            from: claim
+      - model: attribute
+        fields:
+          type:
+            input: entity_type
+            from: value
+          value:
+            input: entity_type
+            from: claim
+      - model: attribute
+        fields:
+          type:
+            input: registered_jurisdiction
+            from: value
+          value:
+            input: registered_jurisdiction
+            from: claim
+      - model: attribute
+        fields:
+          type:
+            input: effective_date
+            from: value
+          format:
+            input: datetime
+            from: value
+          value:
+            input: effective_date
+            from: claim
+      - model: attribute
+        fields:
+          type:
+            input: expiry_date
+            from: value
+          format:
+            input: datetime
+            from: value
+          value:
+            input: expiry_date
+            from: claim
+    - description: The ian-permit credential issued by ian-cille
+      schema: ian-permit.ian-ville
+      issuer_url: $ENDPOINT_URL/ian-ville/ian-permit
+      depends_on:
+      - greenlight_registration
+      credential:
+        effective_date:
+          input: effective_date
+          from: claim
+      topic:
+        source_id:
+          input: corp_num
+          from: claim
+        type:
+          input: registration
+          from: value
+      mapping:
+      - model: attribute
+        fields:
+          type:
+            input: corp_num
+            from: value
+          value:
+            input: corp_num
+            from: claim
+      - model: name
+        fields:
+          text:
+            input: entity_name
+            from: claim
+          type:
+            input: entity_name
+            from: value
+      - model: attribute
+        fields:
+          type:
+            input: permit_id
+            from: value
+          value:
+            input: permit_id
+            from: claim
+      - model: attribute
+        fields:
+          type:
+            input: permit_type
+            from: value
+          value:
+            input: permit_type
+            from: claim
+      - model: attribute
+        fields:
+          type:
+            input: permit_issued_date
+            from: value
+          format:
+            input: datetime
+            from: value
+          value:
+            input: permit_issued_date
+            from: claim
+      - model: attribute
+        fields:
+          type:
+            input: permit_status
+            from: value
+          value:
+            input: permit_status
+            from: claim
+      - model: attribute
+        fields:
+          type:
+            input: effective_date
+            from: value
+          format:
+            input: datetime
+            from: value
+          value:
+            input: effective_date
+            from: claim
 
 verifiers:
   bctob:

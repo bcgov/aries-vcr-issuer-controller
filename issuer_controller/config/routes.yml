@@ -1,72 +1,114 @@
 # Documentation: https://github.com/bcgov/von-agent-template/tree/master/von-x-agent/config
 
 forms:
-  ian-permit:
-
-    # URL for the Web form - becomes <server>/<path> e.g. http://localhost:5000/ian-ville/ian-permit
-    path: /ian-ville/ian-permit
-  
-    # type is always "issue-credential"
+  ian-villeian-registration:
+    path: /ian-ville/ian-registration
     type: issue-credential
-  
-    schema_name: ian-permit.ian-ville
-    page_title: ian-cille Permits
-    title: Application for ian-permit
-  
-    # Templates are defined in von-x-agent/templates
+    schema_name: ian-registration.ian-ville
+    page_title: Title for ian-registration.ian-ville
+    title: Title for ian-registration.ian-ville
     template: bcgov.index.html
-  
-    description: >
-      ian-cille issues ian-permit credentials to organizations to authorize those organizations to be able to do something.
-  
-    explanation: Use the form below to apply for a ian-permit for your organization.
-
+    description: The ian-permit credential issued by ian-cille
+    explanation: Use the form below to issue a Credential.
+    fields:
+    - name: registration_date
+      label: registration_date
+      type: date
+      required: false
+    - name: entity_name
+      label: entity_name
+      type: text
+      required: true
+    - name: entity_name_effective
+      label: entity_name_effective
+      type: date
+      required: true
+    - name: entity_address
+      label: Mailing Address
+      type: address
+      required: true
+    - name: entity_status
+      label: entity_status
+      type: select
+      options:
+      - todo-1
+      - todo-2
+      - todo-3
+      required: true
+    - name: entity_status_effective
+      label: entity_status_effective
+      type: date
+      required: true
+    - name: entity_type
+      label: entity_type
+      type: text
+      required: true
+    - name: registered_jurisdiction
+      label: registered_jurisdiction
+      type: text
+      required: false
+    - name: effective_date
+      label: effective_date
+      type: date
+      required: true
+    - name: expiry_date
+      label: expiry_date
+      type: date
+      required: false
+    mapping:
+      attributes:
+      - name: corp_num
+        from: helper
+        source: uuid
+  ian-villeian-permit:
+    path: /ian-ville/ian-permit
+    type: issue-credential
+    schema_name: ian-permit.ian-ville
+    page_title: Title for ian-permit.ian-ville
+    title: Title for ian-permit.ian-ville
+    template: bcgov.index.html
+    description: The ian-permit credential issued by ian-cille
+    explanation: Use the form below to issue a Credential.
     proof_request:
       id: greenlight_registration
       connection_id: bctob
-
-    #js_includes:
-    #  - src: js/bc_registries.js
-
-    # "fields" are displayed on the UI for the user to enter values
     fields:
-      - name: corp_num
-        label: Corp Num
-        type: text
-        required: true
-
-      - name: legal_name
-        label: Legal Name
-        type: text
-        required: true
-
-      - name: permit_type
-        label: Permit Type requested
-        type: select
-        options:
-          - Limited Use Authorization
-          - Unlimited Use Authorization
-        required: true
-
-      - name: effective_date
-        label: Effective Date
-        type: date
-        required: true
-
-    # "mapping" identifies attributes that are auto-populated
+    - name: corp_num
+      label: corp_num
+      type: text
+      required: true
+    - name: entity_name
+      label: entity_name
+      type: text
+      required: true
+    - name: permit_type
+      label: permit_type
+      type: select
+      options:
+      - todo-1
+      - todo-2
+      - todo-3
+      required: true
+    - name: permit_issued_date
+      label: permit_issued_date
+      type: date
+      required: true
+    - name: permit_status
+      label: permit_status
+      type: select
+      options:
+      - todo-1
+      - todo-2
+      - todo-3
+      required: true
+    - name: effective_date
+      label: effective_date
+      type: date
+      required: true
     mapping:
       attributes:
-        - name: permit_id
-          from: helper
-          source: uuid
-
-        - name: permit_issued_date
-          from: helper
-          source: now_iso
-
-        - name: permit_status
-          from: literal
-          source: ACT
-
+      - name: permit_id
+        from: helper
+        source: uuid
 
 ### eof ###

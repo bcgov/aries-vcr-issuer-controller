@@ -1,63 +1,122 @@
 # Documentation: https://github.com/bcgov/von-agent-template/tree/master/von-x-agent/config
 
 - name: ian-registration.ian-ville
-  version: '1.0.0'
+  version: 1.0.0
   description: The ian-permit credential issued by ian-cille
-  path: /ian-ville/ian-registration
   attributes:
     corp_num:
-      label_en: Registration ID
       description_en: Registration/Incorporation Number or Identifying Number
+      label_en: Registration ID
+      data_type: helper_uuid
       required: true
     registration_date:
-      label_en: Registration Date
       description_en: Date of Registration, Incorporation, Continuation or Amalgamation
+      label_en: Registration Date
+      data_type: ui_date
       required: false
     entity_name:
-      label_en: Name
       description_en: The legal name of entity
+      label_en: Name
+      data_type: ui_name
       required: true
     entity_name_effective:
-      label_en: Name Effective Date
       description_en: Date current name became effective
+      label_en: Name Effective Date
+      data_type: ui_date
+      required: true
+    addressee:
+      description: addressee
+      data_type: ui_text
+      required: true
+    address_line_1:
+      description: address_line_1
+      data_type: ui_text
+      required: true
+    city:
+      description: city
+      data_type: ui_text
+      required: true
+    province:
+      description: province
+      data_type: ui_text
+      required: true
+    postal_code:
+      description: postal_code
+      data_type: ui_text
+      required: true
+    country:
+      description: country
+      data_type: ui_text
       required: true
     entity_status:
-      label_en: Registration Status
       description_en: Status of the entity (active or historical)
+      label_en: Registration Status
+      data_type: ui_select
       required: true
     entity_status_effective:
-      label_en: Status Effective Date
       description_en: Date status became effective
+      label_en: Status Effective Date
+      data_type: ui_date
       required: true
     entity_type:
-      label_en: Registration Type
       description_en: Type of entity incorporated or registered
+      label_en: Registration Type
+      data_type: ui_text
       required: true
     registered_jurisdiction:
-      label_en: Registered Jurisdiction
       description_en: The jurisdiction an entity was created in
+      label_en: Registered Jurisdiction
+      data_type: ui_text
       required: false
     effective_date:
-      label_en: Credential Effective Date
       description_en: Date Credential is effective
+      label_en: Credential Effective Date
+      data_type: ui_date
       required: true
     expiry_date:
-      label_en: Credential Expiry Date
       description_en: Date Credential expired
+      label_en: Credential Expiry Date
+      data_type: ui_date
       required: false
-
 - name: ian-permit.ian-ville
-  version: '1.0.0'
+  version: 1.0.0
   description: The ian-permit credential issued by ian-cille
-  path: /ian-ville/ian-permit
   attributes:
-    - corp_num
-    - entity_name
-    - permit_id
-    - permit_type
-    - permit_issued_date
-    - permit_status
-    - effective_date
+    corp_num:
+      description_en: Registration/Incorporation Number or Identifying Number
+      label_en: Registration ID
+      data_type: ui_text
+      required: true
+    entity_name:
+      description_en: The legal name of entity
+      label_en: Name
+      data_type: ui_name
+      required: true
+    permit_id:
+      description_en: Permit Identifying Number
+      label_en: Permit ID
+      data_type: helper_uuid
+      required: true
+    permit_type:
+      description_en: Status of the permit
+      label_en: Permit Type
+      data_type: ui_select
+      required: true
+    permit_issued_date:
+      description_en: Date Permit is issued
+      label_en: Permit Issued Date
+      data_type: ui_date
+      required: true
+    permit_status:
+      description_en: Status of the permit
+      label_en: Permit Status
+      data_type: ui_select
+      required: true
+    effective_date:
+      description_en: Date Credential is effective
+      label_en: Credential Effective Date
+      data_type: ui_date
+      required: true
 
 ### eof ###
 

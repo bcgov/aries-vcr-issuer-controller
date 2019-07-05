@@ -32,9 +32,6 @@ obsvn_credential = 'OBSVN'
 obsvn_schema = 'inspection-document.eao-evidence-locker'
 obsvn_version = '0.0.1'
 
-MDB_COLLECTIONS = ['Inspection','Observation','Audio','Photo','Video']
-MDB_OBJECT_DATE = '_updated_at'
-
 CORP_BATCH_SIZE = 3000
 
 MIN_START_DATE = datetime.datetime(datetime.MINYEAR+1, 1, 1)
@@ -99,26 +96,16 @@ class EventProcessor:
         try:
             params = config(section='event_processor')
             self.conn = psycopg2.connect(**params)
-
-            mdb_config = config(section='eao_data')
-            self.mdb_client = MongoClient('mongodb://%s:%s@%s:%s/%s' % (mdb_config['user'], mdb_config['password'], mdb_config['host'], mdb_config['port'], mdb_config['database']))
-            self.mdb_db = self.mdb_client[mdb_config['database']]
         except (Exception) as error:
             print(error)
             print(traceback.print_exc())
             self.conn = None
-            self.mdb_client = None
-            self.mdb_db = None
             raise
 
     def __del__(self):
         if self.conn:
             self.conn.close()
             self.conn = None
-        if self.mdb_client:
-            self.mdb_client.close()
-            self.mdb_client = None
-            self.mdb_db = None
 
     def __enter__(self):
         return self

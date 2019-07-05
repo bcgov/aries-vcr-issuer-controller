@@ -161,8 +161,8 @@ services:
       # [event_processor]
       - EVENT_PROC_DB_HOST=${EVENT_PROC_DB_HOST:-myorg-pipeline-db}
       - EVENT_PROC_DB_PORT=${EVENT_PROC_DB_PORT:-5432}
-      - EVENT_PROC_DB_DATABASE=${EVENT_PROC_DB_DATABASE:-myorg-pipeline-db}
-      - EVENT_PROC_DB_USER=${EVENT_PROC_DB_USER:-myorg-pipeline-db}
+      - EVENT_PROC_DB_DATABASE=${EVENT_PROC_DB_DATABASE:-pipeline_db}
+      - EVENT_PROC_DB_USER=${EVENT_PROC_DB_USER:-pipeline_db}
       - EVENT_PROC_DB_PASSWORD=
       # [mara_db]
       - MARA_DB_HOST=${MARA_DB_HOST:-myorg-pipeline-db}
@@ -174,11 +174,12 @@ services:
     ports:
       - 5050:5000
     depends_on:
+      - myorg-controller
       - myorg-pipeline-db
     entrypoint: >
       /bin/bash -c "
         echo sleeping ...;
-        sleep 5;
+        sleep 25;
         ./docker-entrypoint.sh;"
 
   myorg-pipeline-db:
