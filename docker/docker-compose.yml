@@ -146,11 +146,62 @@ services:
     volumes:
       - myorg-wallet-db:/var/lib/pgsql/data
 
+  myorg-pipeline:
+    build:
+      context: ../issuer_pipeline
+      dockerfile: docker/mara-app/Dockerfile
+    environment:
+      - VONX_API_URL=${VONX_API_URL:-http://myorg-controller:8000/myorg}
+      # [pipeline data source (directory)]
+      #- EAO_MDB_DB_HOST=${EAO_MDB_DB_HOST:-mongo}
+      #- EAO_MDB_DB_PORT=${EAO_MDB_DB_PORT:-27017}
+      #- EAO_MDB_DB_DATABASE=${EAO_MDB_DB_DATABASE:-eao_db}
+      #- EAO_MDB_DB_USER=${EAO_MDB_DB_USER:-root}
+      #- EAO_MDB_DB_PASSWORD=${EAO_MDB_DB_PASSWORD:-example}
+      # [event_processor]
+      - EVENT_PROC_DB_HOST=${EVENT_PROC_DB_HOST:-myorg-pipeline-db}
+      - EVENT_PROC_DB_PORT=${EVENT_PROC_DB_PORT:-5432}
+      - EVENT_PROC_DB_DATABASE=${EVENT_PROC_DB_DATABASE:-myorg-pipeline-db}
+      - EVENT_PROC_DB_USER=${EVENT_PROC_DB_USER:-myorg-pipeline-db}
+      - EVENT_PROC_DB_PASSWORD=
+      # [mara_db]
+      - MARA_DB_HOST=${MARA_DB_HOST:-myorg-pipeline-db}
+      - MARA_DB_PORT=${MARA_DB_PORT:-5432}
+      - MARA_DB_DATABASE=${MARA_DB_DATABASE:-mara_db}
+      - MARA_DB_USER=${MARA_DB_USER:-mara_db}
+    networks:
+      - myorg
+    ports:
+      - 5050:5000
+    depends_on:
+      - myorg-pipeline-db
+    entrypoint: >
+      /bin/bash -c "
+        echo sleeping ...;
+        sleep 5;
+        ./docker-entrypoint.sh;"
+
+  myorg-pipeline-db:
+    build:
+      context: ../issuer_pipeline
+      dockerfile: docker/postgres/Dockerfile
+    environment:
+      - POSTGRESQL_USER=${POSTGRESQL_USER}
+      - POSTGRESQL_PASSWORD=${POSTGRESQL_PASSWORD}
+      - POSTGRESQL_DATABASE=${POSTGRESQL_DATABASE}
+    networks:
+      - myorg
+    ports:
+      - 5444:5432
+    volumes:
+      - pipeline-data:/var/lib/pgsql/data
+
 volumes:
   caddyx-data:
   caddyx-logs:
   myorg-agent-wallet:
   myorg-wallet-db:
+  pipeline-data:
 
 networks:
   myorg:

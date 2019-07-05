@@ -96,6 +96,21 @@ configureEnvironment () {
   export POSTGRESQL_ADMIN_USER="postgres"
   export POSTGRESQL_ADMIN_PASSWORD="mysecretpassword"
   export WALLET_SEED_VONX="00000000000000000000000000000001"
+
+  # myorg-pipeline
+  export COMPOSE_PROJECT_NAME=${COMPOSE_PROJECT_NAME:-"vonx"}
+  export LEDGER_URL=${LEDGER_URL-http://$DOCKERHOST:9000}
+  export APPLICATION_URL=${APPLICATION_URL-http://localhost:${WEB_HTTP_PORT:-5000}}
+  export ENDPOINT_URL=http://${ENDPOINT_HOST-$DOCKERHOST:${WEB_HTTP_PORT:-5001}}
+
+  # myorg data source (directory)
+  #export EAO_MDB_DB_HOST=${EAO_MDB_DB_HOST:-"mongo"}
+  #export EAO_MDB_DB_PORT=${EAO_MDB_DB_PORT:-27017}
+  #export EAO_MDB_DB_HOST=${EAO_MDB_DB_HOST:-"host.docker.internal"}
+  #export EAO_MDB_DB_PORT=${EAO_MDB_DB_PORT:-27027}
+  #export EAO_MDB_DB_DATABASE=${EAO_MDB_DB_DATABASE:-"parse"}
+  #export EAO_MDB_DB_USER=${EAO_MDB_DB_USER:-"root"}
+  #export EAO_MDB_DB_PASSWORD=${EAO_MDB_DB_PASSWORD:-"example"}
 }
 
 getStartupParams() {

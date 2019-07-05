@@ -262,39 +262,6 @@ def handle_register_issuer(message):
     return jsonify({})
 
 
-# other sample data
-sample_credentials = [
-    {
-        "schema": "ian-registration.ian-ville",
-        "version": "1.0.0",
-        "attributes": {
-            "corp_num": "ABC12345",
-            "registration_date": "2018-01-01", 
-            "entity_name": "Ima Permit",
-            "entity_name_effective": "2018-01-01", 
-            "entity_status": "ACT", 
-            "entity_status_effective": "2019-01-01",
-            "entity_type": "ABC", 
-            "registered_jurisdiction": "BC", 
-            "effective_date": "2019-01-01",
-            "expiry_date": ""
-        }
-    },
-    {
-        "schema": "ian-permit.ian-ville",
-        "version": "1.0.0",
-        "attributes": {
-            "permit_id": str(uuid.uuid4()),
-            "entity_name": "Ima Permit",
-            "corp_num": "ABC12345",
-            "permit_issued_date": "2018-01-01", 
-            "permit_type": "ABC", 
-            "permit_status": "OK", 
-            "effective_date": "2019-01-01"
-        }
-    }
-]
-
 class SendCredentialThread(threading.Thread):
     def __init__(self, credential_definition_id, cred_offer, url):
         threading.Thread.__init__(self)
@@ -315,6 +282,40 @@ class SendCredentialThread(threading.Thread):
         print("Got response", self.cred_response)
 
 def handle_send_credential(cred_input):
+    """
+    # other sample data
+    sample_credentials = [
+        {
+            "schema": "ian-registration.ian-ville",
+            "version": "1.0.0",
+            "attributes": {
+                "corp_num": "ABC12345",
+                "registration_date": "2018-01-01", 
+                "entity_name": "Ima Permit",
+                "entity_name_effective": "2018-01-01", 
+                "entity_status": "ACT", 
+                "entity_status_effective": "2019-01-01",
+                "entity_type": "ABC", 
+                "registered_jurisdiction": "BC", 
+                "effective_date": "2019-01-01",
+                "expiry_date": ""
+            }
+        },
+        {
+            "schema": "ian-permit.ian-ville",
+            "version": "1.0.0",
+            "attributes": {
+                "permit_id": str(uuid.uuid4()),
+                "entity_name": "Ima Permit",
+                "corp_num": "ABC12345",
+                "permit_issued_date": "2018-01-01", 
+                "permit_type": "ABC", 
+                "permit_status": "OK", 
+                "effective_date": "2019-01-01"
+            }
+        }
+    ]
+    """
     # construct and send the credential
     print("Received credentials", cred_input)
 
