@@ -237,7 +237,7 @@ def handle_credentials(state, message):
     # TODO auto-respond to proof requests
     print("handle_credentials()", state, message['credential_exchange_id'])
     if state == 'issued':
-        response = {'success': True, 'result': message['credential_exchange_id'], 'served_by': message['thread_id']}
+        response = {'success': True, 'result': message['credential_exchange_id']}
         add_credential_response(message['credential_exchange_id'], response)
     return jsonify({'message': state})
 

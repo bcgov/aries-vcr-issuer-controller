@@ -23,7 +23,6 @@ def von_root_pipeline():
         description = 'Holder for test and demo tasks.')
 
     test_pipeline.add(von_data_test_registrations())
-    test_pipeline.add(von_list_mongo_data())
 
     parent_pipeline.add(test_pipeline)
 

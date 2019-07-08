@@ -35,7 +35,7 @@ manager.add_command('runserver', CustomServer())
 def not_found(error):
     return make_response(jsonify({'error': 'Not found'}), 404)
 
-@app.route('/api/submit-credential', methods=['POST'])
+@app.route('/issue-credential', methods=['POST'])
 def submit_credential():
     """
     Exposed method to proxy credential issuance requests.

@@ -89,6 +89,7 @@ async def post_credentials(http_client, conn, credentials):
     # post credential
     #print('Post credential ...')
     cur2 = None
+    results = None
     try:
         #print('=============')
         #print(post_creds)
@@ -133,18 +134,21 @@ async def post_credentials(http_client, conn, credentials):
         if cur2 is not None:
             cur2.close()
             cur2 = None
-        cur2 = conn.cursor()
-        res = str(error)
-        if 255 < len(res):
-            res = res[:250] + '...'
-        for i in range(len(credentials)):
-            credential = credentials[i]
-            result = results[i]
-            cur2.execute(sql3, (datetime.datetime.now(), res, credential['RECORD_ID'],))
-            failed = failed + 1
-        conn.commit()
-        cur2.close()
-        cur2 = None
+        if results:
+            cur2 = conn.cursor()
+            res = str(error)
+            if 255 < len(res):
+                res = res[:250] + '...'
+            for i in range(len(credentials)):
+                credential = credentials[i]
+                result = results[i]
+                cur2.execute(sql3, (datetime.datetime.now(), res, credential['RECORD_ID'],))
+                failed = failed + 1
+            conn.commit()
+            cur2.close()
+            cur2 = None
+        else:
+            raise
     finally:
         if cur2 is not None:
             cur2.close()
