@@ -60,13 +60,19 @@ def agent_callback(topic):
 
     # dispatch based on the topic type
     if topic == issuer.TOPIC_CONNECTIONS:
-        return issuer.handle_connections(message["state"], message)
+        if "state" in message:
+            return issuer.handle_connections(message["state"], message)
+        return jsonify({})
 
     elif topic == issuer.TOPIC_CREDENTIALS:
-        return issuer.handle_credentials(message["state"], message)
+        if "state" in message:
+            return issuer.handle_credentials(message["state"], message)
+        return jsonify({})
 
     elif topic == issuer.TOPIC_PRESENTATIONS:
-        return issuer.handle_presentations(message["state"], message)
+        if "state" in message:
+            return issuer.handle_presentations(message["state"], message)
+        return jsonify({})
 
     elif topic == issuer.TOPIC_GET_ACTIVE_MENU:
         return issuer.handle_get_active_menu(message)

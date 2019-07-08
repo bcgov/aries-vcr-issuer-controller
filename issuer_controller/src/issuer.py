@@ -274,7 +274,7 @@ class SendCredentialThread(threading.Thread):
         response.raise_for_status()
         cred_data = response.json()
         result_available = add_credential_request(cred_data['credential_exchange_id'])
-        print("Sent offer", cred_data['credential_exchange_id'], cred_data['connection_id'], cred_data['state'], cred_data['credential_definition_id'])
+        print("Sent offer", cred_data['credential_exchange_id'], cred_data['connection_id'])
 
         # wait for confirmation from the agent, which will include the credential exchange id
         result_available.wait()
@@ -317,7 +317,7 @@ def handle_send_credential(cred_input):
     ]
     """
     # construct and send the credential
-    print("Received credentials", cred_input)
+    #print("Received credentials", cred_input)
 
     agent_admin_url = app_config['AGENT_ADMIN_URL']
 
@@ -332,7 +332,6 @@ def handle_send_credential(cred_input):
             "credential_values": credential['attributes']
         }
         thread = SendCredentialThread(credential_definition_id, cred_offer, agent_admin_url+'/credential_exchange/send')
-        #thread = threading.Thread(target=send_one_credential, args=(credential_definition_id, cred_offer, agent_admin_url+'/credential_exchange/send',))
         thread.start()
         thread.join()
         cred_responses.append(thread.cred_response)

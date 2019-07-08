@@ -9,6 +9,8 @@ import traceback
 import types
 import uuid
 import random
+import string
+import copy
 from enum import Enum
 
 import pytz
@@ -371,21 +373,24 @@ class EventProcessor:
                 cur.close()
 
 
+    def random_string(self, N):
+        return ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits + ' ') for _ in range(N))
+
+
     def generate_credential(self, topic_name, creds_template):
         creds = []
         topic_value = None
         for cred_template in creds_template:
-            cred = cred_template.copy()
+            cred = copy.deepcopy(cred_template)
             for attr_name, value in cred['attributes'].items():
-                print(attr_name, value)
                 if attr_name == topic_name and topic_value:
                     attr_value = topic_value
                 elif value == '$UUID':
                     attr_value = str(uuid.uuid4())
                 elif value == '$Name':
-                    attr_value = 'Random Name'
+                    attr_value = 'Random Name ' + self.random_string(10)
                 elif value == '$Text':
-                    attr_value = 'Random Text'
+                    attr_value = 'Random Text ' + self.random_string(25)
                 elif value == '$Date':
                     attr_value = '2019-01-01'
                 elif value == '$Select':
@@ -395,7 +400,6 @@ class EventProcessor:
                 cred['attributes'][attr_name] = attr_value
                 if attr_name == topic_name and not topic_value:
                     topic_value = attr_value
-                print(cred)
 
             cred['id'] = str(uuid.uuid4())
 
