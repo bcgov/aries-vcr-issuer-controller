@@ -102,7 +102,7 @@ services:
     command: [
         "-c",
         " sleep 5; \
-        acagent \
+        aca-py \
         --inbound-transport http '0.0.0.0' ${AGENT_IN_PORT_1} \
         --inbound-transport http '0.0.0.0' ${AGENT_IN_PORT_2} \
         --inbound-transport ws '0.0.0.0' ${AGENT_IN_PORT_3} \
