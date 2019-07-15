@@ -62,7 +62,6 @@ services:
       - ${WEBHOOK_PORT}:${WEBHOOK_PORT}
     depends_on:
       - myorg-agent
-      - myorg-wallet-db
     entrypoint: >
       /bin/bash -c "
         echo sleeping ...;
@@ -83,18 +82,16 @@ services:
       - WALLET_SEED_VONX=${WALLET_SEED_VONX:-}
       - ISSUER_WALLET_DID=${ISSUER_WALLET_DID}
       - WEBHOOK_URL=${WEBHOOK_HOST}/api/agentcb
-      - AGENT_IN_PORT_1=${AGENT_IN_PORT_1}
-      - AGENT_IN_PORT_2=${AGENT_IN_PORT_2}
-      - AGENT_IN_PORT_3=${AGENT_IN_PORT_3}
+      - AGENT_HTTP_IN_PORT=${AGENT_HTTP_IN_PORT}
+      - AGENT_WS_IN_PORT=${AGENT_WS_IN_PORT}
       - AGENT_ADMIN_PORT=${AGENT_ADMIN_PORT}
       - AGENT_NAME=${AGENT_NAME}
     networks:
       - orgbook
       - myorg
     ports:
-      - ${AGENT_IN_PORT_1}:${AGENT_IN_PORT_1}
-      - ${AGENT_IN_PORT_2}:${AGENT_IN_PORT_2}
-      - ${AGENT_IN_PORT_3}:${AGENT_IN_PORT_3}
+      - ${AGENT_HTTP_IN_PORT}:${AGENT_HTTP_IN_PORT}
+      - ${AGENT_WS_IN_PORT}:${AGENT_WS_IN_PORT}
       - ${AGENT_ADMIN_PORT}:${AGENT_ADMIN_PORT}
     depends_on:
       - myorg-wallet-db
@@ -103,9 +100,8 @@ services:
         "-c",
         " sleep 5; \
         aca-py \
-        --inbound-transport http '0.0.0.0' ${AGENT_IN_PORT_1} \
-        --inbound-transport http '0.0.0.0' ${AGENT_IN_PORT_2} \
-        --inbound-transport ws '0.0.0.0' ${AGENT_IN_PORT_3} \
+        --inbound-transport http '0.0.0.0' ${AGENT_HTTP_IN_PORT} \
+        --inbound-transport ws '0.0.0.0' ${AGENT_WS_IN_PORT} \
         --endpoint ${AGENT_ENDPOINT} \
         --outbound-transport ws \
         --outbound-transport http \
