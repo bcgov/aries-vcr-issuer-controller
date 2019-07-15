@@ -102,7 +102,7 @@ services:
     command: [
         "-c",
         " sleep 5; \
-        acagent \
+        aca-py \
         --inbound-transport http '0.0.0.0' ${AGENT_IN_PORT_1} \
         --inbound-transport http '0.0.0.0' ${AGENT_IN_PORT_2} \
         --inbound-transport ws '0.0.0.0' ${AGENT_IN_PORT_3} \
@@ -128,8 +128,6 @@ services:
         --label ${AGENT_NAME} \
         --protocol indy_catalyst_issuer_registration",
       ]
-    volumes:
-      - myorg-agent-wallet:/home/indy/.indy_client/wallet
 
   myorg-wallet-db:
     image: registry.access.redhat.com/rhscl/postgresql-95-rhel7:9.5
@@ -201,7 +199,6 @@ services:
 volumes:
   caddyx-data:
   caddyx-logs:
-  myorg-agent-wallet:
   myorg-wallet-db:
   pipeline-data:
 
