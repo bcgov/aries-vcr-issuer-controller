@@ -1,0 +1,205 @@
+version: '3'
+services:
+
+  caddyx:
+    build:
+      context: ../issuer_controller
+      dockerfile: Dockerfile.caddy
+    environment:
+      TOB_API_URL: ${TOB_API_URL:-}
+      WEB_BASE_HREF: ${WEB_BASE_HREF:-/}
+      WEB_HOST_NAME: ${WEB_HOST_NAME:-0.0.0.0}
+      WEB_HOST_PORT: ${WEB_HOST_PORT:-8080}
+      WEB_HOST_TLS: ${WEB_HOST_TLS:-off}
+      AGENT_HOST: ${AGENT_HOST:-controller}
+      AGENT_PORT: ${AGENT_PORT:-8000}
+    links:
+      - myorg-controller:controller
+    networks:
+      - myorg
+    ports:
+      - ${WEB_HTTP_PORT:-5000}:${WEB_HOST_PORT:-8080}
+    volumes:
+      - caddyx-data:/root/.caddy
+      - caddyx-logs:/srv/logs
+
+  myorg-controller:
+    build:
+      context: ../issuer_controller
+      dockerfile: Dockerfile
+    environment:
+      LEDGER_URL: ${LEDGER_URL}
+      APPLICATION_URL: ${APPLICATION_URL:-http://localhost:5001}
+      ENDPOINT_URL: ${ENDPOINT_URL:-http://localhost:5001}
+      CONFIG_ROOT: ../config
+      ENVIRONMENT: ${ENVIRONMENT:-default}
+      ENABLE_GUNICORN: ${ENABLE_GUNICORN:-0}
+      INDY_LEDGER_URL: ${LEDGER_URL:-http://localhost:9000}
+      FORMS: ${FORMS:-}
+      ISSUERS: ${ISSUERS:-}
+      LOG_LEVEL: ${LOG_LEVEL:-}
+      PYTHON_ENV: ${PYTHON_ENV:-development}
+      TOB_API_URL: ${TOB_API_URL:-}
+      TOB_APP_URL: ${TOB_APP_URL:-}
+      WALLET_TYPE: ${WALLET_TYPE}
+      POSTGRESQL_WALLET_HOST: ${POSTGRESQL_WALLET_HOST}
+      POSTGRESQL_WALLET_PORT: ${POSTGRESQL_WALLET_PORT}
+      POSTGRESQL_WALLET_USER: ${POSTGRESQL_USER}
+      POSTGRESQL_WALLET_PASSWORD: ${POSTGRESQL_PASSWORD}
+      POSTGRESQL_WALLET_ADMIN_PASSWORD: ${POSTGRESQL_ADMIN_PASSWORD}
+      WALLET_ENCRYPTION_KEY: ${WALLET_ENCRYPTION_KEY}
+      WALLET_SEED_VONX: ${WALLET_SEED_VONX:-}
+      ISSUER_WALLET_DID: ${ISSUER_WALLET_DID}
+      HTTP_FORCE_CLOSE_CONNECTIONS: "true"
+      AGENT_ADMIN_URL: http://myorg-agent:${AGENT_ADMIN_PORT}
+      TOB_AGENT_ADMIN_URL: http://tob-agent:${TOB_AGENT_ADMIN_PORT}
+      TOB_CONNECTION_NAME: tob-agent
+      WEBHOOK_PORT: ${WEBHOOK_PORT}
+    networks:
+      - orgbook
+      - myorg
+    ports:
+      - ${WEBHOOK_PORT}:${WEBHOOK_PORT}
+    depends_on:
+      - myorg-agent
+    entrypoint: >
+      /bin/bash -c "
+        echo sleeping ...;
+        sleep 15;
+        ../docker-entrypoint.sh;"
+
+  myorg-agent:
+    image: tob-agent
+    environment:
+      - LEDGER_URL=${LEDGER_URL}
+      - WALLET_TYPE=${WALLET_TYPE}
+      - POSTGRESQL_WALLET_HOST=${POSTGRESQL_WALLET_HOST}
+      - POSTGRESQL_WALLET_PORT=${POSTGRESQL_WALLET_PORT}
+      - POSTGRESQL_WALLET_USER=${POSTGRESQL_USER}
+      - POSTGRESQL_WALLET_PASSWORD=${POSTGRESQL_PASSWORD}
+      - POSTGRESQL_WALLET_ADMIN_PASSWORD=${POSTGRESQL_ADMIN_PASSWORD}
+      - WALLET_ENCRYPTION_KEY=${WALLET_ENCRYPTION_KEY}
+      - WALLET_SEED_VONX=${WALLET_SEED_VONX:-}
+      - ISSUER_WALLET_DID=${ISSUER_WALLET_DID}
+      - WEBHOOK_URL=${WEBHOOK_HOST}/api/agentcb
+      - AGENT_HTTP_IN_PORT=${AGENT_HTTP_IN_PORT}
+      - AGENT_WS_IN_PORT=${AGENT_WS_IN_PORT}
+      - AGENT_ADMIN_PORT=${AGENT_ADMIN_PORT}
+      - AGENT_NAME=${AGENT_NAME}
+    networks:
+      - orgbook
+      - myorg
+    ports:
+      - ${AGENT_HTTP_IN_PORT}:${AGENT_HTTP_IN_PORT}
+      - ${AGENT_WS_IN_PORT}:${AGENT_WS_IN_PORT}
+      - ${AGENT_ADMIN_PORT}:${AGENT_ADMIN_PORT}
+    depends_on:
+      - myorg-wallet-db
+    entrypoint: /bin/bash
+    command: [
+        "-c",
+        " sleep 5; \
+        aca-py \
+        --inbound-transport http '0.0.0.0' ${AGENT_HTTP_IN_PORT} \
+        --inbound-transport ws '0.0.0.0' ${AGENT_WS_IN_PORT} \
+        --endpoint ${AGENT_ENDPOINT} \
+        --outbound-transport ws \
+        --outbound-transport http \
+        --genesis-url '${LEDGER_URL}/genesis' \
+        --auto-ping-connection \
+        --auto-respond-messages \
+        --auto-respond-credential-offer \
+        --auto-respond-presentation-request \
+        --auto-verify-presentation \
+        --accept-invites \
+        --accept-requests \
+        --wallet-type 'indy' \
+        --wallet-name 'icat_agent_wallet' \
+        --wallet-key '${WALLET_ENCRYPTION_KEY}' \
+        --wallet-storage-type '${WALLET_TYPE}' \
+        --wallet-storage-config '{\"url\":\"${POSTGRESQL_WALLET_HOST}:${POSTGRESQL_WALLET_PORT}\",\"max_connections\":5}' \
+        --wallet-storage-creds '{\"account\":\"${POSTGRESQL_USER}\",\"password\":\"${POSTGRESQL_PASSWORD}\",\"admin_account\":\"postgres\",\"admin_password\":\"${POSTGRESQL_ADMIN_PASSWORD}\"}' \
+        --seed '${WALLET_SEED_VONX}' \
+        --admin '0.0.0.0' ${AGENT_ADMIN_PORT} \
+        --label ${AGENT_NAME} \
+        --protocol indy_catalyst_issuer_registration",
+      ]
+
+  myorg-wallet-db:
+    image: registry.access.redhat.com/rhscl/postgresql-95-rhel7:9.5
+    environment:
+      - POSTGRESQL_USER=${POSTGRESQL_USER}
+      - POSTGRESQL_PASSWORD=${POSTGRESQL_PASSWORD}
+      - POSTGRESQL_DATABASE=${POSTGRESQL_DATABASE}
+      - POSTGRESQL_ADMIN_PASSWORD=${POSTGRESQL_ADMIN_PASSWORD}
+    networks:
+      - orgbook
+      - myorg
+    ports:
+      - 5435:5432
+    volumes:
+      - myorg-wallet-db:/var/lib/pgsql/data
+
+  myorg-pipeline:
+    build:
+      context: ../issuer_pipeline
+      dockerfile: docker/mara-app/Dockerfile
+    environment:
+      - WEBHOOK_PORT=${WEBHOOK_PORT}
+      - VONX_API_URL=${VONX_API_URL:-http://myorg-controller:8000}
+      # [pipeline data source (directory)]
+      #- EAO_MDB_DB_HOST=${EAO_MDB_DB_HOST:-mongo}
+      #- EAO_MDB_DB_PORT=${EAO_MDB_DB_PORT:-27017}
+      #- EAO_MDB_DB_DATABASE=${EAO_MDB_DB_DATABASE:-eao_db}
+      #- EAO_MDB_DB_USER=${EAO_MDB_DB_USER:-root}
+      #- EAO_MDB_DB_PASSWORD=${EAO_MDB_DB_PASSWORD:-example}
+      # [event_processor]
+      - EVENT_PROC_DB_HOST=${EVENT_PROC_DB_HOST:-myorg-pipeline-db}
+      - EVENT_PROC_DB_PORT=${EVENT_PROC_DB_PORT:-5432}
+      - EVENT_PROC_DB_DATABASE=${EVENT_PROC_DB_DATABASE:-pipeline_db}
+      - EVENT_PROC_DB_USER=${EVENT_PROC_DB_USER:-pipeline_db}
+      - EVENT_PROC_DB_PASSWORD=
+      # [mara_db]
+      - MARA_DB_HOST=${MARA_DB_HOST:-myorg-pipeline-db}
+      - MARA_DB_PORT=${MARA_DB_PORT:-5432}
+      - MARA_DB_DATABASE=${MARA_DB_DATABASE:-mara_db}
+      - MARA_DB_USER=${MARA_DB_USER:-mara_db}
+    networks:
+      - myorg
+    ports:
+      - 5050:5000
+    depends_on:
+      - myorg-controller
+      - myorg-pipeline-db
+    entrypoint: >
+      /bin/bash -c "
+        echo sleeping ...;
+        sleep 25;
+        ./docker-entrypoint.sh;"
+
+  myorg-pipeline-db:
+    build:
+      context: ../issuer_pipeline
+      dockerfile: docker/postgres/Dockerfile
+    environment:
+      - POSTGRESQL_USER=${POSTGRESQL_USER}
+      - POSTGRESQL_PASSWORD=${POSTGRESQL_PASSWORD}
+      - POSTGRESQL_DATABASE=${POSTGRESQL_DATABASE}
+    networks:
+      - myorg
+    ports:
+      - 5444:5432
+    volumes:
+      - pipeline-data:/var/lib/pgsql/data
+
+volumes:
+  caddyx-data:
+  caddyx-logs:
+  myorg-wallet-db:
+  pipeline-data:
+
+networks:
+  myorg:
+  orgbook:
+    external:
+      name: tob_tob
