@@ -44,6 +44,7 @@ def startup_init(ENV):
         did = response.json()
         print("Registered did", did)
         app_config['DID'] = did['did']
+        time.sleep(5)
 
     # register schemas and credential definitions
     for schema in config_schemas:
