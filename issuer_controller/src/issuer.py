@@ -13,175 +13,185 @@ import threading
 # list of cred defs per schema name/version
 app_config = {}
 app_config['schemas'] = {}
+synced = {}
+
+class StartupProcessingThread(threading.Thread):
+    def __init__(self, ENV):
+        threading.Thread.__init__(self)
+        self.ENV = ENV
+
+    def run(self):
+        # read configuration files
+        config_root = self.ENV.get('CONFIG_ROOT', '../config')
+        config_schemas = config.load_config(config_root + "/schemas.yml", env=self.ENV)
+        config_services = config.load_config(config_root + "/services.yml", env=self.ENV)
+
+        #print("schemas.yml -->", json.dumps(config_schemas))
+        #print("services.yml -->", json.dumps(config_services))
+
+        agent_admin_url = self.ENV.get('AGENT_ADMIN_URL')
+        if not agent_admin_url:
+            raise RuntimeError("Error AGENT_ADMIN_URL is not specified, can't connect to Agent.")
+        app_config['AGENT_ADMIN_URL'] = agent_admin_url
+
+        # ensure DID is registered
+        ledger_url = self.ENV.get('LEDGER_URL')
+        auto_register_did = self.ENV.get('AUTO_REGISTER_DID', False)
+        if auto_register_did and ledger_url:
+            # gt seed and alias to register
+            seed = self.ENV.get('WALLET_SEED_VONX')
+            alias = list(config_services['issuers'].keys())[0]
+
+            # register DID
+            response = requests.post(ledger_url+'/register', json.dumps({"alias": alias, "seed": seed, "role": "TRUST_ANCHOR"}))
+            response.raise_for_status()
+            did = response.json()
+            print("Registered did", did)
+            app_config['DID'] = did['did']
+            time.sleep(5)
+
+        # register schemas and credential definitions
+        for schema in config_schemas:
+            schema_name = schema['name']
+            schema_version = schema['version']
+            schema_attrs = []
+            schema_descs = {}
+            if isinstance(schema['attributes'], dict):
+                # each element is a dict
+                for attr, desc in schema['attributes'].items():
+                    schema_attrs.append(attr)
+                    schema_descs[attr] = desc
+            else:
+                # assume it's an array
+                for attr in schema['attributes']:
+                    schema_attrs.append(attr)
+
+            # register our schema(s) and credential definition(s)
+            schema_request = {"schema_name": schema_name, "schema_version": schema_version, "attributes": schema_attrs}
+            response = requests.post(agent_admin_url+'/schemas', json.dumps(schema_request))
+            response.raise_for_status()
+            schema_id = response.json()
+            app_config['schemas']['SCHEMA_' + schema_name] = schema
+            app_config['schemas']['SCHEMA_' + schema_name + '_' + schema_version] = schema_id['schema_id']
+            print("Registered schema", schema_id)
+
+            cred_def_request = {"schema_id": schema_id['schema_id']}
+            response = requests.post(agent_admin_url+'/credential-definitions', json.dumps(cred_def_request))
+            response.raise_for_status()
+            credential_definition_id = response.json()
+            app_config['schemas']['CRED_DEF_' + schema_name + '_' + schema_version] = credential_definition_id['credential_definition_id']
+            print("Registered credential definition", credential_definition_id)
+
+        # what is the TOB connection name?
+        tob_connection_params = config_services['verifiers']['bctob']
+
+        # check if we have a TOB connection
+        response = requests.get(agent_admin_url+'/connections')
+        response.raise_for_status()
+        connections = response.json()['results']
+        tob_connection = None
+        for connection in connections:
+            # check for TOB connection
+            if connection['their_label'] == tob_connection_params['alias']:
+                tob_connection = connection
+
+        if not tob_connection:
+            # if no tob connection then establish one
+            tob_agent_admin_url = tob_connection_params['connection']['agent_admin_url']
+            if not tob_agent_admin_url:
+                raise RuntimeError("Error TOB_AGENT_ADMIN_URL is not specified, can't establish a TOB connection.")
+
+            response = requests.post(tob_agent_admin_url+'/connections/create-invitation')
+            response.raise_for_status()
+            invitation = response.json()
+
+            response = requests.post(agent_admin_url+'/connections/receive-invitation', json.dumps(invitation['invitation']))
+            response.raise_for_status()
+            tob_connection = response.json()
+
+            print("Established tob connection", tob_connection)
+
+        app_config['TOB_CONNECTION'] = tob_connection['connection_id']
+        synced[tob_connection['connection_id']] = False
+
+        for issuer_name, issuer_info in config_services['issuers'].items():
+            # register ourselves (issuer, schema(s), cred def(s)) with TOB
+            issuer_config = {
+                        "name": issuer_name,
+                        "abbreviation": issuer_info['abbreviation'],
+                        "did": app_config['DID'],
+                        "email": issuer_info['email'],
+                        "endpoint": issuer_info['endpoint'],
+                        "label": "tbd",
+                        "logo_path": None,  # TODO logo base 64
+                        "url": issuer_info['url']
+                    }
+            credential_types = []
+            for credential_type in issuer_info['credential_types']:
+                schema_name = credential_type['schema']
+                schema_info = app_config['schemas']['SCHEMA_' + schema_name]
+                credential_type_info = {
+                            "name": schema_info['name'],
+                            "schema": schema_name,
+                            "topic": credential_type['topic'],
+                            "version": schema_info['version'],
+                            #"cardinality_fields": {},  # TODO cardinality
+                            #"category_labels": {},  # TODO what is this?
+                            "credential": credential_type['credential'],
+                            "credential_def_id": app_config['schemas']['CRED_DEF_' + schema_name + '_' + schema_info['version']],
+                            "description": schema_info['description'],
+                            "endpoint": credential_type['issuer_url'],
+                            "logo_b64": None,  # TODO logo base 64
+                            "mapping": credential_type['mapping'],
+                            "visible_fields": []
+                        }
+
+                # config for each attribute
+                if isinstance(schema_info['attributes'], dict):
+                    credential_type_info['claim_labels'] = {}
+                    credential_type_info['claim_descriptions'] = {}
+                    # each element is a dict
+                    for attr, desc in schema_info['attributes'].items():
+                        for key, value in desc.items():
+                            if '_' in key:
+                                claim_label = None
+                                label_lang = key.split('_', 1)
+                                if label_lang[0] == 'label':
+                                    claim_label = 'claim_labels'
+                                elif label_lang[0] == 'description':
+                                    claim_label = 'claim_descriptions'
+                                if claim_label:
+                                    if not attr in credential_type_info[claim_label]:
+                                        credential_type_info[claim_label][attr] = {}
+                                    credential_type_info[claim_label][attr][label_lang[1]] = value
+                if 'cardinality_fields' in credential_type:
+                    credential_type_info['cardinality_fields'] = credential_type['cardinality_fields']
+
+                credential_types.append(credential_type_info)
+
+            issuer_request = {
+                "connection_id": app_config['TOB_CONNECTION'],
+                "issuer_registration": {
+                    "credential_types": credential_types,
+                    "issuer": issuer_config
+                }
+            }
+            #print("Registering issuer", json.dumps(issuer_request))
+
+            response = requests.post(agent_admin_url+'/issuer_registration/send', json.dumps(issuer_request))
+            response.raise_for_status()
+            issuer_data = response.json()
+            print("Registered issuer", issuer_name)
+
+        synced[tob_connection['connection_id']] = True
+        print("Connection {} is synchronized".format(tob_connection))
+
 
 def startup_init(ENV):
     global app_config
 
-    # read configuration files
-    config_root = ENV.get('CONFIG_ROOT', '../config')
-    config_schemas = config.load_config(config_root + "/schemas.yml", env=ENV)
-    config_services = config.load_config(config_root + "/services.yml", env=ENV)
-
-    #print("schemas.yml -->", json.dumps(config_schemas))
-    #print("services.yml -->", json.dumps(config_services))
-
-    agent_admin_url = ENV.get('AGENT_ADMIN_URL')
-    if not agent_admin_url:
-        raise RuntimeError("Error AGENT_ADMIN_URL is not specified, can't connect to Agent.")
-    app_config['AGENT_ADMIN_URL'] = agent_admin_url
-
-    # ensure DID is registered
-    ledger_url = ENV.get('LEDGER_URL')
-    auto_register_did = ENV.get('AUTO_REGISTER_DID', False)
-    if auto_register_did and ledger_url:
-        # gt seed and alias to register
-        seed = ENV.get('WALLET_SEED_VONX')
-        alias = list(config_services['issuers'].keys())[0]
-
-        # register DID
-        response = requests.post(ledger_url+'/register', json.dumps({"alias": alias, "seed": seed, "role": "TRUST_ANCHOR"}))
-        response.raise_for_status()
-        did = response.json()
-        print("Registered did", did)
-        app_config['DID'] = did['did']
-        time.sleep(5)
-
-    # register schemas and credential definitions
-    for schema in config_schemas:
-        schema_name = schema['name']
-        schema_version = schema['version']
-        schema_attrs = []
-        schema_descs = {}
-        if isinstance(schema['attributes'], dict):
-            # each element is a dict
-            for attr, desc in schema['attributes'].items():
-                schema_attrs.append(attr)
-                schema_descs[attr] = desc
-        else:
-            # assume it's an array
-            for attr in schema['attributes']:
-                schema_attrs.append(attr)
-
-        # register our schema(s) and credential definition(s)
-        schema_request = {"schema_name": schema_name, "schema_version": schema_version, "attributes": schema_attrs}
-        response = requests.post(agent_admin_url+'/schemas', json.dumps(schema_request))
-        response.raise_for_status()
-        schema_id = response.json()
-        app_config['schemas']['SCHEMA_' + schema_name] = schema
-        app_config['schemas']['SCHEMA_' + schema_name + '_' + schema_version] = schema_id['schema_id']
-        print("Registered schema", schema_id)
-
-        cred_def_request = {"schema_id": schema_id['schema_id']}
-        response = requests.post(agent_admin_url+'/credential-definitions', json.dumps(cred_def_request))
-        response.raise_for_status()
-        credential_definition_id = response.json()
-        app_config['schemas']['CRED_DEF_' + schema_name + '_' + schema_version] = credential_definition_id['credential_definition_id']
-        print("Registered credential definition", credential_definition_id)
-
-    # what is the TOB connection name?
-    tob_connection_params = config_services['verifiers']['bctob']
-
-    # check if we have a TOB connection
-    response = requests.get(agent_admin_url+'/connections')
-    response.raise_for_status()
-    connections = response.json()['results']
-    tob_connection = None
-    for connection in connections:
-        # check for TOB connection
-        if connection['their_label'] == tob_connection_params['alias']:
-            tob_connection = connection
-
-    if not tob_connection:
-        # if no tob connection then establish one
-        tob_agent_admin_url = tob_connection_params['connection']['agent_admin_url']
-        if not tob_agent_admin_url:
-            raise RuntimeError("Error TOB_AGENT_ADMIN_URL is not specified, can't establish a TOB connection.")
-
-        response = requests.post(tob_agent_admin_url+'/connections/create-invitation')
-        response.raise_for_status()
-        invitation = response.json()
-
-        response = requests.post(agent_admin_url+'/connections/receive-invitation', json.dumps(invitation['invitation']))
-        response.raise_for_status()
-        tob_connection = response.json()
-
-        print("Established tob connection", tob_connection)
-        time.sleep(5)
-
-    app_config['TOB_CONNECTION'] = tob_connection['connection_id']
-
-    for issuer_name, issuer_info in config_services['issuers'].items():
-        # register ourselves (issuer, schema(s), cred def(s)) with TOB
-        issuer_config = {
-                    "name": issuer_name,
-                    "abbreviation": issuer_info['abbreviation'],
-                    "did": app_config['DID'],
-                    "email": issuer_info['email'],
-                    "endpoint": issuer_info['endpoint'],
-                    "label": "tbd",
-                    "logo_path": None,  # TODO logo base 64
-                    "url": issuer_info['url']
-                }
-        credential_types = []
-        for credential_type in issuer_info['credential_types']:
-            schema_name = credential_type['schema']
-            schema_info = app_config['schemas']['SCHEMA_' + schema_name]
-            credential_type_info = {
-                        "name": schema_info['name'],
-                        "schema": schema_name,
-                        "topic": credential_type['topic'],
-                        "version": schema_info['version'],
-                        #"cardinality_fields": {},  # TODO cardinality
-                        #"category_labels": {},  # TODO what is this?
-                        "credential": credential_type['credential'],
-                        "credential_def_id": app_config['schemas']['CRED_DEF_' + schema_name + '_' + schema_info['version']],
-                        "description": schema_info['description'],
-                        "endpoint": credential_type['issuer_url'],
-                        "logo_b64": None,  # TODO logo base 64
-                        "mapping": credential_type['mapping'],
-                        "visible_fields": []
-                    }
-
-            # config for each attribute
-            if isinstance(schema_info['attributes'], dict):
-                credential_type_info['claim_labels'] = {}
-                credential_type_info['claim_descriptions'] = {}
-                # each element is a dict
-                for attr, desc in schema_info['attributes'].items():
-                    for key, value in desc.items():
-                        if '_' in key:
-                            claim_label = None
-                            label_lang = key.split('_', 1)
-                            if label_lang[0] == 'label':
-                                claim_label = 'claim_labels'
-                            elif label_lang[0] == 'description':
-                                claim_label = 'claim_descriptions'
-                            if claim_label:
-                                if not attr in credential_type_info[claim_label]:
-                                    credential_type_info[claim_label][attr] = {}
-                                credential_type_info[claim_label][attr][label_lang[1]] = value
-            if 'cardinality_fields' in credential_type:
-                credential_type_info['cardinality_fields'] = credential_type['cardinality_fields']
-
-            credential_types.append(credential_type_info)
-
-        issuer_request = {
-            "connection_id": app_config['TOB_CONNECTION'],
-            "issuer_registration": {
-                "credential_types": credential_types,
-                "issuer": issuer_config
-            }
-        }
-        #print("Registering issuer", json.dumps(issuer_request))
-
-        response = requests.post(agent_admin_url+'/issuer_registration/send', json.dumps(issuer_request))
-        response.raise_for_status()
-        issuer_data = response.json()
-        print("Registered issuer", issuer_name)
-
-    # TODO flag as "synced"
-
-    pass
+    thread = StartupProcessingThread(ENV)
+    thread.start()
 
 
 credential_lock = threading.Lock()
