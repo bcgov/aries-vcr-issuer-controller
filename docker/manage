@@ -77,12 +77,12 @@ configureEnvironment () {
   export AGENT_ADMIN_PORT=8034
   export TOB_AGENT_ADMIN_PORT=8024
   export WEBHOOK_PORT=5000
-  export INDY_WALLET_DID=...
+  #export INDY_WALLET_DID=...
   export AGENT_HTTP_IN_PORT=8031
   export AGENT_WS_IN_PORT=8033
   export WEBHOOK_HOST=http://myorg-controller:${WEBHOOK_PORT}
   export AGENT_NAME="myorg-agent"
-  export AGENT_ENDPOINT=${AGENT_ENDPOINT:-http://$DOCKERHOST:$AGENT_IN_PORT_1}
+  export AGENT_ENDPOINT=${AGENT_ENDPOINT:-http://$DOCKERHOST:$AGENT_HTTP_IN_PORT}
 
   # wallet-db
   export POSTGRESQL_DATABASE="THE_ORG_BOOK"
