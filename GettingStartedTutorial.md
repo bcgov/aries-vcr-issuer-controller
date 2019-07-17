@@ -1,3 +1,78 @@
+# This is a Work in Progress
+
+This repository is in active development, as is the documentation.
+
+For now, to run this repository, do the following:
+
+1. Clone and run von-network (https://github.com/bcgov/von-network)
+
+2. Clone and run Indy Catalyst Credential Registry (https://github.com/bcgov/indy-catalyst), "refactoring" branch
+
+3. Clone and run this repository
+
+Note that on startup, this repository will:
+
+- Register a public DID on the ledger
+- Register schemas and credential definitions on the ledger
+- Create a connection to the Indy Cat Cred Registry agent (if necessary)
+- Register this issuer with Indy Cat Cred Registry
+
+To submit credentials, use Postman (or similar) to submit the following to http://localhost:5000/issue-credential
+
+```
+[
+    {
+        "schema": "ian-registration.ian-ville",
+        "version": "1.0.0",
+        "attributes": {
+            "corp_num": "ABC12345",
+            "registration_date": "2018-01-01", 
+            "entity_name": "Ima Permit",
+            "entity_name_effective": "2018-01-01", 
+            "entity_status": "ACT", 
+            "entity_status_effective": "2019-01-01",
+            "entity_type": "ABC", 
+            "registered_jurisdiction": "BC", 
+            "addressee": "A Person",
+            "address_line_1": "123 Some Street",
+            "city": "Victoria",
+            "country": "Canada",
+            "postal_code": "V1V1V1",
+            "province": "BC",
+            "effective_date": "2019-01-01",
+            "expiry_date": ""
+        }
+    },
+    {
+        "schema": "ian-permit.ian-ville",
+        "version": "1.0.0",
+        "attributes": {
+            "permit_id": "MYPERMIT12345",
+            "entity_name": "Ima Permit",
+            "corp_num": "ABC12345",
+            "permit_issued_date": "2018-01-01", 
+            "permit_type": "ABC", 
+            "permit_status": "OK", 
+            "effective_date": "2019-01-01"
+        }
+    }
+]
+```
+
+Or, open a browser at http://localhost:5050 and:
+
+- click on "initialization and load tasks" | "von data db init"
+- click on "Run"
+- then back to home page (left hand nav bar, click on "Overview")
+- click on "von data event processor" then click on "Run"
+- this will post about 20 random credentials
+- then back to home page (left hand nav bar, click on "Overview")
+- click on "von data pipeline status" then click on "Run"
+- this will display the summary counts
+
+If you navigate to the Credential Registry (http://localhost:8080) you can search for and view the credentials.
+
+
 # VON Agent Getting Started Tutorial
 
 This Getting Started Guide is to get someone new to VON Issuer/Verifier Agents up and running in about an hour.  We assume that if you are here, you have some background in the goals and purpose of the Verifiable Organizations Network (VON), OrgBook, VON Issuer/Verifier Agents and GreenLight (decentralized workflow).  If any of this is new to you, please learn more at [https://vonx.io](https://vonx.io). On that site, we recommend the overview in the "About" section, and especially, the webinar linked at the top.
