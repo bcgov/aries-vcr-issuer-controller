@@ -111,8 +111,8 @@ services:
         --auto-respond-credential-offer \
         --auto-respond-presentation-request \
         --auto-verify-presentation \
-        --accept-invites \
-        --accept-requests \
+        --auto-accept-invites \
+        --auto-accept-requests \
         --wallet-type 'indy' \
         --wallet-name 'icat_agent_wallet' \
         --wallet-key '${WALLET_ENCRYPTION_KEY}' \
@@ -121,6 +121,7 @@ services:
         --wallet-storage-creds '{\"account\":\"${POSTGRESQL_USER}\",\"password\":\"${POSTGRESQL_PASSWORD}\",\"admin_account\":\"postgres\",\"admin_password\":\"${POSTGRESQL_ADMIN_PASSWORD}\"}' \
         --seed '${WALLET_SEED_VONX}' \
         --admin '0.0.0.0' ${AGENT_ADMIN_PORT} \
+        --admin-insecure-mode \
         --label ${AGENT_NAME} \
         --protocol indy_catalyst_issuer_registration",
       ]
