@@ -2,11 +2,11 @@
 
 issuers:
   ian-ville:
-    name: ian-cille
-    abbreviation: ian-ville
-    url: https://www.ian-ville.ca/ian-ville-info-page
-    email: info@ian-ville.ca
-    logo_path: ../assets/img/ian-ville-logo.jpg
+    name: my-org-full-name
+    abbreviation: my-organization
+    url: https://www.my-organization.ca/my-organization-info-page
+    email: info@my-organization.ca
+    logo_path: ../assets/img/my-organization-logo.jpg
     endpoint: $ENDPOINT_URL
 
     connection:
@@ -15,9 +15,9 @@ issuers:
       sign_target: false
 
     credential_types:
-    - description: The ian-permit credential issued by ian-cille
-      schema: ian-registration.ian-ville
-      issuer_url: $ENDPOINT_URL/ian-ville/ian-registration
+    - description: The my-registration credential issued by my-organization
+      schema: my-registration.my-organization
+      issuer_url: $ENDPOINT_URL/my-organization/my-registration
       credential:
         effective_date:
           input: effective_date
@@ -148,9 +148,9 @@ issuers:
           value:
             input: expiry_date
             from: claim
-    - description: The ian-permit credential issued by ian-cille
-      schema: ian-permit.ian-ville
-      issuer_url: $ENDPOINT_URL/ian-ville/ian-permit
+    - description: The my-permit credential issued by my-organization
+      schema: my-permit.my-organization
+      issuer_url: $ENDPOINT_URL/my-organization/my-permit
       depends_on:
       - greenlight_registration
       credential:

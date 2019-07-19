@@ -1,14 +1,14 @@
 # Documentation: https://github.com/bcgov/von-agent-template/tree/master/von-x-agent/config
 
 forms:
-  ian-villeian-registration:
-    path: /ian-ville/ian-registration
+  my-organizationmy-registration:
+    path: /my-organization/my-registration
     type: issue-credential
-    schema_name: ian-registration.ian-ville
-    page_title: Title for ian-registration.ian-ville
-    title: Title for ian-registration.ian-ville
+    schema_name: my-registration.my-organization
+    page_title: Title for my-registration.my-organization
+    title: Title for my-registration.my-organization
     template: bcgov.index.html
-    description: The ian-permit credential issued by ian-cille
+    description: The my-registration credential issued by my-organization
     explanation: Use the form below to issue a Credential.
     fields:
     - name: registration_date
@@ -60,14 +60,14 @@ forms:
       - name: corp_num
         from: helper
         source: uuid
-  ian-villeian-permit:
-    path: /ian-ville/ian-permit
+  my-organizationian-permit:
+    path: /my-organization/my-permit
     type: issue-credential
-    schema_name: ian-permit.ian-ville
-    page_title: Title for ian-permit.ian-ville
-    title: Title for ian-permit.ian-ville
+    schema_name: my-permit.my-organization
+    page_title: Title for my-permit.my-organization
+    title: Title for my-permit.my-organization
     template: bcgov.index.html
-    description: The ian-permit credential issued by ian-cille
+    description: The my-permit credential issued by my-organization
     explanation: Use the form below to issue a Credential.
     proof_request:
       id: greenlight_registration

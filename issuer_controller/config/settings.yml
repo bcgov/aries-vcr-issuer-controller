@@ -1,14 +1,15 @@
 default:
-  APPLICATION_URL_VONX: $APPLICATION_URL/ian-ville/ian-permit
+  APPLICATION_URL_VONX: $APPLICATION_URL/my-organization/my-permit
   TEMPLATE_PATH: ../templates
 
-  TOB_API_URL: http://tob-api:8080/api/v2
-  TOB_APP_URL: http://localhost:8080
+  TOB_API_URL: TOBAPIURL
+  TOB_APP_URL: TOBAPPURL
 
-  WALLET_SEED_VONX: ian-ville_0000000000000000000000
+  WALLET_SEED_VONX: my-organization_0000000000000000
 
-  #INDY_GENESIS_URL: http://localhost:9000/genesis
+  INDY_GENESIS_URL: GENESISURL
 
+  LEDGER_PROTOCOL_VERSION: "1.6"
   AUTO_REGISTER_DID: true
 
 ### eof ###
