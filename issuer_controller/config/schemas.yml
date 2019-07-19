@@ -1,8 +1,8 @@
 # Documentation: https://github.com/bcgov/von-agent-template/tree/master/von-x-agent/config
 
-- name: ian-registration.ian-ville
+- name: my-registration.my-organization
   version: 1.0.0
-  description: The ian-permit credential issued by ian-cille
+  description: The my-registration credential issued by my-organization
   attributes:
     corp_num:
       description_en: Registration/Incorporation Number or Identifying Number
@@ -78,9 +78,9 @@
       label_en: Credential Expiry Date
       data_type: ui_date
       required: false
-- name: ian-permit.ian-ville
+- name: my-permit.my-organization
   version: 1.0.0
-  description: The ian-permit credential issued by ian-cille
+  description: The my-permit credential issued by my-organization
   attributes:
     corp_num:
       description_en: Registration/Incorporation Number or Identifying Number

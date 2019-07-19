@@ -402,6 +402,7 @@ class EventProcessor:
                     topic_value = attr_value
 
             cred['id'] = str(uuid.uuid4())
+            cred['cred_type'] = cred['schema'].replace('.', '').replace('-', '').replace('-', '')
 
             creds.append(cred)
 
@@ -414,7 +415,8 @@ class EventProcessor:
     # this is just a "faux" method that creates some dummy credentials
     # in real life would pull data from a source DB
     def process_event_queue(self):
-        topic_name = 'corp_num'
+        """
+        Generate some sample credentials, based on a template like:
         sample_creds_template = [
             {
                 "attributes": {
@@ -436,8 +438,7 @@ class EventProcessor:
                     "registration_date": "$Date"
                 },
                 "schema": "ian-registration.ian-ville",
-                "version": "1.0.0",
-                "cred_type": "registration"
+                "version": "1.0.0"
             },
             {
                 "attributes": {
@@ -450,10 +451,14 @@ class EventProcessor:
                     "permit_type": "$Select"
                 },
                 "schema": "ian-permit.ian-ville",
-                "version": "1.0.0",
-                "cred_type": "permit"
+                "version": "1.0.0"
             }
         ]
+        """
+        topic_name = 'corp_num'
+        with open ("./gen-data.json", "r") as myfile:
+            sample_creds_template_str = myfile.read().replace('\n', '')
+        sample_creds_template = json.loads(sample_creds_template_str)
 
         # generate and save some dummy credentials
         count = 0

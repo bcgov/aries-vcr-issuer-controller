@@ -18,7 +18,7 @@
             "registered_jurisdiction": "$Text",
             "registration_date": "$Date"
         },
-        "schema": "ian-registration.ian-ville",
+        "schema": "my-registration.my-organization",
         "version": "1.0.0"
     },
     {
@@ -31,7 +31,7 @@
             "permit_status": "$Select",
             "permit_type": "$Select"
         },
-        "schema": "ian-permit.ian-ville",
+        "schema": "my-permit.my-organization",
         "version": "1.0.0"
     }
 ]

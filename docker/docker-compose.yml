@@ -56,7 +56,7 @@ services:
       TOB_CONNECTION_NAME: tob-agent
       WEBHOOK_PORT: ${WEBHOOK_PORT}
     networks:
-      - orgbook
+#local      - orgbook
       - myorg
     ports:
       - ${WEBHOOK_PORT}:${WEBHOOK_PORT}
@@ -87,7 +87,7 @@ services:
       - AGENT_ADMIN_PORT=${AGENT_ADMIN_PORT}
       - AGENT_NAME=${AGENT_NAME}
     networks:
-      - orgbook
+#local      - orgbook
       - myorg
     ports:
       - ${AGENT_HTTP_IN_PORT}:${AGENT_HTTP_IN_PORT}
@@ -135,7 +135,7 @@ services:
       - POSTGRESQL_DATABASE=${POSTGRESQL_DATABASE}
       - POSTGRESQL_ADMIN_PASSWORD=${POSTGRESQL_ADMIN_PASSWORD}
     networks:
-      - orgbook
+#local      - orgbook
       - myorg
     ports:
       - 5435:5432
@@ -202,6 +202,6 @@ volumes:
 
 networks:
   myorg:
-  orgbook:
-    external:
-      name: tob_tob
+#local  orgbook:
+#local    external:
+#local      name: tob_tob
