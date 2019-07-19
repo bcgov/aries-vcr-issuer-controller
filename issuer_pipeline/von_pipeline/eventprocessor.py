@@ -458,7 +458,7 @@ class EventProcessor:
         """
         topic_name = 'corp_num'
         with open ("./gen-data.json", "r") as myfile:
-            sample_creds_template_str = myfile.readlines()
+            sample_creds_template_str = myfile.read().replace('\n', '')
         sample_creds_template = json.loads(sample_creds_template_str)
 
         # generate and save some dummy credentials
