@@ -457,7 +457,7 @@ class EventProcessor:
         ]
         """
         topic_name = 'corp_num'
-        with open ("../issuer_controller/config/gen-data.json", "r") as myfile:
+        with open ("./gen-data.json", "r") as myfile:
             sample_creds_template_str = myfile.readlines()
         sample_creds_template = json.loads(sample_creds_template_str)
 

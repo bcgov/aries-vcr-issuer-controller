@@ -85,6 +85,7 @@ find issuer_controller/config -name "*.yml" -exec sed -i.bak s/my-permit/${MY_PE
 find issuer_controller/config -name "*.json" -exec sed -i.bak s/my-organization/${MY_ORG}/g {} +
 find issuer_controller/config -name "*.json" -exec sed -i.bak s/my-permit/${MY_PERMIT}/g {} +
 find issuer_controller -name "*.bak" -type f|xargs rm -f
+cp issuer_controller/config/gen-data.json issuer_pipeline/
 
 # Register DID
 # https://gist.github.com/subfuzion/08c5d85437d5d4f00e58
