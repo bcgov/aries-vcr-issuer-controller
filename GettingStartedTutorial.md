@@ -10,6 +10,8 @@ For now, to run this repository, do the following:
 
 3. Clone and run this repository
 
+- Note, use the ```init.sh``` script to customize your local config, as described [here](#clone-initialize-and-start-your-agent) 
+
 Note that on startup, this repository will:
 
 - Register a public DID on the ledger
@@ -17,7 +19,7 @@ Note that on startup, this repository will:
 - Create a connection to the Indy Cat Cred Registry agent (if necessary)
 - Register this issuer with Indy Cat Cred Registry
 
-To submit credentials, use Postman (or similar) to submit the following to http://localhost:5000/issue-credential
+To submit credentials, use Postman (or similar, based on your local configuration) to submit the following to http://localhost:5000/issue-credential
 
 ```
 [
