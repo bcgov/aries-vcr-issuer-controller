@@ -402,6 +402,7 @@ class EventProcessor:
                     topic_value = attr_value
 
             cred['id'] = str(uuid.uuid4())
+            cred['cred_type'] = cred['schema'].replace('.', '').replace('-', '').replace('-', '')
 
             creds.append(cred)
 
@@ -437,8 +438,7 @@ class EventProcessor:
                     "registration_date": "$Date"
                 },
                 "schema": "ian-registration.ian-ville",
-                "version": "1.0.0",
-                "cred_type": "registration"
+                "version": "1.0.0"
             },
             {
                 "attributes": {
@@ -451,8 +451,7 @@ class EventProcessor:
                     "permit_type": "$Select"
                 },
                 "schema": "ian-permit.ian-ville",
-                "version": "1.0.0",
-                "cred_type": "permit"
+                "version": "1.0.0"
             }
         ]
         """
