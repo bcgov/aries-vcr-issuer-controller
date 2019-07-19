@@ -6,7 +6,7 @@ For now, to run this repository, do the following:
 
 1. Clone and run von-network (https://github.com/bcgov/von-network)
 
-2. Clone and run Indy Catalyst Credential Registry (https://github.com/bcgov/indy-catalyst), "refactoring" branch
+2. Clone and run Indy Catalyst Credential Registry (https://github.com/bcgov/indy-catalyst)
 
 3. Clone and run this repository
 
