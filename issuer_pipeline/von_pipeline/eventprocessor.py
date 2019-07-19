@@ -414,7 +414,8 @@ class EventProcessor:
     # this is just a "faux" method that creates some dummy credentials
     # in real life would pull data from a source DB
     def process_event_queue(self):
-        topic_name = 'corp_num'
+        """
+        Generate some sample credentials, based on a template like:
         sample_creds_template = [
             {
                 "attributes": {
@@ -454,6 +455,11 @@ class EventProcessor:
                 "cred_type": "permit"
             }
         ]
+        """
+        topic_name = 'corp_num'
+        with open ("../issuer_controller/config/gen-data.json", "r") as myfile:
+            sample_creds_template_str = myfile.readlines()
+        sample_creds_template = json.loads(sample_creds_template_str)
 
         # generate and save some dummy credentials
         count = 0
