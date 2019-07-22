@@ -110,6 +110,7 @@ class StartupProcessingThread(threading.Thread):
             tob_connection = response.json()
 
             print("Established tob connection", tob_connection)
+            time.sleep(5)
 
         app_config['TOB_CONNECTION'] = tob_connection['connection_id']
         synced[tob_connection['connection_id']] = False
