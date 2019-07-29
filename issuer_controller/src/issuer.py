@@ -238,6 +238,7 @@ TOPIC_PRESENTATIONS = "presentations"
 TOPIC_GET_ACTIVE_MENU = "get-active-menu"
 TOPIC_PERFORM_MENU_ACTION = "perform-menu-action"
 TOPIC_ISSUER_REGISTRATION = "issuer_registration"
+TOPIC_PROBLEM_REPORT = "problem-report"
 
 
 def handle_connections(state, message):
@@ -272,6 +273,9 @@ def handle_register_issuer(message):
     # TODO add/update issuer info?
     print("handle_register_issuer()")
     return jsonify({})
+
+def handle_problem_report(message):
+    print("handle_problem_report()", message)
 
 
 class SendCredentialThread(threading.Thread):
