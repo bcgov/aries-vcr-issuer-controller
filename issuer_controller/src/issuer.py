@@ -276,6 +276,7 @@ def handle_register_issuer(message):
 
 def handle_problem_report(message):
     print("handle_problem_report()", message)
+    return jsonify({})
 
 
 class SendCredentialThread(threading.Thread):
