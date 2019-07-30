@@ -249,7 +249,9 @@ def handle_connections(state, message):
 def handle_credentials(state, message):
     # TODO auto-respond to proof requests
     print("handle_credentials()", state, message['credential_exchange_id'])
-    if state == 'issued':
+    print("handle_credentials()", message)
+    # TODO new "stored" state is being added by Nick
+    if state == 'stored':
         response = {'success': True, 'result': message['credential_exchange_id']}
         add_credential_response(message['credential_exchange_id'], response)
     return jsonify({'message': state})
@@ -276,6 +278,17 @@ def handle_register_issuer(message):
 
 def handle_problem_report(message):
     print("handle_problem_report()", message)
+    if is_credential_error():
+        # TODO set credential status
+        # {
+        #    '@type': 'did:sov:BzCbsNYhMrjHiqZDTUASHg;spec/notification/1.0/problem-report', 
+        #    '@id': '773a2a97-1831-40c7-ad26-e51d61eb3e1b', 
+        #    '~thread': {'thid': '4100b3da-334d-4032-9c63-e884753965a5'}, 
+        #    'explain-ltxt': 'Deliberately failed'
+        # }
+        response = {'success': False, 'result': message['something']}
+        add_credential_response(message['credential_exchange_id'], response)
+
     return jsonify({})
 
 
@@ -290,6 +303,7 @@ class SendCredentialThread(threading.Thread):
         response = requests.post(self.url, json.dumps(self.cred_offer))
         response.raise_for_status()
         cred_data = response.json()
+        print("cred_data after initial post:", cred_data)
         result_available = add_credential_request(cred_data['credential_exchange_id'])
         print("Sent offer", cred_data['credential_exchange_id'], cred_data['connection_id'])
 
