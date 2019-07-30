@@ -82,6 +82,9 @@ def agent_callback(topic):
 
     elif topic == issuer.TOPIC_ISSUER_REGISTRATION:
         return issuer.handle_register_issuer(message)
+    
+    elif topic == issuer.TOPIC_PROBLEM_REPORT:
+        return issuer.handle_problem_report(message)
 
     else:
         print("Callback: topic=", topic, ", message=", message)
