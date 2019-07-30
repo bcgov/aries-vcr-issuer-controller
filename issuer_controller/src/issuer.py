@@ -298,16 +298,9 @@ def handle_register_issuer(message):
 
 def handle_problem_report(message):
     print("handle_problem_report()", message)
-    if is_credential_error():
-        # TODO set credential status
-        # {
-        #    '@type': 'did:sov:BzCbsNYhMrjHiqZDTUASHg;spec/notification/1.0/problem-report', 
-        #    '@id': '773a2a97-1831-40c7-ad26-e51d61eb3e1b', 
-        #    '~thread': {'thid': '4100b3da-334d-4032-9c63-e884753965a5'}, 
-        #    'explain-ltxt': 'Deliberately failed'
-        # }
-        response = {'success': False, 'result': message['explain-ltxt']}
-        add_credential_problem_report(message['~thread']['thid'], response)
+
+    response = {'success': False, 'result': message['explain-ltxt']}
+    add_credential_problem_report(message['~thread']['thid'], response)
 
     return jsonify({})
 
