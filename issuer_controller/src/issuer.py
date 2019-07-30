@@ -198,6 +198,16 @@ def startup_init(ENV):
 credential_lock = threading.Lock()
 credential_requests = {}
 credential_responses = {}
+credential_threads = {}
+
+def set_credential_thread_id(cred_exch_id, thread_id):
+    credential_lock.acquire()
+    try:
+        # add 2 records so we can x-ref
+        credential_threads[thread_id] = cred_exch_id
+        credential_threads[cred_exch_id] = thread_id
+    finally:
+        credential_lock.release()
 
 def add_credential_request(cred_exch_id):
     credential_lock.acquire()
@@ -219,12 +229,21 @@ def add_credential_response(cred_exch_id, response):
     finally:
         credential_lock.release()
 
+def add_credential_problem_report(thread_id, response):
+    if thread_id in credential_threads:
+        cred_exch_id = credential_threads[thread_id]
+        add_credential_response(cred_exch_id, response)
+
 def get_credential_response(cred_exch_id):
     credential_lock.acquire()
     try:
         if cred_exch_id in credential_responses:
             response = credential_responses[cred_exch_id]
             del credential_responses[cred_exch_id]
+            if cred_exch_id in credential_threads:
+                thread_id = credential_threads[cred_exch_id]
+                del credential_threads[cred_exch_id]
+                del credential_threads[thread_id]
             return response
         else:
             return None
@@ -249,8 +268,9 @@ def handle_connections(state, message):
 def handle_credentials(state, message):
     # TODO auto-respond to proof requests
     print("handle_credentials()", state, message['credential_exchange_id'])
-    print("handle_credentials()", message)
     # TODO new "stored" state is being added by Nick
+    if 'thread_id' in message:
+        set_credential_thread_id(message['credential_exchange_id'], message['thread_id'])
     if state == 'stored':
         response = {'success': True, 'result': message['credential_exchange_id']}
         add_credential_response(message['credential_exchange_id'], response)
@@ -286,8 +306,8 @@ def handle_problem_report(message):
         #    '~thread': {'thid': '4100b3da-334d-4032-9c63-e884753965a5'}, 
         #    'explain-ltxt': 'Deliberately failed'
         # }
-        response = {'success': False, 'result': message['something']}
-        add_credential_response(message['credential_exchange_id'], response)
+        response = {'success': False, 'result': message['explain-ltxt']}
+        add_credential_problem_report(message['~thread']['thid'], response)
 
     return jsonify({})
 
