@@ -204,6 +204,7 @@ def set_credential_thread_id(cred_exch_id, thread_id):
     credential_lock.acquire()
     try:
         # add 2 records so we can x-ref
+        print("Set cred_exch_id, thread_id", cred_exch_id, thread_id)
         credential_threads[thread_id] = cred_exch_id
         credential_threads[cred_exch_id] = thread_id
     finally:
@@ -230,9 +231,12 @@ def add_credential_response(cred_exch_id, response):
         credential_lock.release()
 
 def add_credential_problem_report(thread_id, response):
+    print("get problem report for thread", thread_id)
     if thread_id in credential_threads:
         cred_exch_id = credential_threads[thread_id]
         add_credential_response(cred_exch_id, response)
+    else:
+        print("thread_id not found", thread_id)
 
 def get_credential_response(cred_exch_id):
     credential_lock.acquire()
@@ -242,6 +246,7 @@ def get_credential_response(cred_exch_id):
             del credential_responses[cred_exch_id]
             if cred_exch_id in credential_threads:
                 thread_id = credential_threads[cred_exch_id]
+                print("cleaning out cred_exch_id, thread_id", cred_exch_id, thread_id)
                 del credential_threads[cred_exch_id]
                 del credential_threads[thread_id]
             return response
@@ -316,7 +321,6 @@ class SendCredentialThread(threading.Thread):
         response = requests.post(self.url, json.dumps(self.cred_offer))
         response.raise_for_status()
         cred_data = response.json()
-        print("cred_data after initial post:", cred_data)
         result_available = add_credential_request(cred_data['credential_exchange_id'])
         print("Sent offer", cred_data['credential_exchange_id'], cred_data['connection_id'])
 
