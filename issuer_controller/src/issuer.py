@@ -237,6 +237,14 @@ def add_credential_problem_report(thread_id, response):
         add_credential_response(cred_exch_id, response)
     else:
         print("thread_id not found", thread_id)
+        # hack for now
+        if 1 == len(list(credential_requests.keys())):
+            cred_exch_id = list(credential_requests.keys())[0]
+            add_credential_response(cred_exch_id, response)
+        else:
+            print("darn, too many outstanding requests :-(")
+            print(credential_requests)
+
 
 def get_credential_response(cred_exch_id):
     credential_lock.acquire()
