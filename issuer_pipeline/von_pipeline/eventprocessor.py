@@ -23,7 +23,7 @@ PIPELINE_SYSTEM_TYPE = 'PPL'
 CORP_BATCH_SIZE = 3000
 
 # number of test/random credentials to generate and post
-GEN_TOPIC_COUNT = 5000
+GEN_TOPIC_COUNT = 100
 
 MIN_START_DATE = datetime.datetime(datetime.MINYEAR+1, 1, 1)
 MAX_END_DATE   = datetime.datetime(datetime.MAXYEAR-1, 12, 31)
