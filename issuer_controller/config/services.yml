@@ -158,12 +158,12 @@ issuers:
           input: effective_date
           from: claim
       topic:
-          related_source_id:
-            input: associated_corp_num
-            from: claim
-          related_type:
-            input: registration
-            from: value
+        related_source_id:
+          input: associated_corp_num
+          from: claim
+        related_type:
+          input: registration
+          from: value
         source_id:
           input: corp_num
           from: claim
