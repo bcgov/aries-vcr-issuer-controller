@@ -412,7 +412,7 @@ class EventProcessor:
 
     def generate_credential(self, topic_name, creds_template, topics):
         creds = []
-        for j in range(len(topics))
+        for j in range(len(topics)):
             topic_value = topics[j]
             for cred_template in creds_template:
                 if cred_template['schema'].startswith('my-relationship'):
