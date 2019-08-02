@@ -78,6 +78,55 @@
       label_en: Credential Expiry Date
       data_type: ui_date
       required: false
+- name: my-relationship.my-organization
+  version: 1.0.0
+  description: The relationship between two organizations
+  attributes:
+    corp_num:
+      description_en: Unique identifer assigned to entity by registrar
+      label_en: Registration ID
+      data_type: ui_text
+      required: true
+    associated_corp_num:
+      description_en: Registry id(s) of associated organizations/individuals
+      label_en: Associated Registration ID
+      data_type: ui_text
+      required: true
+    associated_registration_name:
+      description_en: Registered name of associated organizations/individuals
+      label_en: Associated Registration Namwe
+      data_type: ui_text
+      required: false
+    relationship:
+      description_en: Name of the relationship
+      label_en: Relationship
+      data_type: ui_text
+      required: true
+    relationship_description:
+      description_en: Description of the relationship
+      label_en: Relationship Description
+      data_type: ui_text
+      required: true
+    relationship_status:
+      description_en: Status of the relationship
+      label_en: Relationship Status
+      data_type: ui_select
+      required: true
+    relationship_status_effective:
+      description_en: Date the relationship became/becomes effective
+      label_en: Relationship Status Effective
+      data_type: ui_date
+      required: false
+    effective_date:
+      description_en: Date Credential is effective
+      label_en: Effective Date
+      data_type: ui_date
+      required: true
+    expiry_date:
+      description_en: Date Credential expires
+      label_en: Credential Expiry Date
+      data_type: ui_date
+      required: false
 - name: my-permit.my-organization
   version: 1.0.0
   description: The my-permit credential issued by my-organization

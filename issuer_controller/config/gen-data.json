@@ -23,6 +23,21 @@
     },
     {
         "attributes": {
+            "associated_corp_num": "$Text",
+            "associated_registration_name": "$Text",
+            "corp_num": "$Text",
+            "effective_date": "$Date",
+            "expiry_date": "$Date",
+            "relationship": "$Text",
+            "relationship_description": "$Text",
+            "relationship_status": "$Select",
+            "relationship_status_effective": "$Date"
+        },
+        "schema": "my-relationship.my-organization",
+        "version": "1.0.0"
+    },
+    {
+        "attributes": {
             "corp_num": "$Text",
             "effective_date": "$Date",
             "entity_name": "$Name",
