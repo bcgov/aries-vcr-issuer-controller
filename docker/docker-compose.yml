@@ -100,7 +100,7 @@ services:
         "-c",
         "curl -d '{\"seed\":\"${WALLET_SEED_VONX}\", \"role\":\"TRUST_ANCHOR\", \"alias\":\"${AGENT_NAME}\"}' -X POST ${LEDGER_URL}/register; \
         sleep 5; \
-        aca-py \
+        aca-py start \
         --inbound-transport http '0.0.0.0' ${AGENT_HTTP_IN_PORT} \
         --inbound-transport ws '0.0.0.0' ${AGENT_WS_IN_PORT} \
         --endpoint ${AGENT_ENDPOINT} \
