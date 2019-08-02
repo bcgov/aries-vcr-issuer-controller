@@ -22,6 +22,9 @@ PIPELINE_SYSTEM_TYPE = 'PPL'
 
 CORP_BATCH_SIZE = 3000
 
+# number of test/random credentials to generate and post
+GEN_TOPIC_COUNT = 50000
+
 MIN_START_DATE = datetime.datetime(datetime.MINYEAR+1, 1, 1)
 MAX_END_DATE   = datetime.datetime(datetime.MAXYEAR-1, 12, 31)
 DATA_CONVERSION_DATE = datetime.datetime(2004, 3, 26)
@@ -462,7 +465,7 @@ class EventProcessor:
 
         # generate and save some dummy credentials
         count = 0
-        for i in range(10):
+        for i in range(GEN_TOPIC_COUNT):
             creds = self.generate_credential(topic_name, sample_creds_template)
             count = count + len(creds)
         print("Generated cred count = ", count)
