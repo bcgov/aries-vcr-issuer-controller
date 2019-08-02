@@ -23,7 +23,7 @@ PIPELINE_SYSTEM_TYPE = 'PPL'
 CORP_BATCH_SIZE = 3000
 
 # number of test/random credentials to generate and post
-GEN_TOPIC_COUNT = 50000
+GEN_TOPIC_COUNT = 5000
 
 MIN_START_DATE = datetime.datetime(datetime.MINYEAR+1, 1, 1)
 MAX_END_DATE   = datetime.datetime(datetime.MAXYEAR-1, 12, 31)
@@ -380,34 +380,82 @@ class EventProcessor:
         return ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits + ' ') for _ in range(N))
 
 
-    def generate_credential(self, topic_name, creds_template):
-        creds = []
-        topic_value = None
-        for cred_template in creds_template:
-            cred = copy.deepcopy(cred_template)
-            for attr_name, value in cred['attributes'].items():
-                if attr_name == topic_name and topic_value:
-                    attr_value = topic_value
-                elif value == '$UUID':
-                    attr_value = str(uuid.uuid4())
-                elif value == '$Name':
-                    attr_value = 'Random Name ' + self.random_string(10)
-                elif value == '$Text':
-                    attr_value = 'Random Text ' + self.random_string(25)
-                elif value == '$Date':
-                    attr_value = '2019-01-01'
-                elif value == '$Select':
-                    attr_value = 'OPT1'
+    def generate_relationship_credential(self, topic_name, topic_value, related_topic_name, related_topic_value, relationship, cred):
+        for attr_name, value in cred['attributes'].items():
+            if attr_name == topic_name:
+                attr_value = topic_value
+            elif attr_name == related_topic_name:
+                attr_value = related_topic_value
+            elif attr_name == 'relationship' or attr_name == 'relationship_description':
+                attr_value = relationship
+            elif value == '$UUID':
+                attr_value = str(uuid.uuid4())
+            elif value == '$Name':
+                attr_value = 'Random Name ' + self.random_string(10)
+            elif value == '$Text':
+                attr_value = 'Random Text ' + self.random_string(25)
+            elif value == '$Date':
+                if attr_name == 'expiry_date':
+                    attr_value = ''
                 else:
-                    attr_value = value
-                cred['attributes'][attr_name] = attr_value
-                if attr_name == topic_name and not topic_value:
-                    topic_value = attr_value
+                    attr_value = '2019-01-01'
+            elif value == '$Select':
+                attr_value = 'OPT1'
+            else:
+                attr_value = value
+            cred['attributes'][attr_name] = attr_value
 
-            cred['id'] = str(uuid.uuid4())
-            cred['cred_type'] = cred['schema'].replace('.', '').replace('-', '').replace('-', '')
+        cred['id'] = str(uuid.uuid4())
+        cred['cred_type'] = cred['schema'].replace('.', '').replace('-', '').replace('-', '')
 
-            creds.append(cred)
+        return cred
+
+    def generate_credential(self, topic_name, creds_template, topics):
+        creds = []
+        for j in range(len(topics))
+            topic_value = topics[j]
+            for cred_template in creds_template:
+                if cred_template['schema'].startswith('my-relationship'):
+                    # special case handling for relationships
+                    if j == 0:
+                        # create "Owns" relationships
+                        for k in range(len(topics)-1):
+                            cred = copy.deepcopy(cred_template)
+                            cred = self.generate_relationship_credential(topic_name, topic_value, "associated_corp_num", topics[1+k], "Owns", cred)
+                            creds.append(cred)
+
+                    else:
+                        # create a "DBA" relationship
+                        cred = copy.deepcopy(cred_template)
+                        cred = self.generate_relationship_credential(topic_name, topic_value, "associated_corp_num", topics[0], "DBA", cred)
+                        creds.append(cred)
+
+                else:
+                    cred = copy.deepcopy(cred_template)
+                    for attr_name, value in cred['attributes'].items():
+                        if attr_name == topic_name:
+                            attr_value = topic_value
+                        elif value == '$UUID':
+                            attr_value = str(uuid.uuid4())
+                        elif value == '$Name':
+                            attr_value = 'Random Name ' + self.random_string(10)
+                        elif value == '$Text':
+                            attr_value = 'Random Text ' + self.random_string(25)
+                        elif value == '$Date':
+                            if attr_name == 'expiry_date':
+                                attr_value = ''
+                            else:
+                                attr_value = '2019-01-01'
+                        elif value == '$Select':
+                            attr_value = 'OPT1'
+                        else:
+                            attr_value = value
+                        cred['attributes'][attr_name] = attr_value
+
+                    cred['id'] = str(uuid.uuid4())
+                    cred['cred_type'] = cred['schema'].replace('.', '').replace('-', '').replace('-', '')
+
+                    creds.append(cred)
 
         self.store_credentials(PIPELINE_SYSTEM_TYPE, creds)
 
@@ -465,8 +513,11 @@ class EventProcessor:
 
         # generate and save some dummy credentials
         count = 0
-        for i in range(GEN_TOPIC_COUNT):
-            creds = self.generate_credential(topic_name, sample_creds_template)
+        for i in range(GEN_TOPIC_COUNT//5):
+            topics = []
+            for j in range(5):
+                topics.append(str(uuid.uuid4()))
+            creds = self.generate_credential(topic_name, sample_creds_template, topics)
             count = count + len(creds)
         print("Generated cred count = ", count)
 
