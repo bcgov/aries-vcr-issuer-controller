@@ -52,8 +52,8 @@ services:
       ISSUER_WALLET_DID: ${ISSUER_WALLET_DID}
       HTTP_FORCE_CLOSE_CONNECTIONS: "true"
       AGENT_ADMIN_URL: http://myorg-agent:${AGENT_ADMIN_PORT}
-      TOB_AGENT_ADMIN_URL: http://tob-agent:${TOB_AGENT_ADMIN_PORT}
-      TOB_CONNECTION_NAME: tob-agent
+      TOB_AGENT_ADMIN_URL: ${TOB_AGENT_ADMIN_URL}
+      TOB_CONNECTION_NAME: ${TOB_CONNECTION_NAME}
       WEBHOOK_PORT: ${WEBHOOK_PORT}
     networks:
 #local      - orgbook
