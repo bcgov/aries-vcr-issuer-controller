@@ -8,4 +8,4 @@
 *.conf text eol=lf
 **/s2i/bin/* text eol=lf
 **/root/**/* text eol=lf
-**/.scripts/* text eol=lf
+**/.scripts/**/* text eol=lf
