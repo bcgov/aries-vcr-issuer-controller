@@ -104,8 +104,8 @@ configureEnvironment () {
   export VONX_API_URL=http://myorg-controller:${WEBHOOK_PORT}
 
   # myorg-controller
-  export TOB_AGENT_ADMIN_URL: ${TOB_AGENT_ADMIN_URL:-http://tob-agent:${TOB_AGENT_ADMIN_PORT}} 
-  export TOB_CONNECTION_NAME: ${TOB_CONNECTION_NAME:-tob-agent} 
+  export TOB_AGENT_ADMIN_URL=${TOB_AGENT_ADMIN_URL:-http://tob-agent:${TOB_AGENT_ADMIN_PORT}} 
+  export TOB_CONNECTION_NAME=${TOB_CONNECTION_NAME:-tob-agent} 
 
   # myorg data source (directory)
   #export EAO_MDB_DB_HOST=${EAO_MDB_DB_HOST:-"mongo"}
