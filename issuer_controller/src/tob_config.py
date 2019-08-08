@@ -25,18 +25,6 @@ import pathlib
 
 LOGGER = logging.getLogger(__name__)
 
-CRED_TYPE_PARAMETERS = (
-    "cardinality_fields",
-    "category_labels",
-    "claim_descriptions",
-    "claim_labels",
-    "credential",
-    "details",
-    "mapping",
-    "topic",
-    "visible_fields",
-)
-
 
 def encode_logo_image(config: dict, path_root: str) -> str:
     """
@@ -108,10 +96,21 @@ def assemble_credential_type_spec(config: dict) -> dict:
     Create the issuer JSON definition which will be submitted to the OrgBook
     """
 
+    CRED_TYPE_PARAMETERS = (
+        "cardinality_fields",
+        "category_labels",
+        "claim_descriptions",
+        "claim_labels",
+        "credential",
+        "details",
+        "mapping",
+        "topic",
+        "visible_fields",
+    )
+
     config_root = config.get("config_root")
     deflang = "en"
 
-    schema = config["schema"]
     if not config.get("topic"):
         raise RuntimeError("Missing 'topic' for credential type")
 

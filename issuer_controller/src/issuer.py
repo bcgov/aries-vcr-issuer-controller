@@ -7,9 +7,6 @@ import requests
 from flask import jsonify
 
 import config
-import tob_config
-
-LOGGER = logging.getLogger(__name__)
 
 # list of cred defs per schema name/version
 app_config = {}
@@ -55,7 +52,7 @@ class StartupProcessingThread(threading.Thread):
             )
             response.raise_for_status()
             did = response.json()
-            LOGGER.info("Registered did: %s", did)
+            logging.getLogger(__name__).info("Registered did: %s", did)
             app_config["DID"] = did["did"]
             time.sleep(5)
 
@@ -90,7 +87,7 @@ class StartupProcessingThread(threading.Thread):
             app_config["schemas"][
                 "SCHEMA_" + schema_name + "_" + schema_version
             ] = schema_id["schema_id"]
-            LOGGER.info("Registered schema: %s", schema_id)
+            logging.getLogger(__name__).info("Registered schema: %s", schema_id)
 
             cred_def_request = {"schema_id": schema_id["schema_id"]}
             response = requests.post(
@@ -102,7 +99,7 @@ class StartupProcessingThread(threading.Thread):
             app_config["schemas"][
                 "CRED_DEF_" + schema_name + "_" + schema_version
             ] = credential_definition_id["credential_definition_id"]
-            LOGGER.info(
+            logging.getLogger(__name__).info(
                 "Registered credential definition: %s", credential_definition_id
             )
 
@@ -140,7 +137,9 @@ class StartupProcessingThread(threading.Thread):
             response.raise_for_status()
             tob_connection = response.json()
 
-            LOGGER.info("Established tob connection: %s", tob_connection)
+            logging.getLogger(__name__).info(
+                "Established tob connection: %s", tob_connection
+            )
             time.sleep(5)
 
         app_config["TOB_CONNECTION"] = tob_connection["connection_id"]
@@ -154,7 +153,7 @@ class StartupProcessingThread(threading.Thread):
                 "config_root": config_root,
             }
             issuer_config.update(issuer_info)
-            issuer_spec = tob_config.assemble_issuer_spec(issuer_config)
+            issuer_spec = config.assemble_issuer_spec(issuer_config)
 
             credential_types = []
             for credential_type in issuer_info["credential_types"]:
@@ -170,7 +169,7 @@ class StartupProcessingThread(threading.Thread):
                     ],
                 }
                 ctype_config.update(credential_type)
-                ctype = tob_config.assemble_credential_type_spec(ctype_config)
+                ctype = config.assemble_credential_type_spec(ctype_config)
                 if ctype is not None:
                     credential_types.append(ctype)
 
@@ -188,10 +187,12 @@ class StartupProcessingThread(threading.Thread):
             )
             response.raise_for_status()
             response.json()
-            LOGGER.info("Registered issuer: %s", issuer_name)
+            logging.getLogger(__name__).info("Registered issuer: %s", issuer_name)
 
         synced[tob_connection["connection_id"]] = True
-        LOGGER.info("Connection {} is synchronized".format(tob_connection))
+        logging.getLogger(__name__).info(
+            "Connection {} is synchronized".format(tob_connection)
+        )
 
 
 def startup_init(ENV):
