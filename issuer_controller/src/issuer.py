@@ -139,9 +139,7 @@ class StartupProcessingThread(threading.Thread):
             response.raise_for_status()
             tob_connection = response.json()
 
-            LOGGER.info(
-                "Established tob connection: %s", tob_connection
-            )
+            LOGGER.info("Established tob connection: %s", tob_connection)
             time.sleep(5)
 
         app_config["TOB_CONNECTION"] = tob_connection["connection_id"]
@@ -192,9 +190,7 @@ class StartupProcessingThread(threading.Thread):
             LOGGER.info("Registered issuer: %s", issuer_name)
 
         synced[tob_connection["connection_id"]] = True
-        LOGGER.info(
-            "Connection {} is synchronized".format(tob_connection)
-        )
+        LOGGER.info("Connection {} is synchronized".format(tob_connection))
 
 
 def startup_init(ENV):

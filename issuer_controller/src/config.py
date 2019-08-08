@@ -90,7 +90,7 @@ def load_settings(config_root=None, env=True) -> dict:
         config_root = os.environ.get("CONFIG_ROOT", os.curdir)
         ext_path = os.path.join(config_root, "settings.yml")
     with load_resource(ext_path) as resource:
-        ext_cfg = yaml.load(resource)
+        ext_cfg = yaml.load(resource, Loader=yaml.FullLoader)
         if "default" in ext_cfg:
             settings.update(ext_cfg["default"])
         if env_name != "default":
@@ -127,7 +127,7 @@ def load_config(path: str, env=None):
     """
     try:
         with load_resource(path) as resource:
-            cfg = yaml.load(resource)
+            cfg = yaml.load(resource, Loader=yaml.FullLoader)
     except FileNotFoundError:
         return False
     cfg = expand_tree_variables(cfg, env or os.environ)
