@@ -29,6 +29,8 @@ from typing import Callable, Mapping, TextIO
 import pkg_resources
 import yaml
 
+LOGGER = logging.getLogger(__name__)
+
 
 def load_resource(path: str) -> TextIO:
     """
@@ -156,9 +158,7 @@ def expand_string_variables(value, env: Mapping, warn: bool = True):
         if found is None or found == "":
             found = default
         if found is None and warn:
-            logging.getLogger(__name__).warning(
-                "Configuration variable not defined: %s", var
-            )
+            LOGGER.warning("Configuration variable not defined: %s", var)
             found = ""
         return found
 
@@ -211,7 +211,7 @@ def encode_logo_image(config: dict, path_root: str) -> str:
             if content:
                 return base64.b64encode(content).decode("ascii")
         else:
-            logging.getLogger(__name__).warning("No file found at logo path: %s", path)
+            LOGGER.warning("No file found at logo path: %s", path)
     return None
 
 

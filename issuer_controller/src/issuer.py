@@ -8,6 +8,8 @@ from flask import jsonify
 
 import config
 
+LOGGER = logging.getLogger(__name__)
+
 # list of cred defs per schema name/version
 app_config = {}
 app_config["schemas"] = {}
@@ -52,7 +54,7 @@ class StartupProcessingThread(threading.Thread):
             )
             response.raise_for_status()
             did = response.json()
-            logging.getLogger(__name__).info("Registered did: %s", did)
+            LOGGER.info("Registered did: %s", did)
             app_config["DID"] = did["did"]
             time.sleep(5)
 
@@ -87,7 +89,7 @@ class StartupProcessingThread(threading.Thread):
             app_config["schemas"][
                 "SCHEMA_" + schema_name + "_" + schema_version
             ] = schema_id["schema_id"]
-            logging.getLogger(__name__).info("Registered schema: %s", schema_id)
+            LOGGER.info("Registered schema: %s", schema_id)
 
             cred_def_request = {"schema_id": schema_id["schema_id"]}
             response = requests.post(
@@ -99,7 +101,7 @@ class StartupProcessingThread(threading.Thread):
             app_config["schemas"][
                 "CRED_DEF_" + schema_name + "_" + schema_version
             ] = credential_definition_id["credential_definition_id"]
-            logging.getLogger(__name__).info(
+            LOGGER.info(
                 "Registered credential definition: %s", credential_definition_id
             )
 
@@ -137,7 +139,7 @@ class StartupProcessingThread(threading.Thread):
             response.raise_for_status()
             tob_connection = response.json()
 
-            logging.getLogger(__name__).info(
+            LOGGER.info(
                 "Established tob connection: %s", tob_connection
             )
             time.sleep(5)
@@ -187,10 +189,10 @@ class StartupProcessingThread(threading.Thread):
             )
             response.raise_for_status()
             response.json()
-            logging.getLogger(__name__).info("Registered issuer: %s", issuer_name)
+            LOGGER.info("Registered issuer: %s", issuer_name)
 
         synced[tob_connection["connection_id"]] = True
-        logging.getLogger(__name__).info(
+        LOGGER.info(
             "Connection {} is synchronized".format(tob_connection)
         )
 
