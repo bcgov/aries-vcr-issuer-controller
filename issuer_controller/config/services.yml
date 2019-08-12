@@ -1,7 +1,7 @@
 # Documentation: https://github.com/bcgov/von-agent-template/tree/master/von-x-agent/config
 
 issuers:
-  ian-ville:
+  myorg:
     name: my-org-full-name
     abbreviation: my-organization
     url: https://www.my-organization.ca/my-organization-info-page
@@ -125,6 +125,112 @@ issuers:
             from: value
           value:
             input: registered_jurisdiction
+            from: claim
+      - model: attribute
+        fields:
+          type:
+            input: effective_date
+            from: value
+          format:
+            input: datetime
+            from: value
+          value:
+            input: effective_date
+            from: claim
+      - model: attribute
+        fields:
+          type:
+            input: expiry_date
+            from: value
+          format:
+            input: datetime
+            from: value
+          value:
+            input: expiry_date
+            from: claim
+    - description: The relationship between two organizations
+      schema: my-relationship.my-organization
+      issuer_url: $ENDPOINT_URL/my-organization/my-relationship
+      depends_on:
+      - greenlight_registration
+      credential:
+        effective_date:
+          input: effective_date
+          from: claim
+      topic:
+        related_source_id:
+          input: associated_corp_num
+          from: claim
+        related_type:
+          input: registration
+          from: value
+        source_id:
+          input: corp_num
+          from: claim
+        type:
+          input: registration
+          from: value
+      cardinality_fields:
+        - associated_corp_num
+      mapping:
+      - model: attribute
+        fields:
+          type:
+            input: corp_num
+            from: value
+          value:
+            input: corp_num
+            from: claim
+      - model: attribute
+        fields:
+          type:
+            input: associated_corp_num
+            from: value
+          value:
+            input: associated_corp_num
+            from: claim
+      - model: attribute
+        fields:
+          type:
+            input: associated_registration_name
+            from: value
+          value:
+            input: associated_registration_name
+            from: claim
+      - model: attribute
+        fields:
+          type:
+            input: relationship
+            from: value
+          value:
+            input: relationship
+            from: claim
+      - model: attribute
+        fields:
+          type:
+            input: relationship_description
+            from: value
+          value:
+            input: relationship_description
+            from: claim
+      - model: attribute
+        fields:
+          type:
+            input: relationship_status
+            from: value
+          value:
+            input: relationship_status
+            from: claim
+      - model: attribute
+        fields:
+          type:
+            input: relationship_status_effective
+            from: value
+          format:
+            input: datetime
+            from: value
+          value:
+            input: relationship_status_effective
             from: claim
       - model: attribute
         fields:

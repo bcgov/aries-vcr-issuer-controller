@@ -81,6 +81,75 @@
       data_type: ui_date
       required: false
 
+- name: my-relationship.my-organization
+  version: '1.0.0'
+  description: The relationship between two organizations
+  endpoint: $ENDPOINT_URL
+  # identify the attribute which identify the owning organization
+  topic: corp_num
+  # optionally identify the credential attribute to map to the TOB credential effective date
+  effective_date: effective_date
+  # optionally identify the credential attribute to map to the TOB credential revoked date
+  #revoked_date: expiry_date
+  # optionally identify a dependant proof request
+  proof_request: greenlight_registration
+  path: /my-organization/my-relationship
+  attributes:
+    corp_num:
+      label_en: Registration ID
+      description_en: Unique identifer assigned to entity by registrar
+      # one of: ui_name, ui_address, ui_text, ui_date, ui_select, helper_uuid, helper_now_iso, helper_value
+      data_type: ui_text
+      required: true
+    associated_corp_num:
+      label_en: Associated Registration ID
+      description_en: Registry id(s) of associated organizations/individuals
+      # one of: ui_name, ui_address, ui_text, ui_date, ui_select, helper_uuid, helper_now_iso, helper_value
+      data_type: ui_text
+      required: true
+    associated_registration_name:
+      label_en: Associated Registration Namwe
+      description_en: Registered name of associated organizations/individuals
+      # one of: ui_name, ui_address, ui_text, ui_date, ui_select, helper_uuid, helper_now_iso, helper_value
+      data_type: ui_text
+      required: false
+    relationship:
+      label_en: Relationship
+      description_en: Name of the relationship
+      # one of: ui_name, ui_address, ui_text, ui_date, ui_select, helper_uuid, helper_now_iso, helper_value
+      data_type: ui_text
+      required: true
+    relationship_description:
+      label_en: Relationship Description
+      description_en: Description of the relationship
+      # one of: ui_name, ui_address, ui_text, ui_date, ui_select, helper_uuid, helper_now_iso, helper_value
+      data_type: ui_text
+      required: true
+    relationship_status:
+      label_en: Relationship Status
+      description_en: Status of the relationship
+      # one of: ui_name, ui_address, ui_text, ui_date, ui_select, helper_uuid, helper_now_iso, helper_value
+      data_type: ui_select
+      required: true
+    relationship_status_effective:
+      label_en: Relationship Status Effective
+      description_en: Date the relationship became/becomes effective
+      # one of: ui_name, ui_address, ui_text, ui_date, ui_select, helper_uuid, helper_now_iso, helper_value
+      data_type: ui_date
+      required: false
+    effective_date:
+      label_en: Effective Date
+      description_en: Date Credential is effective
+      # one of: ui_name, ui_address, ui_text, ui_date, ui_select, helper_uuid, helper_now_iso, helper_value
+      data_type: ui_date
+      required: true
+    expiry_date:
+      label_en: Credential Expiry Date
+      description_en: Date Credential expires
+      # one of: ui_name, ui_address, ui_text, ui_date, ui_select, helper_uuid, helper_now_iso, helper_value
+      data_type: ui_date
+      required: false
+
 - name: my-permit.my-organization
   version: '1.0.0'
   description: The my-permit credential issued by my-organization
