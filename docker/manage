@@ -94,7 +94,7 @@ configureEnvironment () {
   export POSTGRESQL_WALLET_PORT="5432"
   export POSTGRESQL_ADMIN_USER="postgres"
   export POSTGRESQL_ADMIN_PASSWORD="mysecretpassword"
-  export WALLET_SEED_VONX="myorg_issuer_0000000000000000001"
+  export WALLET_SEED_VONX=${WALLET_SEED_VONX:-"myorg_issuer_0000000000000000001"}
 
   # myorg-pipeline
   export COMPOSE_PROJECT_NAME=${COMPOSE_PROJECT_NAME:-"vonx"}
@@ -104,7 +104,7 @@ configureEnvironment () {
   export VONX_API_URL=http://myorg-controller:${WEBHOOK_PORT}
 
   # myorg-controller
-  export TOB_AGENT_ADMIN_URL=${TOB_AGENT_ADMIN_URL:-http://tob-agent:${TOB_AGENT_ADMIN_PORT}} 
+  export TOB_AGENT_ADMIN_URL=${TOB_AGENT_ADMIN_URL:-http://${DOCKERHOST}:${TOB_AGENT_ADMIN_PORT}} 
   export TOB_CONNECTION_NAME=${TOB_CONNECTION_NAME:-tob-agent} 
 
   # myorg data source (directory)
