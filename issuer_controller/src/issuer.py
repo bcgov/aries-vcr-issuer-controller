@@ -325,6 +325,7 @@ def handle_register_issuer(message):
 def handle_problem_report(message):
     print("handle_problem_report()", message)
 
+    response = {"success": False, "result": message["~thread"]["thid"]}
     add_credential_problem_report(message["~thread"]["thid"], response)
 
     return jsonify({})
