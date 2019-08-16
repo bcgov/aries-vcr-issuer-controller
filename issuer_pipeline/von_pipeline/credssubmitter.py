@@ -31,7 +31,7 @@ from von_pipeline.config import config
 AGENT_URL = os.environ.get('VONX_API_URL', 'http://localhost:5000/von_data')
 
 CREDS_BATCH_SIZE = 3000
-CREDS_REQUEST_SIZE = 20
+CREDS_REQUEST_SIZE = 1
 MAX_CREDS_REQUESTS = 16
 
 
@@ -50,7 +50,7 @@ async def submit_cred_batch(http_client, creds):
         return result_json
     except Exception as exc:
         print(exc)
-        raise exc
+        raise 
 
 async def submit_cred(http_client, attrs, schema, version):
     try:
