@@ -31,7 +31,7 @@ from von_pipeline.config import config
 AGENT_URL = os.environ.get('VONX_API_URL', 'http://localhost:5000/von_data')
 
 CREDS_BATCH_SIZE = 3000
-CREDS_REQUEST_SIZE = 20
+CREDS_REQUEST_SIZE = 1
 MAX_CREDS_REQUESTS = 16
 
 
@@ -50,7 +50,7 @@ async def submit_cred_batch(http_client, creds):
         return result_json
     except Exception as exc:
         print(exc)
-        raise
+        raise 
 
 async def submit_cred(http_client, attrs, schema, version):
     try:
@@ -96,8 +96,7 @@ async def post_credentials(http_client, conn, credentials):
         #print('=============')
         # old code for submitting one credential at a time
         # result_json = await submit_cred(http_client, credential['CREDENTIAL_JSON'], credential['SCHEMA_NAME'], credential['SCHEMA_VERSION'])
-        result_json = await submit_cred_batch(http_client, post_creds)
-        results = result_json 
+        results = await submit_cred_batch(http_client, post_creds)
 
         #print("Posted = ", len(credentials), ", results = ", len(results))
 
@@ -134,21 +133,17 @@ async def post_credentials(http_client, conn, credentials):
         if cur2 is not None:
             cur2.close()
             cur2 = None
-        if results:
-            cur2 = conn.cursor()
-            res = str(error)
-            if 255 < len(res):
-                res = res[:250] + '...'
-            for i in range(len(credentials)):
-                credential = credentials[i]
-                result = results[i]
-                cur2.execute(sql3, (datetime.datetime.now(), res, credential['RECORD_ID'],))
-                failed = failed + 1
-            conn.commit()
-            cur2.close()
-            cur2 = None
-        else:
-            raise
+        cur2 = conn.cursor()
+        res = str(error)
+        if 255 < len(res):
+            res = res[:250] + '...'
+        for i in range(len(credentials)):
+            credential = credentials[i]
+            cur2.execute(sql3, (datetime.datetime.now(), res, credential['RECORD_ID'],))
+            failed = failed + 1
+        conn.commit()
+        cur2.close()
+        cur2 = None
     finally:
         if cur2 is not None:
             cur2.close()

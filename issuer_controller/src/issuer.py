@@ -8,6 +8,7 @@ from flask import jsonify
 
 import config
 
+
 # list of cred defs per schema name/version
 app_config = {}
 app_config["schemas"] = {}
@@ -251,6 +252,18 @@ def add_credential_problem_report(thread_id, response):
             print(credential_requests)
 
 
+def add_credential_timeout_report(cred_exch_id):
+    print("add timeout report for cred", cred_exch_id)
+    response = {"success": False, "result": cred_exch_id + "::Error thread timeout"}
+    add_credential_response(cred_exch_id, response)
+
+
+def add_credential_exception_report(cred_exch_id, exc):
+    print("add exception report for cred", cred_exch_id)
+    response = {"success": False, "result": cred_exch_id + "::" + str(exc)}
+    add_credential_response(cred_exch_id, response)
+
+
 def get_credential_response(cred_exch_id):
     credential_lock.acquire()
     try:
@@ -277,6 +290,8 @@ TOPIC_PERFORM_MENU_ACTION = "perform-menu-action"
 TOPIC_ISSUER_REGISTRATION = "issuer_registration"
 TOPIC_PROBLEM_REPORT = "problem-report"
 
+# max 15 second wait for a credential response (prevents blocking forever)
+MAX_CRED_RESPONSE_TIMEOUT = 15
 
 def handle_connections(state, message):
     # TODO auto-accept?
@@ -325,6 +340,8 @@ def handle_register_issuer(message):
 def handle_problem_report(message):
     print("handle_problem_report()", message)
 
+    msg = message["~thread"]["thid"] + "::" + message["explain-ltxt"]
+    response = {"success": False, "result": msg}
     add_credential_problem_report(message["~thread"]["thid"], response)
 
     return jsonify({})
@@ -338,18 +355,28 @@ class SendCredentialThread(threading.Thread):
         self.url = url
 
     def run(self):
-        response = requests.post(self.url, json.dumps(self.cred_offer))
-        response.raise_for_status()
-        cred_data = response.json()
-        result_available = add_credential_request(cred_data["credential_exchange_id"])
-        print(
-            "Sent offer",
-            cred_data["credential_exchange_id"],
-            cred_data["connection_id"],
-        )
+        cred_data = None
+        try:
+            response = requests.post(self.url, json.dumps(self.cred_offer))
+            response.raise_for_status()
+            cred_data = response.json()
+            result_available = add_credential_request(cred_data["credential_exchange_id"])
+            print(
+                "Sent offer",
+                cred_data["credential_exchange_id"],
+                cred_data["connection_id"],
+            )
 
-        # wait for confirmation from the agent, which will include the credential exchange id
-        result_available.wait()
+            # wait for confirmation from the agent, which will include the credential exchange id
+            if not result_available.wait(MAX_CRED_RESPONSE_TIMEOUT):
+                add_credential_timeout_report(cred_data["credential_exchange_id"])
+        except Exception as exc:
+            print(exc)
+            # if cred_data is not set we don't have a credential to set status for
+            if cred_data:
+                add_credential_exception_report(cred_data["credential_exchange_id"], exc)
+            # don't re-raise; we want to log the exception as the credential error response
+
         self.cred_response = get_credential_response(
             cred_data["credential_exchange_id"]
         )
