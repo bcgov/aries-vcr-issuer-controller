@@ -31,7 +31,7 @@ from von_pipeline.config import config
 AGENT_URL = os.environ.get('VONX_API_URL', 'http://localhost:5000/von_data')
 
 CREDS_BATCH_SIZE = 3000
-CREDS_REQUEST_SIZE = 1
+CREDS_REQUEST_SIZE = 1     # use 1 because it's more likely to trigger deadlocks
 MAX_CREDS_REQUESTS = 16
 
 
