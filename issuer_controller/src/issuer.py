@@ -106,13 +106,13 @@ class StartupProcessingThread(threading.Thread):
         tob_connection_params = config_services["verifiers"]["bctob"]
 
         # check if we have a TOB connection
-        response = requests.get(agent_admin_url + "/connections")
+        response = requests.get(agent_admin_url + "/connections?alias=" + tob_connection_params['alias'])
         response.raise_for_status()
         connections = response.json()["results"]
         tob_connection = None
         for connection in connections:
             # check for TOB connection
-            if connection["their_label"] == tob_connection_params["alias"]:
+            if connection["alias"] == tob_connection_params["alias"]:
                 tob_connection = connection
 
         if not tob_connection:
@@ -129,8 +129,9 @@ class StartupProcessingThread(threading.Thread):
             response.raise_for_status()
             invitation = response.json()
 
+
             response = requests.post(
-                agent_admin_url + "/connections/receive-invitation",
+                agent_admin_url + "/connections/receive-invitation?alias=" + tob_connection_params['alias'],
                 json.dumps(invitation["invitation"]),
             )
             response.raise_for_status()
