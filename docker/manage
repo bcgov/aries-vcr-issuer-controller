@@ -83,6 +83,11 @@ configureEnvironment () {
   export WEBHOOK_HOST=http://myorg-controller:${WEBHOOK_PORT}
   export AGENT_NAME="myorg-agent"
   export AGENT_ENDPOINT=${AGENT_ENDPOINT:-http://$DOCKERHOST:$AGENT_HTTP_IN_PORT}
+  export AGENT_ADMIN_API_KEY=${AGENT_ADMIN_API_KEY}
+  export AGENT_ADMIN_MODE="admin-insecure-mode"
+  if [ ! -z "${AGENT_ADMIN_API_KEY}" ]; then
+    AGENT_ADMIN_MODE="admin-api-key ${AGENT_ADMIN_API_KEY}"
+  fi
 
   # wallet-db
   export POSTGRESQL_DATABASE="THE_ORG_BOOK"
@@ -106,15 +111,7 @@ configureEnvironment () {
   # myorg-controller
   export TOB_AGENT_ADMIN_URL=${TOB_AGENT_ADMIN_URL:-http://tob-agent:${TOB_AGENT_ADMIN_PORT}} 
   export TOB_CONNECTION_NAME=${TOB_CONNECTION_NAME:-tob-agent} 
-
-  # myorg data source (directory)
-  #export EAO_MDB_DB_HOST=${EAO_MDB_DB_HOST:-"mongo"}
-  #export EAO_MDB_DB_PORT=${EAO_MDB_DB_PORT:-27017}
-  #export EAO_MDB_DB_HOST=${EAO_MDB_DB_HOST:-"host.docker.internal"}
-  #export EAO_MDB_DB_PORT=${EAO_MDB_DB_PORT:-27027}
-  #export EAO_MDB_DB_DATABASE=${EAO_MDB_DB_DATABASE:-"parse"}
-  #export EAO_MDB_DB_USER=${EAO_MDB_DB_USER:-"root"}
-  #export EAO_MDB_DB_PASSWORD=${EAO_MDB_DB_PASSWORD:-"example"}
+  export TOB_ADMIN_API_KEY=${TOB_ADMIN_API_KEY}
 }
 
 getStartupParams() {
