@@ -28,12 +28,12 @@ services:
       dockerfile: Dockerfile
     environment:
       LEDGER_URL: ${LEDGER_URL}
-      APPLICATION_URL: ${APPLICATION_URL:-http://localhost:5001}
-      ENDPOINT_URL: ${ENDPOINT_URL:-http://localhost:5001}
+      #APPLICATION_URL: ${APPLICATION_URL:-http://localhost:5001}
+      #ENDPOINT_URL: ${ENDPOINT_URL:-http://localhost:5001}
       CONFIG_ROOT: ../config
       ENVIRONMENT: ${ENVIRONMENT:-default}
       ENABLE_GUNICORN: ${ENABLE_GUNICORN:-0}
-      INDY_LEDGER_URL: ${LEDGER_URL:-http://localhost:9000}
+      #INDY_LEDGER_URL: ${LEDGER_URL:-http://localhost:9000}
       FORMS: ${FORMS}
       ISSUERS: ${ISSUERS}
       LOG_LEVEL: ${LOG_LEVEL}
