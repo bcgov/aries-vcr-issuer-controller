@@ -47,24 +47,14 @@ class StartupProcessingThread(threading.Thread):
             )
         app_config["AGENT_ADMIN_URL"] = agent_admin_url
 
-        # ensure DID is registered
-        ledger_url = self.ENV.get("LEDGER_URL")
-        auto_register_did = self.ENV.get("AUTO_REGISTER_DID", False)
-        if auto_register_did and ledger_url:
-            # gt seed and alias to register
-            seed = self.ENV.get("WALLET_SEED_VONX")
-            alias = list(config_services["issuers"].keys())[0]
-
-            # register DID
-            response = requests.post(
-                ledger_url + "/register",
-                json.dumps({"alias": alias, "seed": seed, "role": "TRUST_ANCHOR"}),
-            )
-            response.raise_for_status()
-            did = response.json()
-            print("Registered did: ", did)
-            app_config["DID"] = did["did"]
-            time.sleep(5)
+        # get public DID from our agent
+        response = requests.get(
+            agent_admin_url + "/wallet/did/public"
+        )
+        result = response.json()
+        did = result["result"]
+        print("Fetched DID from agent: ", did)
+        app_config["DID"] = did["did"]
 
         # register schemas and credential definitions
         for schema in config_schemas:
