@@ -111,7 +111,7 @@ configureEnvironment () {
   # myorg-controller
   export TOB_AGENT_ADMIN_URL=${TOB_AGENT_ADMIN_URL:-http://tob-agent:${TOB_AGENT_ADMIN_PORT}} 
   export TOB_CONNECTION_NAME=${TOB_CONNECTION_NAME:-tob-agent} 
-  export TOB_ADMIN_API_KEY=${TOB_ADMIN_API_KEY}
+  export TOB_ADMIN_API_KEY=${TOB_ADMIN_API_KEY:-R2D2HfPM5Zwd69IjclQiuFmcMV6}
 }
 
 getStartupParams() {
