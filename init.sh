@@ -52,7 +52,6 @@ select example in "1" "2" "3"; do
             __TOBAPPURL=http://localhost:8080
 
             # Adjustments to files for local execution
-            sed -i.bak "s/#local//g" docker/docker-compose.yml
             sed -i.bak "s/ INDY_GENESIS_URL/ #INDY_GENESIS_URL/" issuer_controller/config/settings.yml
             # sed -i.bak "s/ AUTO_REGISTER_DID/ #AUTO_REGISTER_DID/" issuer_controller/config/settings.yml
             find docker issuer_controller -name "*.bak" -type f|xargs rm -f
