@@ -30,7 +30,7 @@ issuers:
           input: corp_num
           from: claim
         type:
-          input: registration
+          input: my-registration.my-organization
           from: value
       mapping:
       - model: attribute
@@ -162,13 +162,13 @@ issuers:
           input: associated_corp_num
           from: claim
         related_type:
-          input: registration
+          input: my-registration.my-organization
           from: value
         source_id:
           input: corp_num
           from: claim
         type:
-          input: registration
+          input: my-registration.my-organization
           from: value
       cardinality_fields:
         - associated_corp_num
@@ -268,7 +268,7 @@ issuers:
           input: corp_num
           from: claim
         type:
-          input: registration
+          input: my-registration.my-organization
           from: value
       mapping:
       - model: attribute
