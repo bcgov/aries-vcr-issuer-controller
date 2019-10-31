@@ -31,6 +31,7 @@ services:
       #APPLICATION_URL: ${APPLICATION_URL:-http://localhost:5001}
       #ENDPOINT_URL: ${ENDPOINT_URL:-http://localhost:5001}
       CONFIG_ROOT: ../config
+      HOST_PORT: ${CONTROLLER_PORT}
       ENVIRONMENT: ${ENVIRONMENT:-default}
       ENABLE_GUNICORN: ${ENABLE_GUNICORN:-0}
       #INDY_LEDGER_URL: ${LEDGER_URL:-http://localhost:9000}
@@ -59,7 +60,7 @@ services:
     networks:
       - myorg
     ports:
-      - ${WEBHOOK_PORT}:${WEBHOOK_PORT}
+      - ${EXPOSED_CONTROLLER_PORT}:${CONTROLLER_PORT}
     depends_on:
       - myorg-agent
     entrypoint: >
