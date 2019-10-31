@@ -25,6 +25,8 @@ synced = {}
 
 
 class StartupProcessingThread(threading.Thread):
+    global app_config
+
     def __init__(self, ENV):
         threading.Thread.__init__(self)
         self.ENV = ENV
@@ -49,7 +51,8 @@ class StartupProcessingThread(threading.Thread):
 
         # get public DID from our agent
         response = requests.get(
-            agent_admin_url + "/wallet/did/public"
+            agent_admin_url + "/wallet/did/public",
+            headers=ADMIN_REQUEST_HEADERS,
         )
         result = response.json()
         did = result["result"]
@@ -187,6 +190,7 @@ class StartupProcessingThread(threading.Thread):
                 },
             }
 
+            print(json.dumps(issuer_request))
             response = requests.post(
                 agent_admin_url + "/issuer_registration/send",
                 json.dumps(issuer_request),
@@ -293,6 +297,7 @@ def get_credential_response(cred_exch_id):
 
 
 TOPIC_CONNECTIONS = "connections"
+TOPIC_CONNECTIONS_ACTIVITY = "connections_actvity"
 TOPIC_CREDENTIALS = "credentials"
 TOPIC_PRESENTATIONS = "presentations"
 TOPIC_GET_ACTIVE_MENU = "get-active-menu"
@@ -301,7 +306,7 @@ TOPIC_ISSUER_REGISTRATION = "issuer_registration"
 TOPIC_PROBLEM_REPORT = "problem-report"
 
 # max 15 second wait for a credential response (prevents blocking forever)
-MAX_CRED_RESPONSE_TIMEOUT = 15
+MAX_CRED_RESPONSE_TIMEOUT = 45
 
 
 def handle_connections(state, message):
@@ -438,6 +443,7 @@ def handle_send_credential(cred_input):
     """
     # construct and send the credential
     # print("Received credentials", cred_input)
+    global app_config
 
     agent_admin_url = app_config["AGENT_ADMIN_URL"]
 

@@ -299,7 +299,7 @@ def assemble_credential_type_spec(config: dict) -> dict:
         "credential_def_id": config.get("credential_def_id"),
         "name": labels[deflang],
         "endpoint": urls[deflang],
-        "topic": config["topic"],
+        "topic": (config["topic"] if isinstance(config["topic"], list) else [config["topic"],]),
         "logo_b64": logo_b64,
     }
     for k in labels:

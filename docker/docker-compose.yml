@@ -106,10 +106,13 @@ services:
         --outbound-transport ws \
         --outbound-transport http \
         --genesis-url '${LEDGER_URL}/genesis' \
+        --auto-accept-invites \
+        --auto-accept-requests \
         --auto-ping-connection \
         --auto-respond-messages \
         --auto-respond-credential-offer \
         --auto-respond-presentation-request \
+        --auto-respond-credential-request \
         --auto-verify-presentation \
         --auto-accept-invites \
         --auto-accept-requests \
