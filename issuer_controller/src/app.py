@@ -13,13 +13,13 @@ import issuer
 config_root = os.environ.get('CONFIG_ROOT', '../config')
 ENV = config.load_settings(config_root=config_root)
 
-class BCRegController(Flask):
+class Controller(Flask):
     def __init__(self):
         print("Initializing " + __name__ + " ...")
         super().__init__(__name__)
         issuer.startup_init(ENV)
 
-app = BCRegController()
+app = Controller()
 wsgi_app = app.wsgi_app
 
 @app.route('/health', methods=['GET'])
