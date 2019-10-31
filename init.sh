@@ -3,11 +3,17 @@
 echo This script initializes some config data a run of a new VON Issuer/Verifier Agent.
 echo Please answer the following questions and we will get things all set up for you.
 
-read -p 'Please provide a descriptive title for your permit-issuing organization (e.g. City of Victoria): ' ORG_TITLE
-read -p 'Please provide a domain for your permit-issuing organization - no spaces (e.g. city-of-victoria): ' MY_ORG
-MY_ORG=`echo ${MY_ORG// /} | xargs`
-read -p 'Please provide the name of the permit your organization will issue - no spaces (e.g. museum-permit): ' MY_PERMIT
-MY_PERMIT=`echo ${MY_PERMIT// /} | xargs`
+while [[ -z "$ORG_TITLE" ]]; do
+	read -p 'Please provide a descriptive title for your permit-issuing organization (e.g. City of Victoria): ' ORG_TITLE
+done
+while [[ -z "$MY_ORG" ]]; do
+	read -p 'Please provide a domain for your permit-issuing organization - no spaces (e.g. city-of-victoria): ' MY_ORG
+	MY_ORG=`echo ${MY_ORG// /} | xargs`
+done
+while [[ -z "$MY_PERMIT" ]]; do
+	read -p 'Please provide the name of the permit your organization will issue - no spaces (e.g. museum-permit): ' MY_PERMIT
+	MY_PERMIT=`echo ${MY_PERMIT// /} | xargs`
+done
 
 echo ""
 
@@ -16,13 +22,13 @@ export MY_SEED=`echo ${MY_ORG}_00000000000000000000000000000000 | cut -c 1-32`
 
 echo How will you be the VON Issuer/Verifier Agent:
 echo
-echo 1 - Using Play with Docker in your browser
-echo 2 - Using docker on your own machine - with local von-network and TheOrgBook instances
-echo 3 - Some other way
+DEPLOY_OPTS=("Using Play with Docker in your browser"
+			 "Using docker on your own machine - with local von-network and TheOrgBook instances"
+			 "Some other way")
 
 # Determine the example to expand and expand it
-select example in "1" "2" "3"; do
-    case $example in
+select example in "${DEPLOY_OPTS[@]}"; do
+    case $REPLY in
         1 ) 
             if [ $PWD_HOST_FQDN == "labs.play-with-docker.com" ]
               then
