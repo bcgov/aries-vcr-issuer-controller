@@ -231,6 +231,10 @@ def set_credential_thread_id(cred_exch_id, thread_id):
 def add_credential_request(cred_exch_id):
     credential_lock.acquire()
     try:
+        # short circuit if we already have the response
+        if cred_exch_id in credential_responses:
+            return None
+            
         result_available = threading.Event()
         credential_requests[cred_exch_id] = result_available
         return result_available
@@ -389,7 +393,7 @@ class SendCredentialThread(threading.Thread):
             )
 
             # wait for confirmation from the agent, which will include the credential exchange id
-            if not result_available.wait(MAX_CRED_RESPONSE_TIMEOUT):
+            if result_available and not result_available.wait(MAX_CRED_RESPONSE_TIMEOUT):
                 add_credential_timeout_report(cred_data["credential_exchange_id"])
         except Exception as exc:
             print(exc)
