@@ -33,7 +33,8 @@ AGENT_URL = os.environ.get('VONX_API_URL', 'http://localhost:5000')
 CREDS_BATCH_SIZE = 3000
 CREDS_REQUEST_SIZE = 5     # use 1 because it's more likely to trigger deadlocks
 MAX_CREDS_REQUESTS = 16
-PROCESS_LOOP_REPORT_CT = 10
+MAX_PROCESSING_MINS = 10
+PROCESS_LOOP_REPORT_CT = 100
 
 
 async def submit_cred_batch(http_client, creds):
@@ -225,7 +226,7 @@ class CredsSubmitter:
             processing_time = 0
             processed_count = 0
             perf_proc_count = 0
-            max_processing_time = 10 * 60
+            max_processing_time = 60 * MAX_PROCESSING_MINS
 
             while 0 < cred_count_remaining and processing_time < max_processing_time:
                 # create a cursor
