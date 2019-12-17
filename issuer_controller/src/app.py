@@ -44,6 +44,9 @@ def submit_credential():
     """
     Exposed method to proxy credential issuance requests.
     """
+    if not issuer.tob_connection_synced():
+        abort(503, "Connection not yet synced")
+
     start_time = time.perf_counter()
     method = 'submit_credential.batch'
 
