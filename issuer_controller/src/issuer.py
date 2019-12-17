@@ -170,7 +170,7 @@ class StartupProcessingThread(threading.Thread):
             ] = schema_id["schema_id"]
             print("Registered schema: ", schema_id)
 
-            if schema_key not in existing_schemas:
+            if schema_key not in existing_schemas or "cred_def" not in existing_schemas[schema_key]:
                 cred_def_request = {"schema_id": schema_id["schema_id"]}
                 response = agent_post_with_retry(
                     agent_admin_url + "/credential-definitions",
