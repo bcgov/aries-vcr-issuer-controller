@@ -23,6 +23,74 @@ app_config = {}
 app_config["schemas"] = {}
 synced = {}
 
+MAX_RETRIES = 3
+
+
+def agent_post_with_retry(url, payload, headers=None):
+    retries = 0
+    while True:
+        try:
+            # test code to test exception handling
+            #if retries < MAX_RETRIES:
+            #    raise Exception("Fake exception!!!")
+            response = requests.post(
+                url,
+                payload,
+                headers=headers,
+            )
+            response.raise_for_status()
+            return response
+        except Exception as e:
+            print("Error posting", url, e)
+            retries = retries + 1
+            if retries > MAX_RETRIES:
+                raise e
+            time.sleep(5)
+
+
+def agent_schemas_cred_defs(agent_admin_url):
+    ret_schemas = {}
+
+    # get loaded cred defs and schemas
+    response = requests.get(
+        agent_admin_url + "/schemas/created",
+        headers=ADMIN_REQUEST_HEADERS,
+    )
+    response.raise_for_status()
+    schemas = response.json()["schema_ids"]
+    for schema_id in schemas:
+        response = requests.get(
+            agent_admin_url + "/schemas/" + schema_id,
+            headers=ADMIN_REQUEST_HEADERS,
+        )
+        response.raise_for_status()
+        schema = response.json()["schema_json"]
+        schema_key = schema["name"] + "::" + schema["version"]
+        ret_schemas[schema_key] = {
+            "schema": schema,
+            "schema_id": str(schema["seqNo"])
+        }
+
+    response = requests.get(
+        agent_admin_url + "/credential-definitions/created",
+        headers=ADMIN_REQUEST_HEADERS,
+    )
+    response.raise_for_status()
+    cred_defs = response.json()["credential_definition_ids"]
+    for cred_def_id in cred_defs:
+        response = requests.get(
+            agent_admin_url + "/credential-definitions/" + cred_def_id,
+            headers=ADMIN_REQUEST_HEADERS,
+        )
+        response.raise_for_status()
+        cred_def = response.json()["credential_definition"]
+        for schema_key in ret_schemas:
+            if ret_schemas[schema_key]["schema_id"] == cred_def["schemaId"]:
+                ret_schemas[schema_key]["cred_def"] = cred_def
+                break
+
+    return ret_schemas
+
 
 class StartupProcessingThread(threading.Thread):
     global app_config
@@ -59,49 +127,60 @@ class StartupProcessingThread(threading.Thread):
         print("Fetched DID from agent: ", did)
         app_config["DID"] = did["did"]
 
+        # determine pre-registered schemas and cred defs
+        existing_schemas = agent_schemas_cred_defs(agent_admin_url)
+        #print("Existing schemas:", json.dumps(existing_schemas))
+
         # register schemas and credential definitions
         for schema in config_schemas:
             schema_name = schema["name"]
             schema_version = schema["version"]
-            schema_attrs = []
-            schema_descs = {}
-            if isinstance(schema["attributes"], dict):
-                # each element is a dict
-                for attr, desc in schema["attributes"].items():
-                    schema_attrs.append(attr)
-                    schema_descs[attr] = desc
-            else:
-                # assume it's an array
-                for attr in schema["attributes"]:
-                    schema_attrs.append(attr)
+            schema_key = schema_name + "::" + schema_version
+            if schema_key not in existing_schemas:
+                schema_attrs = []
+                schema_descs = {}
+                if isinstance(schema["attributes"], dict):
+                    # each element is a dict
+                    for attr, desc in schema["attributes"].items():
+                        schema_attrs.append(attr)
+                        schema_descs[attr] = desc
+                else:
+                    # assume it's an array
+                    for attr in schema["attributes"]:
+                        schema_attrs.append(attr)
 
-            # register our schema(s) and credential definition(s)
-            schema_request = {
-                "schema_name": schema_name,
-                "schema_version": schema_version,
-                "attributes": schema_attrs,
-            }
-            response = requests.post(
-                agent_admin_url + "/schemas",
-                json.dumps(schema_request),
-                headers=ADMIN_REQUEST_HEADERS,
-            )
-            response.raise_for_status()
-            schema_id = response.json()
+                # register our schema(s) and credential definition(s)
+                schema_request = {
+                    "schema_name": schema_name,
+                    "schema_version": schema_version,
+                    "attributes": schema_attrs,
+                }
+                response = agent_post_with_retry(
+                    agent_admin_url + "/schemas",
+                    json.dumps(schema_request),
+                    headers=ADMIN_REQUEST_HEADERS,
+                )
+                response.raise_for_status()
+                schema_id = response.json()
+            else:
+                schema_id = {"schema_id": existing_schemas[schema_key]["schema"]["id"]}
             app_config["schemas"]["SCHEMA_" + schema_name] = schema
             app_config["schemas"][
                 "SCHEMA_" + schema_name + "_" + schema_version
             ] = schema_id["schema_id"]
             print("Registered schema: ", schema_id)
 
-            cred_def_request = {"schema_id": schema_id["schema_id"]}
-            response = requests.post(
-                agent_admin_url + "/credential-definitions",
-                json.dumps(cred_def_request),
-                headers=ADMIN_REQUEST_HEADERS,
-            )
-            response.raise_for_status()
-            credential_definition_id = response.json()
+            if schema_key not in existing_schemas:
+                cred_def_request = {"schema_id": schema_id["schema_id"]}
+                response = agent_post_with_retry(
+                    agent_admin_url + "/credential-definitions",
+                    json.dumps(cred_def_request),
+                    headers=ADMIN_REQUEST_HEADERS,
+                )
+                response.raise_for_status()
+                credential_definition_id = response.json()
+            else:
+                credential_definition_id = {"credential_definition_id": existing_schemas[schema_key]["cred_def"]["id"]}
             app_config["schemas"][
                 "CRED_DEF_" + schema_name + "_" + schema_version
             ] = credential_definition_id["credential_definition_id"]
@@ -202,6 +281,10 @@ class StartupProcessingThread(threading.Thread):
 
         synced[tob_connection["connection_id"]] = True
         print("Connection {} is synchronized".format(tob_connection))
+
+
+def tob_connection_synced():
+    return ("TOB_CONNECTION" in app_config) and (app_config["TOB_CONNECTION"] in synced) and (synced[app_config["TOB_CONNECTION"]])
 
 
 def startup_init(ENV):
