@@ -70,7 +70,7 @@ services:
         ../docker-entrypoint.sh;"
 
   myorg-agent:
-    image: tob-agent
+    image: vcr-agent
     environment:
       - LEDGER_URL=${LEDGER_URL}
       - WALLET_TYPE=${WALLET_TYPE}
