@@ -20,7 +20,8 @@ RUN apt-get update -y \
                 python$python_version-dev \
                 python$python_version-venv \
                 python-psycopg2 \
-                libpq-dev
+                libpq-dev \
+                curl
 
 # ========================================================================================================
 # Install go-crond (https://github.com/webdevops/go-crond)
@@ -33,9 +34,8 @@ RUN apt-get update -y \
 #   - The history issues with the OpenShift cron jobs are avoided.
 # --------------------------------------------------------------------------------------------------------
 ARG GOCROND_VERSION=0.6.1
-ADD https://github.com/webdevops/go-crond/releases/download/$GOCROND_VERSION/go-crond-64-linux /usr/bin/
-RUN mv /usr/bin/go-crond-64-linux /usr/bin/go-crond \
-    && chmod ug+x /usr/bin/go-crond
+RUN curl https://github.com/$SOURCE_REPO/go-crond/releases/download/$GOCROND_VERSION/go-crond-64-linux -s -o /usr/local/bin/go-crond
+RUN chmod ug+x /usr/local/bin/go-crond
 # ========================================================================================================
 
 # mara-app section - this is specific to our use of mara
