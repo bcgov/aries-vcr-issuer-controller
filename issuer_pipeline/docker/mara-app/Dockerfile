@@ -34,7 +34,7 @@ RUN apt-get update -y \
 #   - The history issues with the OpenShift cron jobs are avoided.
 # --------------------------------------------------------------------------------------------------------
 ARG GOCROND_VERSION=0.6.1
-RUN curl https://github.com/$SOURCE_REPO/go-crond/releases/download/$GOCROND_VERSION/go-crond-64-linux -s -o /usr/local/bin/go-crond
+RUN curl https://github.com/$SOURCE_REPO/go-crond/releases/download/$GOCROND_VERSION/go-crond-64-linux -s -L -o /usr/local/bin/go-crond
 RUN chmod ug+x /usr/local/bin/go-crond
 # ========================================================================================================
 
