@@ -25,7 +25,7 @@ Mako==1.0.7
 -e git+https://github.com/mara/mara-app.git@66ba874d50fd30910ecf38f8c313c3a9f7e6624a#egg=mara_app
 -e git+https://github.com/mara/mara-db.git@4b496a8f82b780753c698cee70fe5619779d3906#egg=mara_db
 -e git+https://github.com/mara/mara-page.git@b1c32141080a322c9d8a7613ae1dc070479f762d#egg=mara_page
-MarkupSafe==1.0
+MarkupSafe==1.1.1
 more-itertools==4.1.0
 multimethod==0.7.1
 oauth2client==4.1.2
