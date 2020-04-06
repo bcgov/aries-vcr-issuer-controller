@@ -440,7 +440,7 @@ def get_credential_response(cred_exch_id):
 
 TOPIC_CONNECTIONS = "connections"
 TOPIC_CONNECTIONS_ACTIVITY = "connections_actvity"
-TOPIC_CREDENTIALS = "credentials"
+TOPIC_CREDENTIALS = "issue_credential"
 TOPIC_PRESENTATIONS = "presentations"
 TOPIC_GET_ACTIVE_MENU = "get-active-menu"
 TOPIC_PERFORM_MENU_ACTION = "perform-menu-action"
