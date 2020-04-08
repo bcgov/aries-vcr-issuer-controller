@@ -31,13 +31,9 @@ def agent_post_with_retry(url, payload, headers=None):
     while True:
         try:
             # test code to test exception handling
-            #if retries < MAX_RETRIES:
+            # if retries < MAX_RETRIES:
             #    raise Exception("Fake exception!!!")
-            response = requests.post(
-                url,
-                payload,
-                headers=headers,
-            )
+            response = requests.post(url, payload, headers=headers)
             response.raise_for_status()
             return response
         except Exception as e:
@@ -53,23 +49,18 @@ def agent_schemas_cred_defs(agent_admin_url):
 
     # get loaded cred defs and schemas
     response = requests.get(
-        agent_admin_url + "/schemas/created",
-        headers=ADMIN_REQUEST_HEADERS,
+        agent_admin_url + "/schemas/created", headers=ADMIN_REQUEST_HEADERS
     )
     response.raise_for_status()
     schemas = response.json()["schema_ids"]
     for schema_id in schemas:
         response = requests.get(
-            agent_admin_url + "/schemas/" + schema_id,
-            headers=ADMIN_REQUEST_HEADERS,
+            agent_admin_url + "/schemas/" + schema_id, headers=ADMIN_REQUEST_HEADERS
         )
         response.raise_for_status()
         schema = response.json()["schema_json"]
         schema_key = schema["name"] + "::" + schema["version"]
-        ret_schemas[schema_key] = {
-            "schema": schema,
-            "schema_id": str(schema["seqNo"])
-        }
+        ret_schemas[schema_key] = {"schema": schema, "schema_id": str(schema["seqNo"])}
 
     response = requests.get(
         agent_admin_url + "/credential-definitions/created",
@@ -119,8 +110,7 @@ class StartupProcessingThread(threading.Thread):
 
         # get public DID from our agent
         response = requests.get(
-            agent_admin_url + "/wallet/did/public",
-            headers=ADMIN_REQUEST_HEADERS,
+            agent_admin_url + "/wallet/did/public", headers=ADMIN_REQUEST_HEADERS
         )
         result = response.json()
         did = result["result"]
@@ -129,7 +119,7 @@ class StartupProcessingThread(threading.Thread):
 
         # determine pre-registered schemas and cred defs
         existing_schemas = agent_schemas_cred_defs(agent_admin_url)
-        #print("Existing schemas:", json.dumps(existing_schemas))
+        # print("Existing schemas:", json.dumps(existing_schemas))
 
         # register schemas and credential definitions
         for schema in config_schemas:
@@ -170,7 +160,10 @@ class StartupProcessingThread(threading.Thread):
             ] = schema_id["schema_id"]
             print("Registered schema: ", schema_id)
 
-            if schema_key not in existing_schemas or "cred_def" not in existing_schemas[schema_key]:
+            if (
+                schema_key not in existing_schemas
+                or "cred_def" not in existing_schemas[schema_key]
+            ):
                 cred_def_request = {"schema_id": schema_id["schema_id"]}
                 response = agent_post_with_retry(
                     agent_admin_url + "/credential-definitions",
@@ -180,7 +173,11 @@ class StartupProcessingThread(threading.Thread):
                 response.raise_for_status()
                 credential_definition_id = response.json()
             else:
-                credential_definition_id = {"credential_definition_id": existing_schemas[schema_key]["cred_def"]["id"]}
+                credential_definition_id = {
+                    "credential_definition_id": existing_schemas[schema_key][
+                        "cred_def"
+                    ]["id"]
+                }
             app_config["schemas"][
                 "CRED_DEF_" + schema_name + "_" + schema_version
             ] = credential_definition_id["credential_definition_id"]
@@ -284,7 +281,11 @@ class StartupProcessingThread(threading.Thread):
 
 
 def tob_connection_synced():
-    return ("TOB_CONNECTION" in app_config) and (app_config["TOB_CONNECTION"] in synced) and (synced[app_config["TOB_CONNECTION"]])
+    return (
+        ("TOB_CONNECTION" in app_config)
+        and (app_config["TOB_CONNECTION"] in synced)
+        and (synced[app_config["TOB_CONNECTION"]])
+    )
 
 
 def startup_init(ENV):
@@ -304,6 +305,7 @@ timing_lock = threading.Lock()
 record_timings = True
 timings = {}
 
+
 def clear_stats():
     global timings
     timing_lock.acquire()
@@ -312,12 +314,14 @@ def clear_stats():
     finally:
         timing_lock.release()
 
+
 def get_stats():
     timing_lock.acquire()
     try:
         return timings
     finally:
         timing_lock.release()
+
 
 def log_timing_method(method, start_time, end_time, success, data=None):
     if not record_timings:
@@ -328,29 +332,31 @@ def log_timing_method(method, start_time, end_time, success, data=None):
         elapsed_time = end_time - start_time
         if not method in timings:
             timings[method] = {
-                'total_count': 1,
-                'success_count': 1 if success else 0,
-                'fail_count': 0 if success else 1,
-                'min_time': elapsed_time,
-                'max_time': elapsed_time,
-                'total_time': elapsed_time,
-                'avg_time': elapsed_time,
-                'data': {}
+                "total_count": 1,
+                "success_count": 1 if success else 0,
+                "fail_count": 0 if success else 1,
+                "min_time": elapsed_time,
+                "max_time": elapsed_time,
+                "total_time": elapsed_time,
+                "avg_time": elapsed_time,
+                "data": {},
             }
         else:
-            timings[method]['total_count'] = timings[method]['total_count'] + 1
+            timings[method]["total_count"] = timings[method]["total_count"] + 1
             if success:
-                timings[method]['success_count'] = timings[method]['success_count'] + 1
+                timings[method]["success_count"] = timings[method]["success_count"] + 1
             else:
-                timings[method]['fail_count'] = timings[method]['fail_count'] + 1
-            if elapsed_time > timings[method]['max_time']:
-                timings[method]['max_time'] = elapsed_time
-            if elapsed_time < timings[method]['min_time']:
-                timings[method]['min_time'] = elapsed_time
-            timings[method]['total_time'] = timings[method]['total_time'] + elapsed_time
-            timings[method]['avg_time'] = timings[method]['total_time'] / timings[method]['total_count']
+                timings[method]["fail_count"] = timings[method]["fail_count"] + 1
+            if elapsed_time > timings[method]["max_time"]:
+                timings[method]["max_time"] = elapsed_time
+            if elapsed_time < timings[method]["min_time"]:
+                timings[method]["min_time"] = elapsed_time
+            timings[method]["total_time"] = timings[method]["total_time"] + elapsed_time
+            timings[method]["avg_time"] = (
+                timings[method]["total_time"] / timings[method]["total_count"]
+            )
         if data:
-            timings[method]['data'][str(timings[method]['total_count'])] = data
+            timings[method]["data"][str(timings[method]["total_count"])] = data
     finally:
         timing_lock.release()
 
@@ -465,7 +471,7 @@ def handle_credentials(state, message):
         set_credential_thread_id(
             message["credential_exchange_id"], message["thread_id"]
         )
-    if state == "stored":
+    if state == "credential_acked":
         response = {"success": True, "result": message["credential_exchange_id"]}
         add_credential_response(message["credential_exchange_id"], response)
     return jsonify({"message": state})
@@ -515,7 +521,7 @@ class SendCredentialThread(threading.Thread):
 
     def run(self):
         start_time = time.perf_counter()
-        method = 'submit_credential.credential'
+        method = "submit_credential.credential"
 
         cred_data = None
         try:
@@ -527,14 +533,16 @@ class SendCredentialThread(threading.Thread):
             result_available = add_credential_request(
                 cred_data["credential_exchange_id"]
             )
-            #print(
+            # print(
             #    "Sent offer",
             #    cred_data["credential_exchange_id"],
             #    cred_data["connection_id"],
-            #)
+            # )
 
             # wait for confirmation from the agent, which will include the credential exchange id
-            if result_available and not result_available.wait(MAX_CRED_RESPONSE_TIMEOUT):
+            if result_available and not result_available.wait(
+                MAX_CRED_RESPONSE_TIMEOUT
+            ):
                 add_credential_timeout_report(cred_data["credential_exchange_id"])
                 end_time = time.perf_counter()
                 print(
@@ -542,20 +550,24 @@ class SendCredentialThread(threading.Thread):
                     cred_data["credential_exchange_id"],
                     cred_data["connection_id"],
                 )
-                log_timing_method(method, start_time, end_time, False, 
+                log_timing_method(
+                    method,
+                    start_time,
+                    end_time,
+                    False,
                     data={
-                        'thread_id':cred_data["thread_id"], 
-                        'credential_exchange_id':cred_data["credential_exchange_id"], 
-                        'Error': 'Timeout',
-                        'elapsed_time': (end_time-start_time)
-                    }
+                        "thread_id": cred_data["thread_id"],
+                        "credential_exchange_id": cred_data["credential_exchange_id"],
+                        "Error": "Timeout",
+                        "elapsed_time": (end_time - start_time),
+                    },
                 )
             else:
-                #print(
+                # print(
                 #    "Got credential response:",
                 #    cred_data["credential_exchange_id"],
                 #    cred_data["connection_id"],
-                #)
+                # )
                 end_time = time.perf_counter()
                 log_timing_method(method, start_time, end_time, True)
                 pass
@@ -568,27 +580,22 @@ class SendCredentialThread(threading.Thread):
                 add_credential_exception_report(
                     cred_data["credential_exchange_id"], exc
                 )
-                data={
-                    'thread_id':cred_data["thread_id"], 
-                    'credential_exchange_id':cred_data["credential_exchange_id"], 
-                    'Error': str(exc),
-                    'elapsed_time': (end_time-start_time)
+                data = {
+                    "thread_id": cred_data["thread_id"],
+                    "credential_exchange_id": cred_data["credential_exchange_id"],
+                    "Error": str(exc),
+                    "elapsed_time": (end_time - start_time),
                 }
             else:
-                data={
-                    'Error': str(exc),
-                    'elapsed_time': (end_time-start_time)
-                }
-            log_timing_method(method, start_time, end_time, False, 
-                data=data
-            )
+                data = {"Error": str(exc), "elapsed_time": (end_time - start_time)}
+            log_timing_method(method, start_time, end_time, False, data=data)
             # don't re-raise; we want to log the exception as the credential error response
 
         self.cred_response = get_credential_response(
             cred_data["credential_exchange_id"]
         )
         processing_time = end_time - start_time
-        #print("Got response", self.cred_response, "time=", processing_time)
+        # print("Got response", self.cred_response, "time=", processing_time)
 
 
 def handle_send_credential(cred_input):
@@ -641,15 +648,34 @@ def handle_send_credential(cred_input):
     for credential in cred_input:
         cred_def_key = "CRED_DEF_" + credential["schema"] + "_" + credential["version"]
         credential_definition_id = app_config["schemas"][cred_def_key]
-        cred_offer = {
+        schema_name = credential["schema"]
+        schema_info = app_config["schemas"]["SCHEMA_" + schema_name]
+        schema_version = schema_info["version"]
+        schema_id = app_config["schemas"][
+            "SCHEMA_" + schema_name + "_" + schema_version
+        ]
+        cred_req = {
+            "schema_issuer_did": app_config["DID"],
+            "issuer_did": app_config["DID"],
+            "schema_name": schema_name,
+            "cred_def_id": credential_definition_id,
+            "schema_version": schema_version,
+            "credential_proposal": {
+                "@type": "did:sov:BzCbsNYhMrjHiqZDTUASHg;spec/issue-credential/1.0/credential-preview",
+                "attributes": [
+                    {"name": attr_name, "value": attr_value}
+                    for attr_name, attr_value in credential["attributes"].items()
+                ],
+            },
             "connection_id": app_config["TOB_CONNECTION"],
-            "credential_definition_id": credential_definition_id,
-            "credential_values": credential["attributes"],
+            # "comment": "string",
+            "schema_id": schema_id,
         }
+
         thread = SendCredentialThread(
             credential_definition_id,
-            cred_offer,
-            agent_admin_url + "/credential_exchange/send",
+            cred_req,
+            agent_admin_url + "/issue-credential/send",
             ADMIN_REQUEST_HEADERS,
         )
         thread.start()
@@ -659,6 +685,6 @@ def handle_send_credential(cred_input):
 
     processing_time = time.perf_counter() - start_time
     print(">>> Processed", processed_count, "credentials in", processing_time)
-    print("   ", processing_time/processed_count, "seconds per credential")
+    print("   ", processing_time / processed_count, "seconds per credential")
 
     return jsonify(cred_responses)
