@@ -1,7 +1,7 @@
 FROM ubuntu:16.04
 
 # mara-base section
-ARG python_version=3.6
+ARG python_version=3.8
 
 RUN apt-get update -y \
     && apt-get install -y \
@@ -23,7 +23,9 @@ RUN apt-get update -y \
                 libpq-dev
 
 # ========================================================================================================
-# Install go-crond (https://github.com/webdevops/go-crond)
+# Install go-crond (from https://github.com/BCDevOps/go-crond)
+#  - Adds some additional logging enhancements on top of the upstream project; 
+#    https://github.com/webdevops/go-crond
 #
 # CRON Jobs in OpenShift:
 # - https://blog.danman.eu/cron-jobs-in-openshift/
@@ -32,10 +34,10 @@ RUN apt-get update -y \
 #   - Allows the mara container to be running and the user interface to be available.
 #   - The history issues with the OpenShift cron jobs are avoided.
 # --------------------------------------------------------------------------------------------------------
-ARG GOCROND_VERSION=0.6.1
-ADD https://github.com/webdevops/go-crond/releases/download/$GOCROND_VERSION/go-crond-64-linux /usr/bin/
-RUN mv /usr/bin/go-crond-64-linux /usr/bin/go-crond \
-    && chmod ug+x /usr/bin/go-crond
+ARG SOURCE_REPO=BCDevOps
+ARG GOCROND_VERSION=0.6.2
+ADD https://github.com/$SOURCE_REPO/go-crond/releases/download/$GOCROND_VERSION/go-crond-64-linux /usr/bin/go-crond
+RUN chmod ug+x /usr/bin/go-crond
 # ========================================================================================================
 
 # mara-app section - this is specific to our use of mara
@@ -61,6 +63,7 @@ ENV APP_ROOT=$HOME \
 
 # Copy source code
 ADD . $APP_ROOT
+ADD ./.scripts $APP_ROOT
 ADD ./docker/mara-app/docker-entrypoint.sh $APP_ROOT
 ARG entrypoint=$APP_ROOT/docker-entrypoint.sh
 
