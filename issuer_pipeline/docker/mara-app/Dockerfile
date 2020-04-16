@@ -20,7 +20,8 @@ RUN apt-get update -y \
                 python$python_version-dev \
                 python$python_version-venv \
                 python-psycopg2 \
-                libpq-dev
+                libpq-dev \
+                curl
 
 # ========================================================================================================
 # Install go-crond (from https://github.com/BCDevOps/go-crond)
@@ -36,8 +37,8 @@ RUN apt-get update -y \
 # --------------------------------------------------------------------------------------------------------
 ARG SOURCE_REPO=BCDevOps
 ARG GOCROND_VERSION=0.6.2
-ADD https://github.com/$SOURCE_REPO/go-crond/releases/download/$GOCROND_VERSION/go-crond-64-linux /usr/bin/go-crond
-RUN chmod ug+x /usr/bin/go-crond
+RUN curl https://github.com/$SOURCE_REPO/go-crond/releases/download/$GOCROND_VERSION/go-crond-64-linux -s -L -o /usr/local/bin/go-crond
+RUN chmod ug+x /usr/local/bin/go-crond
 # ========================================================================================================
 
 # mara-app section - this is specific to our use of mara
