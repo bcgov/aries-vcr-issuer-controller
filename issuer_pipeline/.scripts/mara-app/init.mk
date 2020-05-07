@@ -1,7 +1,7 @@
 # Makefile boilerplate
 
 # custom shell for coloring + timing
-SHELL=.scripts/mara-app/makeshell $(or $@,-)
+#SHELL=.scripts/mara-app/makeshell $(or $@,-)
 
 # disable command echoing, will be done by makeshell
 .SILENT:

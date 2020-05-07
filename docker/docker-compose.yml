@@ -162,12 +162,13 @@ services:
       - EVENT_PROC_DB_PORT=${EVENT_PROC_DB_PORT:-5432}
       - EVENT_PROC_DB_DATABASE=${EVENT_PROC_DB_DATABASE:-pipeline_db}
       - EVENT_PROC_DB_USER=${EVENT_PROC_DB_USER:-pipeline_db}
-      - EVENT_PROC_DB_PASSWORD=
+      - EVENT_PROC_DB_PASSWORD=${EVENT_PROC_DB_PASSWORD:-pipeline_db_pwd}
       # [mara_db]
       - MARA_DB_HOST=${MARA_DB_HOST:-myorg-pipeline-db}
       - MARA_DB_PORT=${MARA_DB_PORT:-5432}
       - MARA_DB_DATABASE=${MARA_DB_DATABASE:-mara_db}
       - MARA_DB_USER=${MARA_DB_USER:-mara_db}
+      - MARA_DB_PASSWORD=${MARA_DB_PASSWORD:-mara_db_pwd}
     networks:
       - myorg
     ports:
@@ -186,9 +187,9 @@ services:
       context: ../issuer_pipeline
       dockerfile: docker/postgres/Dockerfile
     environment:
-      - POSTGRESQL_USER=${POSTGRESQL_USER}
-      - POSTGRESQL_PASSWORD=${POSTGRESQL_PASSWORD}
-      - POSTGRESQL_DATABASE=${POSTGRESQL_DATABASE}
+      - POSTGRES_USER=${POSTGRESQL_USER}
+      - POSTGRES_PASSWORD=${POSTGRESQL_PASSWORD}
+      - POSTGRES_DATABASE=${POSTGRESQL_DATABASE}
     networks:
       - myorg
     ports:

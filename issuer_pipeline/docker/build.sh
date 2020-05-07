@@ -1,5 +1,5 @@
 
-export DOCKERHOST=${APPLICATION_URL-$(docker run  --rm --net=host codenvy/che-ip)}
+export DOCKERHOST=${APPLICATION_URL-$(docker run  --rm --net=host eclipse/che-ip)}
 
 docker rmi -f maraapp
 cd postgres && docker build . -t maradb && cd ..
