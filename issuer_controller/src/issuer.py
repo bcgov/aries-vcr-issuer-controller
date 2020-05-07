@@ -452,7 +452,7 @@ TOPIC_PRESENTATIONS = "presentations"
 TOPIC_GET_ACTIVE_MENU = "get-active-menu"
 TOPIC_PERFORM_MENU_ACTION = "perform-menu-action"
 TOPIC_ISSUER_REGISTRATION = "issuer_registration"
-TOPIC_PROBLEM_REPORT = "problem-report"
+TOPIC_PROBLEM_REPORT = "problem_report"
 
 # max 15 second wait for a credential response (prevents blocking forever)
 MAX_CRED_RESPONSE_TIMEOUT = 45
