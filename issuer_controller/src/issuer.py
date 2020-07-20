@@ -33,6 +33,7 @@ TRACE_MSG_PCT = int(os.getenv("TRACE_MSG_PCT", "0"))
 TRACE_MSG_PCT = max(min(TRACE_MSG_PCT, 100), 0)
 
 ACK_ERROR_PCT = int(os.getenv("ACK_ERROR_PCT", "0"))
+ACK_ERROR_PCT = max(min(ACK_ERROR_PCT, 100), 0)
 
 LOG_LEVEL = os.environ.get('LOG_LEVEL', 'WARNING').upper()
 

@@ -76,6 +76,13 @@ configureEnvironment () {
   export APPLICATION_URL=${APPLICATION_URL-http://localhost:${WEB_HTTP_PORT:-5001}}
   export ENDPOINT_URL=http://${ENDPOINT_HOST-$DOCKERHOST:${WEB_HTTP_PORT:-5001}}
 
+  export RECORD_TIMINGS=${RECORD_TIMINGS:-false}
+  export TRACE_EVENTS=${TRACE_EVENTS:-false}
+  export TRACE_TARGET=${TRACE_TARGET:-log}
+  # set this one manually to trace a percentage of issued credential exchanges
+  export TRACE_MSG_PCT=${TRACE_MSG_PCT}
+  export ACK_ERROR_PCT=${ACK_ERROR_PCT}
+
   # myorg-agent
   export AGENT_ADMIN_PORT=8034
   export TOB_AGENT_ADMIN_PORT=8024
@@ -90,6 +97,14 @@ configureEnvironment () {
   export AGENT_ADMIN_MODE="admin-insecure-mode"
   if [ ! -z "${AGENT_ADMIN_API_KEY}" ]; then
     AGENT_ADMIN_MODE="admin-api-key ${AGENT_ADMIN_API_KEY}"
+  fi
+  export AGENT_TIMING_MODE=""
+  if [ "${RECORD_TIMINGS}" = "true" ]; then
+    AGENT_TIMING_MODE="--timing"
+  fi
+  export AGENT_TRACE_MODE=""
+  if [ "${TRACE_EVENTS}" = "true" ]; then
+    AGENT_TRACE_MODE="--trace"
   fi
 
   # wallet-db
