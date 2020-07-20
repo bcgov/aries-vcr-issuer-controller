@@ -568,9 +568,9 @@ def add_credential_problem_report(thread_id, response):
             LOGGER.error(credential_requests)
 
 
-def add_credential_timeout_report(cred_exch_id):
+def add_credential_timeout_report(cred_exch_id, thread_id):
     LOGGER.error("add timeout report for cred %s %s", thread_id, cred_exch_id)
-    response = {"success": False, "result": cred_exch_id + "::Error thread timeout"}
+    response = {"success": False, "result": thread_id + "::Error thread timeout"}
     add_credential_response(cred_exch_id, response)
 
 
