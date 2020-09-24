@@ -9,6 +9,9 @@ import yaml
 import config
 import issuer
 
+import signal
+
+
 # Load application settings (environment)
 config_root = os.environ.get('CONFIG_ROOT', '../config')
 ENV = config.load_settings(config_root=config_root)
@@ -22,9 +25,38 @@ class Controller(Flask):
 app = Controller()
 wsgi_app = app.wsgi_app
 
+signal.signal(signal.SIGINT, issuer.signal_issuer_shutdown)
+signal.signal(signal.SIGTERM, issuer.signal_issuer_shutdown)
+
+
 @app.route('/health', methods=['GET'])
 def health_check():
-    return make_response(jsonify({'success': True}), 200)
+    if issuer.tob_connection_synced():
+        return make_response(jsonify({'success': True}), 200)
+    else:
+        abort(503, "Connection not yet synced")
+
+@app.route('/readiness', methods=['GET'])
+def readiness_check():
+    """
+    A readiness probe checks if the container is ready to handle requests.
+    A failed readiness probe means that a container should not receive any traffic from a proxy, even if it's running.
+    """
+    if issuer.tob_connection_synced():
+        return make_response(jsonify({'success': True}), 200)
+    else:
+        abort(503, "Connection not ready to process requests")
+
+@app.route('/liveness', methods=['GET'])
+def liveness_check():
+    """
+    A liveness probe checks if the container is still running.
+    If the liveness probe fails, the container is killed.
+    """
+    if issuer.issuer_liveness_check():
+        return make_response(jsonify({'success': True}), 200)
+    else:
+        abort(503, "Connection is not live")
 
 @app.route('/status/reset', methods=['GET'])
 def clear_status():
@@ -79,6 +111,7 @@ def agent_callback(topic):
         abort(400)
 
     message = request.json
+    issuer.log_timing_event(method, message, start_time, None, False)
 
     # dispatch based on the topic type
     if topic == issuer.TOPIC_CONNECTIONS:
@@ -121,9 +154,11 @@ def agent_callback(topic):
         print("Callback: topic=", topic, ", message=", message)
         end_time = time.perf_counter()
         issuer.log_timing_method(method, start_time, end_time, False)
+        issuer.log_timing_event(method, message, start_time, end_time, False)
         abort(400, {'message': 'Invalid topic: ' + topic})
 
     end_time = time.perf_counter()
     issuer.log_timing_method(method, start_time, end_time, True)
+    issuer.log_timing_event(method, message, start_time, end_time, True)
 
     return response
