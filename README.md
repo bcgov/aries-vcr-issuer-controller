@@ -12,7 +12,7 @@ Still not sure what this is? Please see this [Getting started with VON](https://
 
 ### Aries VCR Issuer Controller or Agent
 
-Aries Agents consist of two parts, a framework that handles all of the Aries agent type functions (e.g. messages, protocols, protocol state, agent storage, etc.) and a controller that provides the business logic that gives the agent personality. As such, we talk about the code in this repo as the Controller. When the controller code is deployed along with an instance of an agent framework&mdash;ACA-Py&mdash;we have an Aries VCR Issuer agent.  As such, in this repo we might take about the code in this repo (the Aries VCR Issuer Controller) or a deployed and running Aries VCR Issuer Agent.
+Aries Agents consist of two parts, a framework that handles all of the Aries agent type functions (e.g. messages, protocols, protocol state, agent storage, etc.) and a controller that provides the business logic that gives the agent personality. As such, we talk about the code in this repo as the Controller. When the controller code is deployed along with an instance of an agent framework&mdash;ACA-Py&mdash;we have an Aries VCR Issuer agent.  As such, in this repo we might talk about the code in this repo (the Aries VCR Issuer Controller), or talk about a deployed and running Aries VCR Issuer Agent.
 
 Make sense?
 
