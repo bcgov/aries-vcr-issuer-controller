@@ -373,6 +373,7 @@ def startup_init(ENV):
 
     thread = StartupProcessingThread(ENV)
     thread.start()
+    return thread
 
 
 credential_lock = threading.Lock()

@@ -6,8 +6,7 @@ import json
 import os
 import time
 import yaml
-import config
-import issuer
+from src import issuer, config
 
 import signal
 
@@ -20,7 +19,7 @@ class Controller(Flask):
     def __init__(self):
         print("Initializing " + __name__ + " ...")
         super().__init__(__name__)
-        issuer.startup_init(ENV)
+        self.startup_thread = issuer.startup_init(ENV)
 
 app = Controller()
 wsgi_app = app.wsgi_app
