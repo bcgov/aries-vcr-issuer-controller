@@ -345,10 +345,10 @@ sample_app_config = {'AGENT_ADMIN_URL': 'http://myorg-agent:8034',
  'DID': 'XZxwKKqiKaV6yZQob1UZpq',
  'TOB_CONNECTION': 'cee21dfa-cd60-479b-b096-9db9552fa948',
  'running': True,
- 'schemas': {'CRED_DEF_bcgov-mines-act-permit.empr_1.0.0': 'XZxwKKqiKaV6yZQob1UZpq:3:CL:14:default',
-             'CRED_DEF_my-registration.empr_1.0.0': 'XZxwKKqiKaV6yZQob1UZpq:3:CL:10:default',
-             'CRED_DEF_my-relationship.empr_1.0.0': 'XZxwKKqiKaV6yZQob1UZpq:3:CL:12:default',
-             'SCHEMA_bcgov-mines-act-permit.empr': {'attributes': {'corp_num': {'data_type': 'ui_text',
+ 'schemas': {'CRED_DEF_test-permit.org_1.0.0': 'XZxwKKqiKaV6yZQob1UZpq:3:CL:14:default',
+             'CRED_DEF_my-registration.org_1.0.0': 'XZxwKKqiKaV6yZQob1UZpq:3:CL:10:default',
+             'CRED_DEF_my-relationship.org_1.0.0': 'XZxwKKqiKaV6yZQob1UZpq:3:CL:12:default',
+             'SCHEMA_test-permit.org': {'attributes': {'corp_num': {'data_type': 'ui_text',
                                                                                 'description_en': 'Registration/Incorporation '
                                                                                                   'Number '
                                                                                                   'or '
@@ -407,14 +407,14 @@ sample_app_config = {'AGENT_ADMIN_URL': 'http://myorg-agent:8034',
                                                                                                'Type',
                                                                                    'required': True}},
                                                     'description': 'The '
-                                                                   'bcgov-mines-act-permit '
+                                                                   'test-permit '
                                                                    'credential '
                                                                    'issued by '
-                                                                   'empr',
-                                                    'name': 'bcgov-mines-act-permit.empr',
+                                                                   'org',
+                                                    'name': 'test-permit.org',
                                                     'version': '1.0.0'},
-             'SCHEMA_bcgov-mines-act-permit.empr_1.0.0': 'XZxwKKqiKaV6yZQob1UZpq:2:bcgov-mines-act-permit.empr:1.0.0',
-             'SCHEMA_my-registration.empr': {'attributes': {'address_line_1': {'data_type': 'ui_text',
+             'SCHEMA_test-permit.org_1.0.0': 'XZxwKKqiKaV6yZQob1UZpq:2:test-permit.org:1.0.0',
+             'SCHEMA_my-registration.org': {'attributes': {'address_line_1': {'data_type': 'ui_text',
                                                                                'description': 'address_line_1',
                                                                                'required': True},
                                                             'addressee': {'data_type': 'ui_text',
@@ -531,11 +531,11 @@ sample_app_config = {'AGENT_ADMIN_URL': 'http://myorg-agent:8034',
                                              'description': 'The '
                                                             'my-registration '
                                                             'credential issued '
-                                                            'by empr',
-                                             'name': 'my-registration.empr',
+                                                            'by org',
+                                             'name': 'my-registration.org',
                                              'version': '1.0.0'},
-             'SCHEMA_my-registration.empr_1.0.0': 'XZxwKKqiKaV6yZQob1UZpq:2:my-registration.empr:1.0.0',
-             'SCHEMA_my-relationship.empr': {'attributes': {'associated_corp_num': {'data_type': 'ui_text',
+             'SCHEMA_my-registration.org_1.0.0': 'XZxwKKqiKaV6yZQob1UZpq:2:my-registration.org:1.0.0',
+             'SCHEMA_my-relationship.org': {'attributes': {'associated_corp_num': {'data_type': 'ui_text',
                                                                                     'description_en': 'Registry '
                                                                                                       'id(s) '
                                                                                                       'of '
@@ -618,79 +618,80 @@ sample_app_config = {'AGENT_ADMIN_URL': 'http://myorg-agent:8034',
                                              'description': 'The relationship '
                                                             'between two '
                                                             'organizations',
-                                             'name': 'my-relationship.empr',
+                                             'name': 'my-relationship.org',
                                              'version': '1.0.0'},
-             'SCHEMA_my-relationship.empr_1.0.0': 'XZxwKKqiKaV6yZQob1UZpq:2:my-relationship.empr:1.0.0'}
+             'SCHEMA_my-relationship.org_1.0.0': 'XZxwKKqiKaV6yZQob1UZpq:2:my-relationship.org:1.0.0'}
         }
 
 
 TestConfig = { 
-    #TELLS APP TO NOT RUN STARTUP_SCRIPT
-    'mode': 'TEST',
+    #other fixed values
     'test_issuer_app_config': sample_app_config,
     'test_issuer_synced': {'cee21dfa-cd60-479b-b096-9db9552fa948': True},
-    #TESTING LOADS THIS INSTEAD OF SETTINGS.yml
-    'ACK_ERROR_PCT': '0',
+    
+    #This is a full pprint of the ENV dict created in the app.py file, only uncommmented values
+    # that cause test to error if missing
+    #'ACK_ERROR_PCT': '0',
     'AGENT_ADMIN_URL': 'http://myorg-agent:8034',
     'APPLICATION_URL': 'http://localhost:5000',
-    'APPLICATION_URL_VONX': 'http://localhost:5000/empr/bcgov-mines-act-permit',
-    'AUTO_REGISTER_DID': False,
+    # 'APPLICATION_URL_VONX': 'http://localhost:5000/org/test-permit',
+    # 'AUTO_REGISTER_DID': False,
     'CONFIG_ROOT': './config',
-    'DESCRIPTION': 'von-image provides a consistent base image for running VON '
-                    'python web components. Based on Ubuntu bionic, this image '
-                    'includes Python 3.6.9,  indy-sdk, and supporting Python '
-                    'libraries.',
-    'ENABLE_GUNICORN': '0',
-    'ENDPOINT_URL': 'http://172.17.0.1:5000',
-    'ENVIRONMENT': 'default',
-    'HOME': '/home/indy',
-    'HOSTNAME': '723f6b74f663',
-    'HOST_IP': '0.0.0.0',
-    'HOST_PORT': '5000',
-    'HTTP_FORCE_CLOSE_CONNECTIONS': 'true',
-    'INDY_GENESIS_PATH': '/home/indy/genesis',
-    'INDY_GENESIS_URL': 'http://localhost:9000/genesis',
-    'INDY_LEDGER_URL': 'http://172.17.0.1:9000',
-    'LANG': 'C.UTF-8',
-    'LC_ALL': 'C.UTF-8',
-    'LD_LIBRARY_PATH': '/home/indy/.local/lib:',
-    'LEDGER_PROTOCOL_VERSION': '1.6',
-    'LEDGER_URL': 'http://172.17.0.1:9000',
-    'LS_COLORS': 'rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:mi=00:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arc=01;31:*.arj=01;31:*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.tzo=01;31:*.t7z=01;31:*.zip=01;31:*.z=01;31:*.Z=01;31:*.dz=01;31:*.gz=01;31:*.lrz=01;31:*.lz=01;31:*.lzo=01;31:*.xz=01;31:*.zst=01;31:*.tzst=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.alz=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.cab=01;31:*.wim=01;31:*.swm=01;31:*.dwm=01;31:*.esd=01;31:*.jpg=01;35:*.jpeg=01;35:*.mjpg=01;35:*.mjpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.au=00;36:*.flac=00;36:*.m4a=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.oga=00;36:*.opus=00;36:*.spx=00;36:*.xspf=00;36:',
-    'PATH': '/home/indy/.pyenv/versions/3.6.9/bin:/home/indy/.pyenv/libexec:/home/indy/.pyenv/plugins/python-build/bin:/home/indy/.local/bin:/home/indy/bin:/home/indy/.pyenv/shims:/home/indy/.pyenv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin',
-    'PIP_NO_CACHE_DIR': 'off',
-    'POSTGRESQL_WALLET_ADMIN_PASSWORD': 'mysecretpassword',
-    'POSTGRESQL_WALLET_HOST': 'myorg-wallet-db',
-    'POSTGRESQL_WALLET_PASSWORD': 'DB_PASSWORD',
-    'POSTGRESQL_WALLET_PORT': '5432',
-    'POSTGRESQL_WALLET_USER': 'DB_USER',
-    'PWD': '/home/indy',
-    'PYENV_DIR': '/home/indy',
-    'PYENV_HOOK_PATH': '/home/indy/.pyenv/pyenv.d:/usr/local/etc/pyenv.d:/etc/pyenv.d:/usr/lib/pyenv/hooks',
-    'PYENV_ROOT': '/home/indy/.pyenv',
-    'PYENV_VERSION': '3.6.9',
-    'PYTEST_CURRENT_TEST': 'test/issue_credential_resource_test.py::test_liveness_method '
-                            '(setup)',
-    'PYTHONIOENCODING': 'UTF-8',
-    'PYTHONUNBUFFERED': '1',
-    'PYTHON_ENV': 'development',
-    'PYTHON_VERSION': '3.6.9',
-    'RUST_LOG': 'warning',
-    'SHELL': '/bin/bash',
-    'SHLVL': '1',
-    'SUMMARY': 'von-image including Python 3.6.9 and indy-sdk',
-    'TEMPLATE_PATH': '../templates',
-    'TERM': 'xterm',
-    'TOB_ADMIN_API_KEY': 'R2D2HfPM5Zwd69IjclQiuFmcMV6',
-    'TOB_AGENT_ADMIN_URL': 'http://172.17.0.1:8024',
-    'TOB_API_URL': 'http://localhost:8081/api/v2',
-    'TOB_APP_URL': 'http://localhost:8080',
-    'TOB_CONNECTION_NAME': 'vcr-agent',
-    'TRACE_EVENTS': 'false',
-    'TRACE_MSG_PCT': '0',
-    'TRACE_TARGET': 'log',
-    'WALLET_ENCRYPTION_KEY': 'key',
-    'WALLET_SEED_VONX': 'empr_000000000000000000000000000',
-    'WALLET_TYPE': 'postgres_storage',
-    'WEBHOOK_PORT': '5000'
+    # 'DESCRIPTION': 'von-image provides a consistent base image for running VON '
+    #                 'python web components. Based on Ubuntu bionic, this image '
+    #                 'includes Python 3.6.9,  indy-sdk, and supporting Python '
+    #                 'libraries.',
+    # 'ENABLE_GUNICORN': '0',
+    # 'ENDPOINT_URL': 'http://172.17.0.1:5000',
+    # 'ENVIRONMENT': 'default',
+    # 'HOME': '/home/indy',
+    # 'HOSTNAME': '723f6b74f663',
+    # 'HOST_IP': '0.0.0.0',
+    # 'HOST_PORT': '5000',
+    # 'HTTP_FORCE_CLOSE_CONNECTIONS': 'true',
+    # 'INDY_GENESIS_PATH': '/home/indy/genesis',
+    # 'INDY_GENESIS_URL': 'http://localhost:9000/genesis',
+    # 'INDY_LEDGER_URL': 'http://172.17.0.1:9000',
+    # 'LANG': 'C.UTF-8',
+    # 'LC_ALL': 'C.UTF-8',
+    # 'LD_LIBRARY_PATH': '/home/indy/.local/lib:',
+    # 'LEDGER_PROTOCOL_VERSION': '1.6',
+    # 'LEDGER_URL': 'http://172.17.0.1:9000',
+    # 'LS_COLORS': 'rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:mi=00:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arc=01;31:*.arj=01;31:*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.tzo=01;31:*.t7z=01;31:*.zip=01;31:*.z=01;31:*.Z=01;31:*.dz=01;31:*.gz=01;31:*.lrz=01;31:*.lz=01;31:*.lzo=01;31:*.xz=01;31:*.zst=01;31:*.tzst=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.alz=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.cab=01;31:*.wim=01;31:*.swm=01;31:*.dwm=01;31:*.esd=01;31:*.jpg=01;35:*.jpeg=01;35:*.mjpg=01;35:*.mjpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.au=00;36:*.flac=00;36:*.m4a=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.oga=00;36:*.opus=00;36:*.spx=00;36:*.xspf=00;36:',
+    # 'PATH': '/home/indy/.pyenv/versions/3.6.9/bin:/home/indy/.pyenv/libexec:/home/indy/.pyenv/plugins/python-build/bin:/home/indy/.local/bin:/home/indy/bin:/home/indy/.pyenv/shims:/home/indy/.pyenv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin',
+    # 'PIP_NO_CACHE_DIR': 'off',
+    # 'POSTGRESQL_WALLET_ADMIN_PASSWORD': 'mysecretpassword',
+    # 'POSTGRESQL_WALLET_HOST': 'myorg-wallet-db',
+    # 'POSTGRESQL_WALLET_PASSWORD': 'DB_PASSWORD',
+    # 'POSTGRESQL_WALLET_PORT': '5432',
+    # 'POSTGRESQL_WALLET_USER': 'DB_USER',
+    # 'PWD': '/home/indy',
+    # 'PYENV_DIR': '/home/indy',
+    # 'PYENV_HOOK_PATH': '/home/indy/.pyenv/pyenv.d:/usr/local/etc/pyenv.d:/etc/pyenv.d:/usr/lib/pyenv/hooks',
+    # 'PYENV_ROOT': '/home/indy/.pyenv',
+    # 'PYENV_VERSION': '3.6.9',
+    # 'PYTEST_CURRENT_TEST': 'test/issue_credential_resource_test.py::test_liveness_method '
+    #                         '(setup)',
+    # 'PYTHONIOENCODING': 'UTF-8',
+    # 'PYTHONUNBUFFERED': '1',
+    # 'PYTHON_ENV': 'development',
+    # 'PYTHON_VERSION': '3.6.9',
+    # 'RUST_LOG': 'warning',
+    # 'SHELL': '/bin/bash',
+    # 'SHLVL': '1',
+    # 'SUMMARY': 'von-image including Python 3.6.9 and indy-sdk',
+    # 'TEMPLATE_PATH': '../templates',
+    # 'TERM': 'xterm',
+    # 'TOB_ADMIN_API_KEY': 'R2D2HfPM5Zwd69IjclQiuFmcMV6',
+    # 'TOB_AGENT_ADMIN_URL': 'http://172.17.0.1:8024',
+    # 'TOB_API_URL': 'http://localhost:8081/api/v2',
+    # 'TOB_APP_URL': 'http://localhost:8080',
+    # 'TOB_CONNECTION_NAME': 'vcr-agent',
+    # 'TRACE_EVENTS': 'false',
+    # 'TRACE_MSG_PCT': '0',
+    # 'TRACE_TARGET': 'log',
+    # 'WALLET_ENCRYPTION_KEY': 'key',
+    # 'WALLET_SEED_VONX': 'empr_000000000000000000000000000',
+    # 'WALLET_TYPE': 'postgres_storage',
+    # 'WEBHOOK_PORT': '5000'
 }

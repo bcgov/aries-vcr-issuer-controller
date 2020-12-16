@@ -7,7 +7,7 @@ from src import issuer,config
 
 test_send_credential = [
     {
-        "schema": "my-registration.empr",
+        "schema": "my-registration.org",
         "version": "1.0.0",
         "attributes": {
             "corp_num": "ABC12345",
@@ -29,7 +29,7 @@ test_send_credential = [
         }
     },
     {
-        "schema": "bcgov-mines-act-permit.empr",
+        "schema": "test-permit.org",
         "version": "1.0.0",
         "attributes": {
             "permit_id": "MYPERMIT12345",
@@ -84,7 +84,7 @@ def test_issue_credential_spawns_thread(app):
 
 
 def test_SendCredentialThread_posts_to_agent(app):
-    cred_def = "CRED_DEF_my-registration.empr_1.0.0"
+    cred_def = "CRED_DEF_my-registration.org_1.0.0"
     cred_offer =  {"test":"tests","test2":"test2"}
     agent_url = config.TestConfig.get("AGENT_ADMIN_URL") + "/issue-credential/send"
     headers = {"Content-Type": "application/json"}
