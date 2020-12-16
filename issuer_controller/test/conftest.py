@@ -8,6 +8,7 @@ from requests.models import Response
 def app(request):
     test_app = entry_file.app
     test_app.startup_thread.join()
+    #stop startup thread and override with test config
     issuer.app_config = config.TestConfig['test_issuer_app_config']
     issuer.synced = config.TestConfig['test_issuer_synced']
 
