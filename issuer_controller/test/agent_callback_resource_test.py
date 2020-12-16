@@ -96,12 +96,4 @@ def test_agent_callback_TOPIC_PROBLEM_REPORT_empty(test_client):
     # empty is not valid
 
    
-# def test_agent_callback_TOPIC_CONNECTIONS_calls_handle_connections(test_client):
-#     data = {
-#         "state":"value"
-#     }
-#     with patch('app.routes.issuer.handle_connections') as mock:
-#         get_resp = test_client.post(f'/api/agentcb/topic/connections/', json=data, headers={"Content-Type": "application/json"})
-#         assert get_resp.status_code == 200
-#         get_data = json.loads(get_resp.data.decode())
-#         mock.assert_called_with(data["state"], data)
+#TODO: happy path tests for each topic
