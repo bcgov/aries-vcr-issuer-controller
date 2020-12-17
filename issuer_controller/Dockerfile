@@ -29,5 +29,5 @@ USER indy
 # HEALTHCHECK --interval=60s --timeout=5s --start-period=120s \
 #     CMD wget -q --spider http://localhost:${HOST_PORT}/health || exit 1
 
-WORKDIR $HOME/src
-ENTRYPOINT ["bash", "../docker-entrypoint.sh"]
+WORKDIR $HOME
+ENTRYPOINT ["bash", "./docker-entrypoint.sh"]
