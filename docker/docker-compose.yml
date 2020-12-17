@@ -28,8 +28,8 @@ services:
       dockerfile: Dockerfile
     environment:
       LEDGER_URL: ${LEDGER_URL}
-      APPLICATION_URL: ${APPLICATION_URL:-http://localhost:5001}
-      ENDPOINT_URL: ${ENDPOINT_URL:-http://localhost:5001}
+      # APPLICATION_URL: ${APPLICATION_URL:-http://localhost:5001}
+      # ENDPOINT_URL: ${ENDPOINT_URL:-http://localhost:5001}
       CONFIG_ROOT: ./config
       HOST_PORT: ${CONTROLLER_PORT}
       ENVIRONMENT: ${ENVIRONMENT:-default}
