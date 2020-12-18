@@ -58,7 +58,7 @@ There are two steps:
 
 3. (There are 3 steps) (depending on your agent startup parameters) Accept this invitation through your agent `/connections/<conn_id>/accept-invitation`
 
-4. (There are 4 steps) VCerify your connection status
+4. (There are 4 steps) Verify your connection status
 
 To test this process on your local installation, use the following startup command:
 
