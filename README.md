@@ -46,6 +46,28 @@ If you are creating an agent for a service organization that will become an Arie
 
 In theory, the two mechanisms above can be combined, and branches could be created in the main repo for the different agent instances. This might be an approach that, for example, the BC Gov could use&mdash;creating a branch for each OrgBookBC Issuer agent in BC Gov. However, we think that the benefits of such a scheme is not worth the complexity.
 
+## Deploying Your Issuer Controller on OpenShift
+
+When you are running locally, your issuer controller will automatically establish a connection between your agent and the OrgBook agent.  However when you deploy on OpenShift and connect to one of the OrgBook environments (dev, test or prod) this is not possible, and the agent connection must be established manually.
+
+There are two steps:
+
+1. Request an Invitation from the OrgBook agent: `/connections/create-invitation`
+
+2. Receive this Invitation in your agent: `/connections/receive-invitation` - set the `alias` to `vcr-agent` (or whatever value you have set here: https://github.com/bcgov/aries-vcr-issuer-controller/blob/master/issuer_controller/config/services.yml#L340)
+
+3. (There are 3 steps) (depending on your agent startup parameters) Accept this invitation through your agent `/connections/<conn_id>/accept-invitation`
+
+4. (There are 4 steps) VCerify your connection status
+
+To test this process on your local installation, use the following startup command:
+
+```bash
+REGISTER_TOB_CONNECTION=false ./manage start
+```
+
+This will startup your Issuer Controller *without* an orgbook connection and you will need to follow the above steps.  Once the connection is established your Issuer will be registered with your local OrgBook.
+
 ## Getting Help or Reporting an Issue
 
 To report bugs/issues/feature requests, please file an [issue](../../issues).
