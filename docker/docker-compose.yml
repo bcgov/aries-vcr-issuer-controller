@@ -28,9 +28,9 @@ services:
       dockerfile: Dockerfile
     environment:
       LEDGER_URL: ${LEDGER_URL}
-      #APPLICATION_URL: ${APPLICATION_URL:-http://localhost:5001}
-      #ENDPOINT_URL: ${ENDPOINT_URL:-http://localhost:5001}
-      CONFIG_ROOT: ../config
+      # APPLICATION_URL: ${APPLICATION_URL:-http://localhost:5001}
+      # ENDPOINT_URL: ${ENDPOINT_URL:-http://localhost:5001}
+      CONFIG_ROOT: ./config
       HOST_PORT: ${CONTROLLER_PORT}
       ENVIRONMENT: ${ENVIRONMENT:-default}
       ENABLE_GUNICORN: ${ENABLE_GUNICORN:-0}
@@ -71,7 +71,7 @@ services:
       /bin/bash -c "
         echo sleeping ...;
         sleep 15;
-        ../docker-entrypoint.sh;"
+        ./docker-entrypoint.sh;"
 
   myorg-agent:
     image: vcr-agent

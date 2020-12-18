@@ -10,7 +10,7 @@ import random
 import requests
 from flask import jsonify
 
-import config
+from src import config
 
 AGENT_ADMIN_API_KEY = os.environ.get("AGENT_ADMIN_API_KEY")
 ADMIN_REQUEST_HEADERS = {"Content-Type": "application/json"}
@@ -373,6 +373,7 @@ def startup_init(ENV):
 
     thread = StartupProcessingThread(ENV)
     thread.start()
+    return thread
 
 
 credential_lock = threading.Lock()
