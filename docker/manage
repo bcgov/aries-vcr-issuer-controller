@@ -127,7 +127,11 @@ configureEnvironment () {
   export VONX_API_URL=http://myorg-controller:${WEBHOOK_PORT}
 
   # myorg-controller
-  export TOB_AGENT_ADMIN_URL=${TOB_AGENT_ADMIN_URL:-http://${DOCKERHOST}:${TOB_AGENT_ADMIN_PORT}} 
+  # specify this as anything other than "true" to force manual connection to the TOB agent
+  export REGISTER_TOB_CONNECTION=${REGISTER_TOB_CONNECTION:-true}
+  if [  "${REGISTER_TOB_CONNECTION}" = "true"  ]; then
+    export TOB_AGENT_ADMIN_URL=${TOB_AGENT_ADMIN_URL:-http://${DOCKERHOST}:${TOB_AGENT_ADMIN_PORT}} 
+  fi
   export TOB_CONNECTION_NAME=${TOB_CONNECTION_NAME:-vcr-agent} 
   export TOB_ADMIN_API_KEY=${TOB_ADMIN_API_KEY:-R2D2HfPM5Zwd69IjclQiuFmcMV6}
 }

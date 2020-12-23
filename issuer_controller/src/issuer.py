@@ -48,6 +48,7 @@ DT_FMT = '%Y-%m-%d %H:%M:%S.%f%z'
 app_config = {}
 app_config["schemas"] = {}
 app_config["running"] = True
+app_config["config_services"] = {}
 synced = {}
 
 MAX_RETRIES = 3
@@ -120,6 +121,66 @@ def agent_schemas_cred_defs(agent_admin_url):
     return ret_schemas
 
 
+def register_issuer_with_orgbook(connection_id):
+    if connection_id in synced and synced[connection_id]:
+        return
+
+    app_config["TOB_CONNECTION"] = connection_id
+    synced[connection_id] = False
+    config_root = app_config["config_root"]
+    config_services = app_config["config_services"]
+    agent_admin_url = app_config["AGENT_ADMIN_URL"]
+
+    for issuer_name, issuer_info in config_services["issuers"].items():
+        # register ourselves (issuer, schema(s), cred def(s)) with TOB
+        issuer_config = {
+            "name": issuer_name,
+            "did": app_config["DID"],
+            "config_root": config_root,
+        }
+        issuer_config.update(issuer_info)
+        issuer_spec = config.assemble_issuer_spec(issuer_config)
+
+        credential_types = []
+        for credential_type in issuer_info["credential_types"]:
+            schema_name = credential_type["schema"]
+            schema_info = app_config["schemas"]["SCHEMA_" + schema_name]
+            ctype_config = {
+                "schema_name": schema_name,
+                "schema_version": schema_info["version"],
+                "issuer_url": issuer_config["url"],
+                "config_root": config_root,
+                "credential_def_id": app_config["schemas"][
+                    "CRED_DEF_" + schema_name + "_" + schema_info["version"]
+                ],
+            }
+            credential_type['attributes'] = schema_info["attributes"]
+            ctype_config.update(credential_type)
+            ctype = config.assemble_credential_type_spec(ctype_config, schema_info.get("attributes"))
+            if ctype is not None:
+                credential_types.append(ctype)
+
+        issuer_request = {
+            "connection_id": app_config["TOB_CONNECTION"],
+            "issuer_registration": {
+                "credential_types": credential_types,
+                "issuer": issuer_spec,
+            },
+        }
+
+        response = requests.post(
+            agent_admin_url + "/issuer_registration/send",
+            json.dumps(issuer_request),
+            headers=ADMIN_REQUEST_HEADERS,
+        )
+        response.raise_for_status()
+        response.json()
+        print("Registered issuer: ", issuer_name)
+
+    synced[connection_id] = True
+    print("Connection {} is synchronized".format(connection_id))
+
+
 class StartupProcessingThread(threading.Thread):
     global app_config
 
@@ -134,6 +195,8 @@ class StartupProcessingThread(threading.Thread):
         config_services = config.load_config(
             config_root + "/services.yml", env=self.ENV
         )
+        app_config["config_root"] = config_root
+        app_config["config_services"] = config_services
 
         agent_admin_url = self.ENV.get("AGENT_ADMIN_URL")
         if not agent_admin_url:
@@ -234,84 +297,39 @@ class StartupProcessingThread(threading.Thread):
                 tob_connection = connection
 
         if not tob_connection:
-            # if no tob connection then establish one
-            tob_agent_admin_url = tob_connection_params["connection"]["agent_admin_url"]
-            if not tob_agent_admin_url:
-                raise RuntimeError(
-                    "Error TOB_AGENT_ADMIN_URL is not specified, can't establish a TOB connection."
+            # if no tob connection then establish one (if we can)
+            # (agent_admin_url is provided if we can directly ask the TOB agent for an invitation,
+            #   ... otherwise the invitation has to be provided manually through the admin api
+            #   ... WITH THE CORRECT ALIAS)
+            if ("agent_admin_url" in tob_connection_params["connection"] 
+                and tob_connection_params["connection"]["agent_admin_url"]
+            ):
+                tob_agent_admin_url = tob_connection_params["connection"]["agent_admin_url"]
+                response = requests.post(
+                    tob_agent_admin_url + "/connections/create-invitation",
+                    headers=TOB_REQUEST_HEADERS,
                 )
+                response.raise_for_status()
+                invitation = response.json()
 
-            response = requests.post(
-                tob_agent_admin_url + "/connections/create-invitation",
-                headers=TOB_REQUEST_HEADERS,
-            )
-            response.raise_for_status()
-            invitation = response.json()
+                response = requests.post(
+                    agent_admin_url
+                    + "/connections/receive-invitation?alias="
+                    + tob_connection_params["alias"],
+                    json.dumps(invitation["invitation"]),
+                    headers=ADMIN_REQUEST_HEADERS,
+                )
+                response.raise_for_status()
+                tob_connection = response.json()
 
-            response = requests.post(
-                agent_admin_url
-                + "/connections/receive-invitation?alias="
-                + tob_connection_params["alias"],
-                json.dumps(invitation["invitation"]),
-                headers=ADMIN_REQUEST_HEADERS,
-            )
-            response.raise_for_status()
-            tob_connection = response.json()
+                LOGGER.info("Established tob connection: %s", json.dumps(tob_connection))
+                time.sleep(5)
 
-            LOGGER.info("Established tob connection: %s", json.dumps(tob_connection))
-            time.sleep(5)
-
-        app_config["TOB_CONNECTION"] = tob_connection["connection_id"]
-        synced[tob_connection["connection_id"]] = False
-
-        for issuer_name, issuer_info in config_services["issuers"].items():
-            # register ourselves (issuer, schema(s), cred def(s)) with TOB
-            issuer_config = {
-                "name": issuer_name,
-                "did": app_config["DID"],
-                "config_root": config_root,
-            }
-            issuer_config.update(issuer_info)
-            issuer_spec = config.assemble_issuer_spec(issuer_config)
-
-            credential_types = []
-            for credential_type in issuer_info["credential_types"]:
-                schema_name = credential_type["schema"]
-                schema_info = app_config["schemas"]["SCHEMA_" + schema_name]
-                ctype_config = {
-                    "schema_name": schema_name,
-                    "schema_version": schema_info["version"],
-                    "issuer_url": issuer_config["url"],
-                    "config_root": config_root,
-                    "credential_def_id": app_config["schemas"][
-                        "CRED_DEF_" + schema_name + "_" + schema_info["version"]
-                    ],
-                }
-                credential_type['attributes'] = schema_info["attributes"]
-                ctype_config.update(credential_type)
-                ctype = config.assemble_credential_type_spec(ctype_config, schema_info.get("attributes"))
-                if ctype is not None:
-                    credential_types.append(ctype)
-
-            issuer_request = {
-                "connection_id": app_config["TOB_CONNECTION"],
-                "issuer_registration": {
-                    "credential_types": credential_types,
-                    "issuer": issuer_spec,
-                },
-            }
-
-            response = requests.post(
-                agent_admin_url + "/issuer_registration/send",
-                json.dumps(issuer_request),
-                headers=ADMIN_REQUEST_HEADERS,
-            )
-            response.raise_for_status()
-            response.json()
-            print("Registered issuer: ", issuer_name)
-
-        synced[tob_connection["connection_id"]] = True
-        print("Connection {} is synchronized".format(tob_connection))
+        # if we have a connection to the TOB agent, we can register our issuer
+        if tob_connection:
+            register_issuer_with_orgbook(tob_connection["connection_id"])
+        else:
+            print("No TOB connection found or established, awaiting invitation to connect to TOB ...")
 
 
 def tob_connection_synced():
@@ -622,7 +640,16 @@ MAX_CRED_RESPONSE_TIMEOUT = int(os.getenv('MAX_CRED_RESPONSE_TIMEOUT', '120'))
 
 
 def handle_connections(state, message):
-    # TODO auto-accept?
+    # if TOB connection becomes "active" then register our issuer
+    # what is the TOB connection name?
+    config_services = app_config["config_services"]
+    tob_connection_params = config_services["verifiers"]["bctob"]
+
+    # check this is the TOB connection
+    if "alias" in message and message["alias"] == tob_connection_params["alias"]:
+        if state == "active":
+            register_issuer_with_orgbook(message["connection_id"])
+
     return jsonify({"message": state})
 
 
