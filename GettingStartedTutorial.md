@@ -174,8 +174,6 @@ All good?  Whoohoo!
 
 To submit credentials, use Postman (or similar, based on your local configuration) to submit the following to http://localhost:5000/issue-credential
 
-> To Do: Need more details on how to do this.
-
 ```
 [
     {
@@ -213,6 +211,24 @@ To submit credentials, use Postman (or similar, based on your local configuratio
             "effective_date": "2019-01-01"
         }
     }
+]
+```
+
+For example:
+
+```bash
+curl -H 'Content-Type: application/json' -X 'POST' http://localhost:5000/issue-credential -d @-
+<paste contents of the above file here>
+<CTRL-D>
+```
+
+This should return the ID numbers for the updated credentials, for example:
+
+```
+[
+    {"result":"70273ab2-ca75-42cd-aef9-c16a968be49c", "success":true},
+    {"result":"2f8986a7-9ba3-48ab-b34d-9cdf7759f5bc", "success":true},
+    {"result":"822408b0-216a-4a51-b768-66436cd8130c", "success":true}
 ]
 ```
 
