@@ -190,7 +190,7 @@ class StartupProcessingThread(threading.Thread):
 
     def run(self):
         # read configuration files
-        config_root = self.ENV.get("CONFIG_ROOT", "../config")
+        config_root = self.ENV.get("CONFIG_ROOT", "../config/local")
         config_schemas = config.load_config(config_root + "/schemas.yml", env=self.ENV)
         config_services = config.load_config(
             config_root + "/services.yml", env=self.ENV

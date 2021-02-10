@@ -87,7 +87,7 @@ def load_settings(config_root=None, env=True) -> dict:
     # Load application settings
     ext_path = os.environ.get("SETTINGS_PATH")
     if not ext_path:
-        config_root = os.environ.get("CONFIG_ROOT", '../config')
+        config_root = os.environ.get("CONFIG_ROOT", '../config/local')
         ext_path = os.path.join(config_root, "settings.yml")
     with load_resource(ext_path) as resource:
         ext_cfg = yaml.load(resource, Loader=yaml.FullLoader)
@@ -636,7 +636,7 @@ TestConfig = {
     'APPLICATION_URL': 'http://localhost:5000',
     # 'APPLICATION_URL_VONX': 'http://localhost:5000/org/test-permit',
     # 'AUTO_REGISTER_DID': False,
-    'CONFIG_ROOT': './config',
+    'CONFIG_ROOT': './config/local',
     # 'DESCRIPTION': 'von-image provides a consistent base image for running VON '
     #                 'python web components. Based on Ubuntu bionic, this image '
     #                 'includes Python 3.6.9,  indy-sdk, and supporting Python '
