@@ -1,5 +1,10 @@
 # Documentation: https://github.com/bcgov/von-agent-template/tree/master/von-x-agent/config
 
+# to update with gen-services.yml,
+## replace credential_types member in this file with credential_types from gen_services.yml
+## DO NOT REPLACE other attributes of myorg (keep lines between myorg: and credential_types:)
+## DO NOT REPLACE verifiers: or proof_requests: at bottom of file. 
+
 issuers:
   myorg:
     name: my-org-full-name

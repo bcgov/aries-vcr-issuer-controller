@@ -1,0 +1,49 @@
+# Documentation: https://github.com/bcgov/von-agent-template/tree/master/von-x-agent/config
+# Should be same as ../local/schemas.yml except
+## No Registration Schema
+## No relationship schema
+## Permit Schema id attributes (corp_num and entity_name)
+#### replaced to link to registries registrations (that are published to orgbook independently)
+- name: my-permit.my-organization
+  version: 1.0.0
+  description: The my-permit credential issued by my-organization
+  attributes:
+    #to link to BC Registries OrgBook Registrations
+    registration_id:
+      description_en: BC Registries Identifying Number
+      label_en: Registration ID
+      data_type: ui_text
+      required: true
+    entity_name:
+      description_en: The legal name of entity
+      label_en: Name
+      data_type: ui_name
+      required: true
+    permit_id:
+      description_en: Permit Identifying Number
+      label_en: Permit ID
+      data_type: helper_uuid
+      required: true
+    permit_type:
+      description_en: Status of the permit
+      label_en: Permit Type
+      data_type: ui_select
+      required: true
+    permit_issued_date:
+      description_en: Date Permit is issued
+      label_en: Permit Issued Date
+      data_type: ui_date
+      required: true
+    permit_status:
+      description_en: Status of the permit
+      label_en: Permit Status
+      data_type: ui_select
+      required: true
+    effective_date:
+      description_en: Date Credential is effective
+      label_en: Credential Effective Date
+      data_type: ui_date
+      required: true
+
+### eof ###
+

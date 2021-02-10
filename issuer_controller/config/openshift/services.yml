@@ -1,0 +1,127 @@
+# Documentation: https://github.com/bcgov/von-agent-template/tree/master/von-x-agent/config
+
+# Should be same as ../local/services.yml except
+## No Registration service
+## No relationship service
+## Permit service topic: relates to BCREgisties Registrations, no local ones
+#### replaced to link to registries registrations (that are published to orgbook independently)
+issuers:
+  myorg:
+    name: my-org-full-name
+    abbreviation: my-organization
+    url: https://www.my-organization.ca/my-organization-info-page
+    email: info@my-organization.ca
+    logo_path: ../assets/img/my-organization-logo.jpg
+    endpoint: $ENDPOINT_URL
+
+    connection:
+      type: TheOrgBook
+      api_url: $TOB_API_URL
+      sign_target: false
+
+    credential_types:
+    - description: The my-permit credential issued by my-organization
+      schema: my-permit.my-organization
+      issuer_url: $ENDPOINT_URL/my-organization/my-permit
+      label_en: BC Mines Act Permit 
+      depends_on:
+      - greenlight_registration
+      credential:
+        effective_date:
+          input: effective_date
+          from: claim
+       topic:
+        label_en: Registration
+        source_id:
+          input: registration_id
+          from: claim
+        type:
+          input: registration.registries.ca #OrgBook Registration Topic
+          from: value
+      mapping:
+      - model: attribute
+        fields:
+          type:
+            input: corp_num
+            from: value
+          value:
+            input: corp_num
+            from: claim
+      - model: name
+        fields:
+          text:
+            input: entity_name
+            from: claim
+          type:
+            input: entity_name
+            from: value
+      - model: attribute
+        fields:
+          type:
+            input: permit_id
+            from: value
+          value:
+            input: permit_id
+            from: claim
+      - model: attribute
+        fields:
+          type:
+            input: permit_type
+            from: value
+          value:
+            input: permit_type
+            from: claim
+      - model: attribute
+        fields:
+          type:
+            input: permit_issued_date
+            from: value
+          format:
+            input: datetime
+            from: value
+          value:
+            input: permit_issued_date
+            from: claim
+      - model: attribute
+        fields:
+          type:
+            input: permit_status
+            from: value
+          value:
+            input: permit_status
+            from: claim
+      - model: attribute
+        fields:
+          type:
+            input: effective_date
+            from: value
+          format:
+            input: datetime
+            from: value
+          value:
+            input: effective_date
+            from: claim
+
+verifiers:
+  bctob:
+    name: BC OrgBook
+    alias: vcr-agent
+    connection:
+      type: TheOrgBook
+      api_url: $TOB_API_URL
+      agent_admin_url: $TOB_AGENT_ADMIN_URL
+
+proof_requests:
+  greenlight_registration:
+    version: '1.0.0'
+    schemas:
+      - key:
+          did: 6qnvgJtqwK44D8LFYnV5Yf
+          name: Registered Corporation
+          version: '1.0.3'
+        attributes:
+          - corp_num
+          - legal_name
+
+
+### eof ###

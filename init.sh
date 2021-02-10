@@ -59,8 +59,8 @@ select example in "${DEPLOY_OPTS[@]}"; do
 
             # Adjustments to files for local execution
             sed -i.bak "s/#local//g" docker/docker-compose.yml
-            sed -i.bak "s/ INDY_GENESIS_URL/ #INDY_GENESIS_URL/" issuer_controller/config/settings.yml
-            # sed -i.bak "s/ AUTO_REGISTER_DID/ #AUTO_REGISTER_DID/" issuer_controller/config/settings.yml
+            sed -i.bak "s/ INDY_GENESIS_URL/ #INDY_GENESIS_URL/" issuer_controller/config/local/settings.yml
+            # sed -i.bak "s/ AUTO_REGISTER_DID/ #AUTO_REGISTER_DID/" issuer_controller/config/local/settings.yml
             find docker issuer_controller -name "*.bak" -type f|xargs rm -f
 
             break;;
@@ -73,7 +73,7 @@ select example in "${DEPLOY_OPTS[@]}"; do
             export GENESIS_URL=${LEDGER}/genesis
             __TOBAPIURL=Update-With-OrgBook-API-URL
             __TOBAPPURL=Update-With-OrgBook-Application-URL
-            echo NOTE: TheOrgBook API and Application URLs must be updated in issuer_controller/config/settings.yml
+            echo NOTE: TheOrgBook API and Application URLs must be updated in issuer_controller/config/local/settings.yml
 
             break;;
     esac
@@ -81,15 +81,15 @@ done
 echo ""
 
 # OK - time to make all the substitutions...
-sed -i.bak "s/my-organization_0000000000000000/${MY_SEED}/g" issuer_controller/config/settings.yml
-sed -i.bak "s#TOBAPIURL#${__TOBAPIURL}#g" issuer_controller/config/settings.yml
-sed -i.bak "s#TOBAPPURL#${__TOBAPPURL}#g" issuer_controller/config/settings.yml
-sed -i.bak "s#GENESISURL#${GENESIS_URL}#g" issuer_controller/config/settings.yml
-find issuer_controller/config -name "*.yml" -exec sed -i.bak "s/my-org-full-name/${ORG_TITLE}/g" {} +
-find issuer_controller/config -name "*.yml" -exec sed -i.bak s/my-organization/${MY_ORG}/g {} +
-find issuer_controller/config -name "*.yml" -exec sed -i.bak s/my-permit/${MY_PERMIT}/g {} +
-find issuer_controller/config -name "*.json" -exec sed -i.bak s/my-organization/${MY_ORG}/g {} +
-find issuer_controller/config -name "*.json" -exec sed -i.bak s/my-permit/${MY_PERMIT}/g {} +
+sed -i.bak "s/my-organization_0000000000000000/${MY_SEED}/g" issuer_controller/config/local/settings.yml
+sed -i.bak "s#TOBAPIURL#${__TOBAPIURL}#g" issuer_controller/config/local/settings.yml
+sed -i.bak "s#TOBAPPURL#${__TOBAPPURL}#g" issuer_controller/config/local/settings.yml
+sed -i.bak "s#GENESISURL#${GENESIS_URL}#g" issuer_controller/config/local/settings.yml
+find issuer_controller/config/local -name "*.yml" -exec sed -i.bak "s/my-org-full-name/${ORG_TITLE}/g" {} +
+find issuer_controller/config/local -name "*.yml" -exec sed -i.bak s/my-organization/${MY_ORG}/g {} +
+find issuer_controller/config/local -name "*.yml" -exec sed -i.bak s/my-permit/${MY_PERMIT}/g {} +
+find issuer_controller/config/local -name "*.json" -exec sed -i.bak s/my-organization/${MY_ORG}/g {} +
+find issuer_controller/config/local -name "*.json" -exec sed -i.bak s/my-permit/${MY_PERMIT}/g {} +
 find issuer_controller -name "*.bak" -type f|xargs rm -f
 cp issuer_controller/config/gen-data.json issuer_pipeline/
 
@@ -112,15 +112,15 @@ echo -------------------------
 echo The following updates were made to the configuration files:
 echo ""
 
-grep -E "${ORG_TITLE}|${MY_ORG}|${MY_PERMIT}|${MY_SEED}|${__TOBAPIURL}|${__TOBAPPURL}|${GENESIS_URL}" issuer_controller/config/*.yml
-# grep ${ORG_TITLE} issuer_controller/config/*.yml
-# grep ${MY_ORG} issuer_controller/config/*.yml
-# grep ${MY_PERMIT} issuer_controller/config/*.yml
-# grep ${MY_DID} issuer_controller/config/*.yml
-# grep ${MY_SEED} issuer_controller/config/*.yml
-# grep ${__TOBAPIURL} issuer_controller/config/*.yml
-# grep ${__TOBAPPURL} issuer_controller/config/*.yml
-# grep ${GENESIS_URL} issuer_controller/config/*.yml
+grep -E "${ORG_TITLE}|${MY_ORG}|${MY_PERMIT}|${MY_SEED}|${__TOBAPIURL}|${__TOBAPPURL}|${GENESIS_URL}" issuer_controller/config/local/*.yml
+# grep ${ORG_TITLE} issuer_controller/config/local/*.yml
+# grep ${MY_ORG} issuer_controller/config/local/*.yml
+# grep ${MY_PERMIT} issuer_controller/config/local/*.yml
+# grep ${MY_DID} issuer_controller/config/local/*.yml
+# grep ${MY_SEED} issuer_controller/config/local/*.yml
+# grep ${__TOBAPIURL} issuer_controller/config/local/*.yml
+# grep ${__TOBAPPURL} issuer_controller/config/local/*.yml
+# grep ${GENESIS_URL} issuer_controller/config/local/*.yml
 
 # Clean up
 unset ORG_TITLE MY_ORG MY_PERMIT MY_DID MY_SEED __TOBAPIURL __TOBAPPURL

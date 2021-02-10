@@ -1,0 +1,175 @@
+# Documentation: https://github.com/bcgov/von-agent-template/tree/master/von-x-agent/config
+
+# to update with gen-schemas.yml
+## full replacement
+## done
+
+- name: my-registration.my-organization
+  version: 1.0.0
+  description: The my-registration credential issued by my-organization
+  attributes:
+    corp_num:
+      description_en: Registration/Incorporation Number or Identifying Number
+      label_en: Registration ID
+      data_type: helper_uuid
+      required: true
+    registration_date:
+      description_en: Date of Registration, Incorporation, Continuation or Amalgamation
+      label_en: Registration Date
+      data_type: ui_date
+      required: false
+    entity_name:
+      description_en: The legal name of entity
+      label_en: Name
+      data_type: ui_name
+      required: true
+    entity_name_effective:
+      description_en: Date current name became effective
+      label_en: Name Effective Date
+      data_type: ui_date
+      required: true
+    addressee:
+      description: addressee
+      data_type: ui_text
+      required: true
+    address_line_1:
+      description: address_line_1
+      data_type: ui_text
+      required: true
+    city:
+      description: city
+      data_type: ui_text
+      required: true
+    province:
+      description: province
+      data_type: ui_text
+      required: true
+    postal_code:
+      description: postal_code
+      data_type: ui_text
+      required: true
+    country:
+      description: country
+      data_type: ui_text
+      required: true
+    entity_status:
+      description_en: Status of the entity (active or historical)
+      label_en: Registration Status
+      data_type: ui_select
+      required: true
+    entity_status_effective:
+      description_en: Date status became effective
+      label_en: Status Effective Date
+      data_type: ui_date
+      required: true
+    entity_type:
+      description_en: Type of entity incorporated or registered
+      label_en: Registration Type
+      data_type: ui_text
+      required: true
+    registered_jurisdiction:
+      description_en: The jurisdiction an entity was created in
+      label_en: Registered Jurisdiction
+      data_type: ui_text
+      required: false
+    effective_date:
+      description_en: Date Credential is effective
+      label_en: Credential Effective Date
+      data_type: ui_date
+      required: true
+    expiry_date:
+      description_en: Date Credential expired
+      label_en: Credential Expiry Date
+      data_type: ui_date
+      required: false
+- name: my-relationship.my-organization
+  version: 1.0.0
+  description: The relationship between two organizations
+  attributes:
+    corp_num:
+      description_en: Unique identifer assigned to entity by registrar
+      label_en: Registration ID
+      data_type: ui_text
+      required: true
+    associated_corp_num:
+      description_en: Registry id(s) of associated organizations/individuals
+      label_en: Associated Registration ID
+      data_type: ui_text
+      required: true
+    associated_registration_name:
+      description_en: Registered name of associated organizations/individuals
+      label_en: Associated Registration Namwe
+      data_type: ui_text
+      required: false
+    relationship:
+      description_en: Name of the relationship
+      label_en: Relationship
+      data_type: ui_text
+      required: true
+    relationship_description:
+      description_en: Description of the relationship
+      label_en: Relationship Description
+      data_type: ui_text
+      required: true
+    relationship_status:
+      description_en: Status of the relationship
+      label_en: Relationship Status
+      data_type: ui_select
+      required: true
+    relationship_status_effective:
+      description_en: Date the relationship became/becomes effective
+      label_en: Relationship Status Effective
+      data_type: ui_date
+      required: false
+    effective_date:
+      description_en: Date Credential is effective
+      label_en: Effective Date
+      data_type: ui_date
+      required: true
+    expiry_date:
+      description_en: Date Credential expires
+      label_en: Credential Expiry Date
+      data_type: ui_date
+      required: false
+- name: my-permit.my-organization
+  version: 1.0.0
+  description: The my-permit credential issued by my-organization
+  attributes:
+    corp_num:
+      description_en: Registration/Incorporation Number or Identifying Number
+      label_en: Registration ID
+      data_type: ui_text
+      required: true
+    entity_name:
+      description_en: The legal name of entity
+      label_en: Name
+      data_type: ui_name
+      required: true
+    permit_id:
+      description_en: Permit Identifying Number
+      label_en: Permit ID
+      data_type: helper_uuid
+      required: true
+    permit_type:
+      description_en: Status of the permit
+      label_en: Permit Type
+      data_type: ui_select
+      required: true
+    permit_issued_date:
+      description_en: Date Permit is issued
+      label_en: Permit Issued Date
+      data_type: ui_date
+      required: true
+    permit_status:
+      description_en: Status of the permit
+      label_en: Permit Status
+      data_type: ui_select
+      required: true
+    effective_date:
+      description_en: Date Credential is effective
+      label_en: Credential Effective Date
+      data_type: ui_date
+      required: true
+
+### eof ###
+

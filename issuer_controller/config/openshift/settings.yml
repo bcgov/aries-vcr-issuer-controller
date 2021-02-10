@@ -1,0 +1,18 @@
+#no change between ../local/settings.yml deployment configs should be 
+## setting env variables that override these defaults
+
+default:
+  APPLICATION_URL_VONX: $APPLICATION_URL/my-organization/my-permit
+  TEMPLATE_PATH: ../templates
+
+  TOB_API_URL: TOBAPIURL
+  TOB_APP_URL: TOBAPPURL
+
+  WALLET_SEED_VONX: my-organization_0000000000000000
+
+  INDY_GENESIS_URL: GENESISURL
+
+  LEDGER_PROTOCOL_VERSION: "1.6"
+  AUTO_REGISTER_DID: false
+
+### eof ###

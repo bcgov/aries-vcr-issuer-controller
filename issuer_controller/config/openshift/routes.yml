@@ -1,0 +1,55 @@
+# Documentation: https://github.com/bcgov/von-agent-template/tree/master/von-x-agent/config
+
+forms:
+  my-organizationmy-permit:
+    path: /my-organization/my-permit
+    type: issue-credential
+    schema_name: my-permit.my-organization
+    page_title: Title for my-permit.my-organization
+    title: Title for my-permit.my-organization
+    template: bcgov.index.html
+    description: The my-permit credential issued by my-organization
+    explanation: Use the form below to issue a Credential.
+    proof_request:
+      id: greenlight_registration
+      connection_id: bctob
+    fields:
+    - name: corp_num
+      label: corp_num
+      type: text
+      required: true
+    - name: entity_name
+      label: entity_name
+      type: text
+      required: true
+    - name: permit_type
+      label: permit_type
+      type: select
+      options:
+      - todo-1
+      - todo-2
+      - todo-3
+      required: true
+    - name: permit_issued_date
+      label: permit_issued_date
+      type: date
+      required: true
+    - name: permit_status
+      label: permit_status
+      type: select
+      options:
+      - todo-1
+      - todo-2
+      - todo-3
+      required: true
+    - name: effective_date
+      label: effective_date
+      type: date
+      required: true
+    mapping:
+      attributes:
+      - name: permit_id
+        from: helper
+        source: uuid
+
+### eof ###

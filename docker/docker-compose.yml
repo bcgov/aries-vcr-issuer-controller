@@ -30,7 +30,7 @@ services:
       LEDGER_URL: ${LEDGER_URL}
       # APPLICATION_URL: ${APPLICATION_URL:-http://localhost:5001}
       # ENDPOINT_URL: ${ENDPOINT_URL:-http://localhost:5001}
-      CONFIG_ROOT: ./config
+      CONFIG_ROOT: ./config/local
       HOST_PORT: ${CONTROLLER_PORT}
       ENVIRONMENT: ${ENVIRONMENT:-default}
       ENABLE_GUNICORN: ${ENABLE_GUNICORN:-0}
