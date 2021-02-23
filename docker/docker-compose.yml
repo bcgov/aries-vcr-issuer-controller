@@ -122,6 +122,7 @@ services:
         --auto-verify-presentation \
         --auto-accept-invites \
         --auto-accept-requests \
+        --auto-provision \
         --wallet-type 'indy' \
         --wallet-name 'icat_agent_wallet' \
         --wallet-key '${WALLET_ENCRYPTION_KEY}' \
