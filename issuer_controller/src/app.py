@@ -1,15 +1,15 @@
 #!/usr/bin/env python
-from flask import Flask, jsonify, abort, request, make_response
-
-import requests
 import json
 import os
-import time
-import yaml
-from src import issuer, config
-
 import signal
+import time
 
+import requests
+import yaml
+from flask import Flask, abort, jsonify, make_response, request
+from flask_cors import CORS
+
+from src import authentication, config, issuer
 
 # Load application settings (environment)
 config_root = os.environ.get('CONFIG_ROOT', '../config')
@@ -22,6 +22,7 @@ class Controller(Flask):
         self.startup_thread = issuer.startup_init(ENV)
 
 app = Controller()
+CORS(app)
 wsgi_app = app.wsgi_app
 
 signal.signal(signal.SIGINT, issuer.signal_issuer_shutdown)
@@ -71,6 +72,7 @@ def not_found(error):
     return make_response(jsonify({'error': 'Not found'}), 404)
 
 @app.route('/issue-credential', methods=['POST'])
+@authentication.auth_required
 def submit_credential():
     """
     Exposed method to proxy credential issuance requests.
@@ -97,6 +99,7 @@ def submit_credential():
 
 
 @app.route('/api/agentcb/topic/<topic>/', methods=['POST'])
+@authentication.api_key_required
 def agent_callback(topic):
     """
     Main callback for aries agent.  Dispatches calls based on the supplied topic.

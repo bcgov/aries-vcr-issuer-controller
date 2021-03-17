@@ -134,6 +134,8 @@ configureEnvironment () {
   fi
   export TOB_CONNECTION_NAME=${TOB_CONNECTION_NAME:-vcr-agent} 
   export TOB_ADMIN_API_KEY=${TOB_ADMIN_API_KEY:-R2D2HfPM5Zwd69IjclQiuFmcMV6}
+  export CONTROLLER_API_KEY=${CONTROLLER_API_KEY}
+  export OIDC_JWKS_URI=${OIDC_JWKS_URI}
 }
 
 getStartupParams() {

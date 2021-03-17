@@ -61,10 +61,14 @@ services:
       TRACE_TARGET: ${TRACE_TARGET}
       TRACE_MSG_PCT: ${TRACE_MSG_PCT}
       ACK_ERROR_PCT: ${ACK_ERROR_PCT}
+      OIDC_JWKS_URI: ${OIDC_JWKS_URI}
+      CONTROLLER_API_KEY: ${CONTROLLER_API_KEY}
     networks:
       - myorg
     ports:
       - ${EXPOSED_CONTROLLER_PORT}:${CONTROLLER_PORT}
+    volumes:
+      - ../issuer_controller/src:/home/indy/src
     depends_on:
       - myorg-agent
     entrypoint: >
@@ -120,8 +124,6 @@ services:
         --auto-respond-presentation-request \
         --auto-respond-credential-request \
         --auto-verify-presentation \
-        --auto-accept-invites \
-        --auto-accept-requests \
         --auto-provision \
         --wallet-type 'indy' \
         --wallet-name 'icat_agent_wallet' \
