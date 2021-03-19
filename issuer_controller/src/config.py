@@ -87,7 +87,7 @@ def load_settings(config_root=None, env=True) -> dict:
     # Load application settings
     ext_path = os.environ.get("SETTINGS_PATH")
     if not ext_path:
-        config_root = os.environ.get("CONFIG_ROOT", '../config')
+        config_root = os.environ.get("CONFIG_ROOT", "../config")
         ext_path = os.path.join(config_root, "settings.yml")
     with load_resource(ext_path) as resource:
         ext_cfg = yaml.load(resource, Loader=yaml.FullLoader)
@@ -287,10 +287,14 @@ def assemble_credential_type_spec(config: dict, schema_attrs: dict) -> dict:
     deflang = "en"
 
     if not config.get("topic"):
-        raise RuntimeError("Missing 'topic' for credential type " + config.get("schema_name"))
+        raise RuntimeError(
+            "Missing 'topic' for credential type " + config.get("schema_name")
+        )
 
     if not config.get("issuer_url"):
-        raise RuntimeError("Missing 'issuer_url' for credential type " + config.get("schema_name"))
+        raise RuntimeError(
+            "Missing 'issuer_url' for credential type " + config.get("schema_name")
+        )
 
     labels = extract_translated(config, "label", config.get("schema_name"), deflang)
     urls = extract_translated(config, "url", config.get("issuer_url"), deflang)
@@ -311,7 +315,13 @@ def assemble_credential_type_spec(config: dict, schema_attrs: dict) -> dict:
         "topic": [],
         "logo_b64": logo_b64,
     }
-    topics = (config["topic"] if isinstance(config["topic"], list) else [config["topic"],])
+    topics = (
+        config["topic"]
+        if isinstance(config["topic"], list)
+        else [
+            config["topic"],
+        ]
+    )
     for config_topic in topics:
         cred_topic = {}
         has_label = False
@@ -321,7 +331,9 @@ def assemble_credential_type_spec(config: dict, schema_attrs: dict) -> dict:
             else:
                 has_label = True
         if has_label:
-            cred_topic["labels"] = extract_translated(config_topic, "label", None, deflang)
+            cred_topic["labels"] = extract_translated(
+                config_topic, "label", None, deflang
+            )
         ctype["topic"].append(cred_topic)
     ctype["labels"] = {}
     for k in labels:
@@ -339,304 +351,291 @@ def assemble_credential_type_spec(config: dict, schema_attrs: dict) -> dict:
     return ctype
 
 
-
 #####
-sample_app_config = {'AGENT_ADMIN_URL': 'http://myorg-agent:8034',
- 'DID': 'XZxwKKqiKaV6yZQob1UZpq',
- 'TOB_CONNECTION': 'cee21dfa-cd60-479b-b096-9db9552fa948',
- 'running': True,
- 'schemas': {'CRED_DEF_test-permit.org_1.0.0': 'XZxwKKqiKaV6yZQob1UZpq:3:CL:14:default',
-             'CRED_DEF_my-registration.org_1.0.0': 'XZxwKKqiKaV6yZQob1UZpq:3:CL:10:default',
-             'CRED_DEF_my-relationship.org_1.0.0': 'XZxwKKqiKaV6yZQob1UZpq:3:CL:12:default',
-             'SCHEMA_test-permit.org': {'attributes': {'corp_num': {'data_type': 'ui_text',
-                                                                                'description_en': 'Registration/Incorporation '
-                                                                                                  'Number '
-                                                                                                  'or '
-                                                                                                  'Identifying '
-                                                                                                  'Number',
-                                                                                'label_en': 'Registration '
-                                                                                            'ID',
-                                                                                'required': True},
-                                                                   'effective_date': {'data_type': 'ui_date',
-                                                                                      'description_en': 'Date '
-                                                                                                        'Credential '
-                                                                                                        'is '
-                                                                                                        'effective',
-                                                                                      'label_en': 'Credential '
-                                                                                                  'Effective '
-                                                                                                  'Date',
-                                                                                      'required': True},
-                                                                   'entity_name': {'data_type': 'ui_name',
-                                                                                   'description_en': 'The '
-                                                                                                     'legal '
-                                                                                                     'name '
-                                                                                                     'of '
-                                                                                                     'entity',
-                                                                                   'label_en': 'Name',
-                                                                                   'required': True},
-                                                                   'permit_id': {'data_type': 'helper_uuid',
-                                                                                 'description_en': 'Permit '
-                                                                                                   'Identifying '
-                                                                                                   'Number',
-                                                                                 'label_en': 'Permit '
-                                                                                             'ID',
-                                                                                 'required': True},
-                                                                   'permit_issued_date': {'data_type': 'ui_date',
-                                                                                          'description_en': 'Date '
-                                                                                                            'Permit '
-                                                                                                            'is '
-                                                                                                            'issued',
-                                                                                          'label_en': 'Permit '
-                                                                                                      'Issued '
-                                                                                                      'Date',
-                                                                                          'required': True},
-                                                                   'permit_status': {'data_type': 'ui_select',
-                                                                                     'description_en': 'Status '
-                                                                                                       'of '
-                                                                                                       'the '
-                                                                                                       'permit',
-                                                                                     'label_en': 'Permit '
-                                                                                                 'Status',
-                                                                                     'required': True},
-                                                                   'permit_type': {'data_type': 'ui_select',
-                                                                                   'description_en': 'Status '
-                                                                                                     'of '
-                                                                                                     'the '
-                                                                                                     'permit',
-                                                                                   'label_en': 'Permit '
-                                                                                               'Type',
-                                                                                   'required': True}},
-                                                    'description': 'The '
-                                                                   'test-permit '
-                                                                   'credential '
-                                                                   'issued by '
-                                                                   'org',
-                                                    'name': 'test-permit.org',
-                                                    'version': '1.0.0'},
-             'SCHEMA_test-permit.org_1.0.0': 'XZxwKKqiKaV6yZQob1UZpq:2:test-permit.org:1.0.0',
-             'SCHEMA_my-registration.org': {'attributes': {'address_line_1': {'data_type': 'ui_text',
-                                                                               'description': 'address_line_1',
-                                                                               'required': True},
-                                                            'addressee': {'data_type': 'ui_text',
-                                                                          'description': 'addressee',
-                                                                          'required': True},
-                                                            'city': {'data_type': 'ui_text',
-                                                                     'description': 'city',
-                                                                     'required': True},
-                                                            'corp_num': {'data_type': 'helper_uuid',
-                                                                         'description_en': 'Registration/Incorporation '
-                                                                                           'Number '
-                                                                                           'or '
-                                                                                           'Identifying '
-                                                                                           'Number',
-                                                                         'label_en': 'Registration '
-                                                                                     'ID',
-                                                                         'required': True},
-                                                            'country': {'data_type': 'ui_text',
-                                                                        'description': 'country',
-                                                                        'required': True},
-                                                            'effective_date': {'data_type': 'ui_date',
-                                                                               'description_en': 'Date '
-                                                                                                 'Credential '
-                                                                                                 'is '
-                                                                                                 'effective',
-                                                                               'label_en': 'Credential '
-                                                                                           'Effective '
-                                                                                           'Date',
-                                                                               'required': True},
-                                                            'entity_name': {'data_type': 'ui_name',
-                                                                            'description_en': 'The '
-                                                                                              'legal '
-                                                                                              'name '
-                                                                                              'of '
-                                                                                              'entity',
-                                                                            'label_en': 'Name',
-                                                                            'required': True},
-                                                            'entity_name_effective': {'data_type': 'ui_date',
-                                                                                      'description_en': 'Date '
-                                                                                                        'current '
-                                                                                                        'name '
-                                                                                                        'became '
-                                                                                                        'effective',
-                                                                                      'label_en': 'Name '
-                                                                                                  'Effective '
-                                                                                                  'Date',
-                                                                                      'required': True},
-                                                            'entity_status': {'data_type': 'ui_select',
-                                                                              'description_en': 'Status '
-                                                                                                'of '
-                                                                                                'the '
-                                                                                                'entity '
-                                                                                                '(active '
-                                                                                                'or '
-                                                                                                'historical)',
-                                                                              'label_en': 'Registration '
-                                                                                          'Status',
-                                                                              'required': True},
-                                                            'entity_status_effective': {'data_type': 'ui_date',
-                                                                                        'description_en': 'Date '
-                                                                                                          'status '
-                                                                                                          'became '
-                                                                                                          'effective',
-                                                                                        'label_en': 'Status '
-                                                                                                    'Effective '
-                                                                                                    'Date',
-                                                                                        'required': True},
-                                                            'entity_type': {'data_type': 'ui_text',
-                                                                            'description_en': 'Type '
-                                                                                              'of '
-                                                                                              'entity '
-                                                                                              'incorporated '
-                                                                                              'or '
-                                                                                              'registered',
-                                                                            'label_en': 'Registration '
-                                                                                        'Type',
-                                                                            'required': True},
-                                                            'expiry_date': {'data_type': 'ui_date',
-                                                                            'description_en': 'Date '
-                                                                                              'Credential '
-                                                                                              'expired',
-                                                                            'label_en': 'Credential '
-                                                                                        'Expiry '
-                                                                                        'Date',
-                                                                            'required': False},
-                                                            'postal_code': {'data_type': 'ui_text',
-                                                                            'description': 'postal_code',
-                                                                            'required': True},
-                                                            'province': {'data_type': 'ui_text',
-                                                                         'description': 'province',
-                                                                         'required': True},
-                                                            'registered_jurisdiction': {'data_type': 'ui_text',
-                                                                                        'description_en': 'The '
-                                                                                                          'jurisdiction '
-                                                                                                          'an '
-                                                                                                          'entity '
-                                                                                                          'was '
-                                                                                                          'created '
-                                                                                                          'in',
-                                                                                        'label_en': 'Registered '
-                                                                                                    'Jurisdiction',
-                                                                                        'required': False},
-                                                            'registration_date': {'data_type': 'ui_date',
-                                                                                  'description_en': 'Date '
-                                                                                                    'of '
-                                                                                                    'Registration, '
-                                                                                                    'Incorporation, '
-                                                                                                    'Continuation '
-                                                                                                    'or '
-                                                                                                    'Amalgamation',
-                                                                                  'label_en': 'Registration '
-                                                                                              'Date',
-                                                                                  'required': False}},
-                                             'description': 'The '
-                                                            'my-registration '
-                                                            'credential issued '
-                                                            'by org',
-                                             'name': 'my-registration.org',
-                                             'version': '1.0.0'},
-             'SCHEMA_my-registration.org_1.0.0': 'XZxwKKqiKaV6yZQob1UZpq:2:my-registration.org:1.0.0',
-             'SCHEMA_my-relationship.org': {'attributes': {'associated_corp_num': {'data_type': 'ui_text',
-                                                                                    'description_en': 'Registry '
-                                                                                                      'id(s) '
-                                                                                                      'of '
-                                                                                                      'associated '
-                                                                                                      'organizations/individuals',
-                                                                                    'label_en': 'Associated '
-                                                                                                'Registration '
-                                                                                                'ID',
-                                                                                    'required': True},
-                                                            'associated_registration_name': {'data_type': 'ui_text',
-                                                                                             'description_en': 'Registered '
-                                                                                                               'name '
-                                                                                                               'of '
-                                                                                                               'associated '
-                                                                                                               'organizations/individuals',
-                                                                                             'label_en': 'Associated '
-                                                                                                         'Registration '
-                                                                                                         'Namwe',
-                                                                                             'required': False},
-                                                            'corp_num': {'data_type': 'ui_text',
-                                                                         'description_en': 'Unique '
-                                                                                           'identifer '
-                                                                                           'assigned '
-                                                                                           'to '
-                                                                                           'entity '
-                                                                                           'by '
-                                                                                           'registrar',
-                                                                         'label_en': 'Registration '
-                                                                                     'ID',
-                                                                         'required': True},
-                                                            'effective_date': {'data_type': 'ui_date',
-                                                                               'description_en': 'Date '
-                                                                                                 'Credential '
-                                                                                                 'is '
-                                                                                                 'effective',
-                                                                               'label_en': 'Effective '
-                                                                                           'Date',
-                                                                               'required': True},
-                                                            'expiry_date': {'data_type': 'ui_date',
-                                                                            'description_en': 'Date '
-                                                                                              'Credential '
-                                                                                              'expires',
-                                                                            'label_en': 'Credential '
-                                                                                        'Expiry '
-                                                                                        'Date',
-                                                                            'required': False},
-                                                            'relationship': {'data_type': 'ui_text',
-                                                                             'description_en': 'Name '
-                                                                                               'of '
-                                                                                               'the '
-                                                                                               'relationship',
-                                                                             'label_en': 'Relationship',
-                                                                             'required': True},
-                                                            'relationship_description': {'data_type': 'ui_text',
-                                                                                         'description_en': 'Description '
-                                                                                                           'of '
-                                                                                                           'the '
-                                                                                                           'relationship',
-                                                                                         'label_en': 'Relationship '
-                                                                                                     'Description',
-                                                                                         'required': True},
-                                                            'relationship_status': {'data_type': 'ui_select',
-                                                                                    'description_en': 'Status '
-                                                                                                      'of '
-                                                                                                      'the '
-                                                                                                      'relationship',
-                                                                                    'label_en': 'Relationship '
-                                                                                                'Status',
-                                                                                    'required': True},
-                                                            'relationship_status_effective': {'data_type': 'ui_date',
-                                                                                              'description_en': 'Date '
-                                                                                                                'the '
-                                                                                                                'relationship '
-                                                                                                                'became/becomes '
-                                                                                                                'effective',
-                                                                                              'label_en': 'Relationship '
-                                                                                                          'Status '
-                                                                                                          'Effective',
-                                                                                              'required': False}},
-                                             'description': 'The relationship '
-                                                            'between two '
-                                                            'organizations',
-                                             'name': 'my-relationship.org',
-                                             'version': '1.0.0'},
-             'SCHEMA_my-relationship.org_1.0.0': 'XZxwKKqiKaV6yZQob1UZpq:2:my-relationship.org:1.0.0'}
-        }
+sample_app_config = {
+    "AGENT_ADMIN_URL": "http://myorg-agent:8034",
+    "DID": "XZxwKKqiKaV6yZQob1UZpq",
+    "TOB_CONNECTION": "cee21dfa-cd60-479b-b096-9db9552fa948",
+    "running": True,
+    "schemas": {
+        "CRED_DEF_test-permit.org_1.0.0": "XZxwKKqiKaV6yZQob1UZpq:3:CL:14:default",
+        "CRED_DEF_my-registration.org_1.0.0": "XZxwKKqiKaV6yZQob1UZpq:3:CL:10:default",
+        "CRED_DEF_my-relationship.org_1.0.0": "XZxwKKqiKaV6yZQob1UZpq:3:CL:12:default",
+        "SCHEMA_test-permit.org": {
+            "attributes": {
+                "corp_num": {
+                    "data_type": "ui_text",
+                    "description_en": "Registration/Incorporation "
+                    "Number "
+                    "or "
+                    "Identifying "
+                    "Number",
+                    "label_en": "Registration " "ID",
+                    "required": True,
+                },
+                "effective_date": {
+                    "data_type": "ui_date",
+                    "description_en": "Date " "Credential " "is " "effective",
+                    "label_en": "Credential " "Effective " "Date",
+                    "required": True,
+                },
+                "entity_name": {
+                    "data_type": "ui_name",
+                    "description_en": "The " "legal " "name " "of " "entity",
+                    "label_en": "Name",
+                    "required": True,
+                },
+                "permit_id": {
+                    "data_type": "helper_uuid",
+                    "description_en": "Permit " "Identifying " "Number",
+                    "label_en": "Permit " "ID",
+                    "required": True,
+                },
+                "permit_issued_date": {
+                    "data_type": "ui_date",
+                    "description_en": "Date " "Permit " "is " "issued",
+                    "label_en": "Permit " "Issued " "Date",
+                    "required": True,
+                },
+                "permit_status": {
+                    "data_type": "ui_select",
+                    "description_en": "Status " "of " "the " "permit",
+                    "label_en": "Permit " "Status",
+                    "required": True,
+                },
+                "permit_type": {
+                    "data_type": "ui_select",
+                    "description_en": "Status " "of " "the " "permit",
+                    "label_en": "Permit " "Type",
+                    "required": True,
+                },
+            },
+            "description": "The " "test-permit " "credential " "issued by " "org",
+            "name": "test-permit.org",
+            "version": "1.0.0",
+        },
+        "SCHEMA_test-permit.org_1.0.0": "XZxwKKqiKaV6yZQob1UZpq:2:test-permit.org:1.0.0",
+        "SCHEMA_my-registration.org": {
+            "attributes": {
+                "address_line_1": {
+                    "data_type": "ui_text",
+                    "description": "address_line_1",
+                    "required": True,
+                },
+                "addressee": {
+                    "data_type": "ui_text",
+                    "description": "addressee",
+                    "required": True,
+                },
+                "city": {
+                    "data_type": "ui_text",
+                    "description": "city",
+                    "required": True,
+                },
+                "corp_num": {
+                    "data_type": "helper_uuid",
+                    "description_en": "Registration/Incorporation "
+                    "Number "
+                    "or "
+                    "Identifying "
+                    "Number",
+                    "label_en": "Registration " "ID",
+                    "required": True,
+                },
+                "country": {
+                    "data_type": "ui_text",
+                    "description": "country",
+                    "required": True,
+                },
+                "effective_date": {
+                    "data_type": "ui_date",
+                    "description_en": "Date " "Credential " "is " "effective",
+                    "label_en": "Credential " "Effective " "Date",
+                    "required": True,
+                },
+                "entity_name": {
+                    "data_type": "ui_name",
+                    "description_en": "The " "legal " "name " "of " "entity",
+                    "label_en": "Name",
+                    "required": True,
+                },
+                "entity_name_effective": {
+                    "data_type": "ui_date",
+                    "description_en": "Date " "current " "name " "became " "effective",
+                    "label_en": "Name " "Effective " "Date",
+                    "required": True,
+                },
+                "entity_status": {
+                    "data_type": "ui_select",
+                    "description_en": "Status "
+                    "of "
+                    "the "
+                    "entity "
+                    "(active "
+                    "or "
+                    "historical)",
+                    "label_en": "Registration " "Status",
+                    "required": True,
+                },
+                "entity_status_effective": {
+                    "data_type": "ui_date",
+                    "description_en": "Date " "status " "became " "effective",
+                    "label_en": "Status " "Effective " "Date",
+                    "required": True,
+                },
+                "entity_type": {
+                    "data_type": "ui_text",
+                    "description_en": "Type "
+                    "of "
+                    "entity "
+                    "incorporated "
+                    "or "
+                    "registered",
+                    "label_en": "Registration " "Type",
+                    "required": True,
+                },
+                "expiry_date": {
+                    "data_type": "ui_date",
+                    "description_en": "Date " "Credential " "expired",
+                    "label_en": "Credential " "Expiry " "Date",
+                    "required": False,
+                },
+                "postal_code": {
+                    "data_type": "ui_text",
+                    "description": "postal_code",
+                    "required": True,
+                },
+                "province": {
+                    "data_type": "ui_text",
+                    "description": "province",
+                    "required": True,
+                },
+                "registered_jurisdiction": {
+                    "data_type": "ui_text",
+                    "description_en": "The "
+                    "jurisdiction "
+                    "an "
+                    "entity "
+                    "was "
+                    "created "
+                    "in",
+                    "label_en": "Registered " "Jurisdiction",
+                    "required": False,
+                },
+                "registration_date": {
+                    "data_type": "ui_date",
+                    "description_en": "Date "
+                    "of "
+                    "Registration, "
+                    "Incorporation, "
+                    "Continuation "
+                    "or "
+                    "Amalgamation",
+                    "label_en": "Registration " "Date",
+                    "required": False,
+                },
+            },
+            "description": "The " "my-registration " "credential issued " "by org",
+            "name": "my-registration.org",
+            "version": "1.0.0",
+        },
+        "SCHEMA_my-registration.org_1.0.0": "XZxwKKqiKaV6yZQob1UZpq:2:my-registration.org:1.0.0",
+        "SCHEMA_my-relationship.org": {
+            "attributes": {
+                "associated_corp_num": {
+                    "data_type": "ui_text",
+                    "description_en": "Registry "
+                    "id(s) "
+                    "of "
+                    "associated "
+                    "organizations/individuals",
+                    "label_en": "Associated " "Registration " "ID",
+                    "required": True,
+                },
+                "associated_registration_name": {
+                    "data_type": "ui_text",
+                    "description_en": "Registered "
+                    "name "
+                    "of "
+                    "associated "
+                    "organizations/individuals",
+                    "label_en": "Associated " "Registration " "Namwe",
+                    "required": False,
+                },
+                "corp_num": {
+                    "data_type": "ui_text",
+                    "description_en": "Unique "
+                    "identifer "
+                    "assigned "
+                    "to "
+                    "entity "
+                    "by "
+                    "registrar",
+                    "label_en": "Registration " "ID",
+                    "required": True,
+                },
+                "effective_date": {
+                    "data_type": "ui_date",
+                    "description_en": "Date " "Credential " "is " "effective",
+                    "label_en": "Effective " "Date",
+                    "required": True,
+                },
+                "expiry_date": {
+                    "data_type": "ui_date",
+                    "description_en": "Date " "Credential " "expires",
+                    "label_en": "Credential " "Expiry " "Date",
+                    "required": False,
+                },
+                "relationship": {
+                    "data_type": "ui_text",
+                    "description_en": "Name " "of " "the " "relationship",
+                    "label_en": "Relationship",
+                    "required": True,
+                },
+                "relationship_description": {
+                    "data_type": "ui_text",
+                    "description_en": "Description " "of " "the " "relationship",
+                    "label_en": "Relationship " "Description",
+                    "required": True,
+                },
+                "relationship_status": {
+                    "data_type": "ui_select",
+                    "description_en": "Status " "of " "the " "relationship",
+                    "label_en": "Relationship " "Status",
+                    "required": True,
+                },
+                "relationship_status_effective": {
+                    "data_type": "ui_date",
+                    "description_en": "Date "
+                    "the "
+                    "relationship "
+                    "became/becomes "
+                    "effective",
+                    "label_en": "Relationship " "Status " "Effective",
+                    "required": False,
+                },
+            },
+            "description": "The relationship " "between two " "organizations",
+            "name": "my-relationship.org",
+            "version": "1.0.0",
+        },
+        "SCHEMA_my-relationship.org_1.0.0": "XZxwKKqiKaV6yZQob1UZpq:2:my-relationship.org:1.0.0",
+    },
+}
 
 
-TestConfig = { 
-    #other fixed values
-    'test_issuer_app_config': sample_app_config,
-    'test_issuer_synced': {'cee21dfa-cd60-479b-b096-9db9552fa948': True},
-    
-    #This is a full pprint of the ENV dict created in the app.py file, only uncommmented values
+TestConfig = {
+    # other fixed values
+    "test_issuer_app_config": sample_app_config,
+    "test_issuer_synced": {"cee21dfa-cd60-479b-b096-9db9552fa948": True},
+    # This is a full pprint of the ENV dict created in the app.py file, only uncommmented values
     # that cause test to error if missing
     #'ACK_ERROR_PCT': '0',
-    'AGENT_ADMIN_URL': 'http://myorg-agent:8034',
-    'APPLICATION_URL': 'http://localhost:5000',
+    "AGENT_ADMIN_URL": "http://myorg-agent:8034",
+    "APPLICATION_URL": "http://localhost:5000",
     # 'APPLICATION_URL_VONX': 'http://localhost:5000/org/test-permit',
     # 'AUTO_REGISTER_DID': False,
-    'CONFIG_ROOT': './config',
+    "CONFIG_ROOT": "./config",
     # 'DESCRIPTION': 'von-image provides a consistent base image for running VON '
     #                 'python web components. Based on Ubuntu bionic, this image '
     #                 'includes Python 3.6.9,  indy-sdk, and supporting Python '
