@@ -71,6 +71,10 @@ ARG entrypoint=$APP_ROOT/docker-entrypoint.sh
 WORKDIR $APP_ROOT
 RUN make install-packages
 
+# pin previous version of sqlalchemy_utils work avoid bug in 0.36.8
+RUN pip install sqlalchemy==1.3.23
+RUN pip install sqlalchemy_utils==0.36.7
+ 
 # Set ownership and permissions
 # Set scripts as executable (make files and python files do not have to be marked)
 # Make /etc/passwd writable for the root group so an entry can be created for an OpenShift assigned user account.
