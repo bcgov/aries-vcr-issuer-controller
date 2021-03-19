@@ -14,9 +14,6 @@ def auth_required(f):
         token_result = validate_token(*args, **kwargs)
         key_result = validate_api_key(*args, **kwargs)
 
-        print("******************TOKEN", token_result)
-        print("******************KEY", key_result)
-
         if token_result is False or key_result is False:
             return jsonify({"error": "Authentication failed."})
 
