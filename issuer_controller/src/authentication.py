@@ -3,7 +3,7 @@ import os
 from functools import wraps
 
 import requests
-from flask import jsonify, request
+from flask import jsonify, request, make_response
 from jose import jwt
 
 
@@ -15,7 +15,7 @@ def auth_required(f):
         key_result = validate_api_key(*args, **kwargs)
 
         if token_result is False or key_result is False:
-            return jsonify({"error": "Authentication failed."})
+            return make_response(jsonify({"error": "Authentication failed."}), 401)
 
         return f(*args, **kwargs)
 
@@ -29,7 +29,9 @@ def api_key_required(f):
         result = validate_api_key(*args, **kwargs)
 
         if result is False:
-            return jsonify({"error": "No valid x-api-key header was provided"})
+            return make_response(
+                jsonify({"error": "No valid x-api-key header was provided"}), 401
+            )
 
         return f(*args, **kwargs)
 
@@ -56,7 +58,7 @@ def validate_token(*args, **kwargs):
                     token,
                     public_key,
                     algorithms=algorithms,
-                    options={"verify_aud": False},
+                    options={"verify_aud": False, "verify_at_hash": False},
                 )
             except Exception as e:
                 print("Error verifying bearer token: " + str(e))
