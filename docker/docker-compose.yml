@@ -68,7 +68,7 @@ services:
     ports:
       - ${EXPOSED_CONTROLLER_PORT}:${CONTROLLER_PORT}
     volumes:
-      - ../issuer_controller/src:/home/indy/src
+      - ../issuer_controller/src:/app/controller/src
     depends_on:
       - myorg-agent
     entrypoint: >
