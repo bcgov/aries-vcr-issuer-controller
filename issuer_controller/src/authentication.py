@@ -42,7 +42,7 @@ def validate_token(*args, **kwargs):
     token = None
     oidc_jwks_uri = os.environ.get("OIDC_JWKS_URI", None)
 
-    if oidc_jwks_uri is not None and oidc_jwks_uri is not "":
+    if oidc_jwks_uri is not None and oidc_jwks_uri != "":
         if "Authorization" in request.headers:
             try:
                 token = request.headers["Authorization"].split()[1]
@@ -73,7 +73,7 @@ def validate_api_key(*args, **kwargs):
     provided_key = None
     api_key = os.environ.get("CONTROLLER_API_KEY", None)
 
-    if api_key is not None and api_key is not "":
+    if api_key is not None and api_key != "":
 
         if "x-api-key" in request.headers:
             provided_key = request.headers["x-api-key"]
