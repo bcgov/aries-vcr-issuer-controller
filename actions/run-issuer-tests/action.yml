@@ -1,0 +1,66 @@
+name: "Run Aries VCR Issuer Tests"
+description: "Run the Aries VCR Issuer submit credentials and test Aries VCR api endpoints"
+author: "iancostanzo@gmail.com"
+inputs:
+  ORG_TITLE:
+    description: "Issuer organization name"
+    required: false
+    default: "Ian Company"
+  MY_ORG:
+    description: "Short form of issuer org name (no spaces)"
+    required: false
+    default: "ian-co"
+  MY_PERMIT:
+    description: "Name of credential permit"
+    required: false
+    default: "ian-permit"
+  INIT_SEED:
+    description: "Seed for randomizer to create predictable pseudo-random credentials"
+    required: false
+    default: "42"
+  TOPIC_COUNT:
+    description: "Number of topics to create"
+    required: false
+    default: "5"
+  TOB_URL_PREFIX:
+    description: "URL location of the aries-vcr api"
+    required: false
+    default: "http://localhost:8081"
+runs:
+  using: "composite"
+  steps:
+    - name: initialize-environment
+      run: ORG_TITLE=${{ inputs.ORG_TITLE }} MY_ORG=${{ inputs.MY_ORG }} MY_PERMIT=${{ inputs.MY_PERMIT }} MY_DEPLOY_OPT=2 . init.sh
+      shell: bash
+      working-directory: aries-vcr-issuer-agent
+    - name: build-aries-vcr-issuer
+      run: ./manage build
+      shell: bash
+      working-directory: aries-vcr-issuer-agent/docker
+    - name: run-aries-vcr-issuer
+      run: ./manage start
+      shell: bash
+      working-directory: aries-vcr-issuer-agent/docker
+    - name: setup-test-environment
+      run: pip install -r requirements.txt
+      shell: bash
+      working-directory: aries-vcr-issuer-agent/issuer_pipeline
+    - name: initialize-issuer-database
+      run: ./run-step.sh von_pipeline/create.py
+      shell: bash
+      working-directory: aries-vcr-issuer-agent/scripts
+    - name: generate-credentials
+      run: INIT_SEED=${{ inputs.INIT_SEED }} TOPIC_COUNT=${{ inputs.TOPIC_COUNT }} ./run-step.sh von_pipeline/generate-creds.py
+      shell: bash
+      working-directory: aries-vcr-issuer-agent/scripts
+    - name: submit-credentials
+      run: ./run-step.sh von_pipeline/submit-creds.py
+      shell: bash
+      working-directory: aries-vcr-issuer-agent/scripts
+    - name: test-aries-vcr-apis
+      run: TOB_URL_PREFIX=${{ inputs.TOB_URL_PREFIX }} python detect_api_changes.py
+      shell: bash
+      working-directory: aries-vcr-issuer-agent/von_pipeline/tests
+branding:
+  icon: "mic"
+  color: "purple"

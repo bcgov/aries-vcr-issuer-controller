@@ -1,0 +1,22 @@
+name: test-aries-vcr-issuer
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 0 * * *"
+defaults:
+  run:
+    shell: bash
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    if: (github.event_name == 'schedule' && github.repository == 'hyperledger/aries-vcr-issuer-agent') || (github.event_name != 'schedule')
+    steps:
+      - name: checkout-aries-vcr-issuer
+        uses: actions/checkout@v2
+        with:
+          path: aries-vcr-issuer-agent
+      - name: run-von-network
+        uses: ./aries-vcr-issuer-agent/actions/run-von-network
+      - name: run-aries-vcr-issuer-tests
+        uses: ./aries-vcr-issuer-agent/actions/run-issuer-tests
+        continue-on-error: false
