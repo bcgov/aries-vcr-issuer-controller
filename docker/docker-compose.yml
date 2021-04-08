@@ -178,6 +178,7 @@ services:
       - MARA_DB_USER=${MARA_DB_USER:-mara_db}
       - MARA_DB_PASSWORD=${MARA_DB_PASSWORD:-mara_db_pwd}
     networks:
+#local      - orgbook
       - myorg
     ports:
       - 5050:5000
