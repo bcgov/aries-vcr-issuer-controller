@@ -123,10 +123,8 @@ def agent_schemas_cred_defs(agent_admin_url):
 
 def register_issuer_with_orgbook(connection_id):
     if connection_id in synced and synced[connection_id]:
-        print("Connection is already synced.")
         return
 
-    print("Syncing connection with OrgBook ...")
     app_config["TOB_CONNECTION"] = connection_id
     synced[connection_id] = False
     config_root = app_config["config_root"]
@@ -179,7 +177,6 @@ def register_issuer_with_orgbook(connection_id):
         )
         response.raise_for_status()
         response.json()
-        print("Registered issuer: ", issuer_name)
 
     synced[connection_id] = True
     print("Connection {} is synchronized".format(connection_id))
@@ -338,7 +335,6 @@ class StartupProcessingThread(threading.Thread):
 
         # if we have a connection to the TOB agent, we can register our issuer
         if tob_connection:
-            print("Register issuer with OrgBook ...")
             register_issuer_with_orgbook(tob_connection["connection_id"])
         else:
             print(
@@ -667,12 +663,9 @@ def handle_connections(state, message):
     config_services = app_config["config_services"]
     tob_connection_params = config_services["verifiers"]["bctob"]
 
-    print(message)
-
     # check this is the TOB connection
     if "alias" in message and message["alias"] == tob_connection_params["alias"]:
         if state == "active":
-            print("Register issuer once connection active ...")
             register_issuer_with_orgbook(message["connection_id"])
 
     return jsonify({"message": state})
