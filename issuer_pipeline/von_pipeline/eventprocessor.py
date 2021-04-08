@@ -453,6 +453,8 @@ class EventProcessor:
 
                     cred['id'] = str(uuid.UUID(int=random.getrandbits(128), version=4))
                     cred['cred_type'] = cred['schema'].replace('.', '').replace('-', '').replace('-', '')
+                    if "registration" in cred['schema']:
+                        print('"' + topic_value + '","' + cred['schema'] + '","' + cred['attributes']['entity_type'] + '","' + cred['attributes']['entity_name'] + '"')
 
                     creds.append(cred)
 
@@ -513,6 +515,8 @@ class EventProcessor:
         sample_creds_template = json.loads(sample_creds_template_str)
 
         # generate and save some dummy credentials
+        print('# TAG:entity_type # Different company types')
+        print('"topic_id","topic_type","entity_type","entity_name"')
         count = 0
         for i in range(topic_count//5):
             topics = []
