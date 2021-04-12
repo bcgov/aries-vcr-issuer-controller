@@ -30,7 +30,7 @@ runs:
   using: "composite"
   steps:
     - name: initialize-environment
-      run: ORG_TITLE=${{ inputs.ORG_TITLE }} MY_ORG=${{ inputs.MY_ORG }} MY_PERMIT=${{ inputs.MY_PERMIT }} MY_DEPLOY_OPT=2 . init.sh
+      run: ORG_TITLE="${{ inputs.ORG_TITLE }}" MY_ORG=${{ inputs.MY_ORG }} MY_PERMIT=${{ inputs.MY_PERMIT }} MY_DEPLOY_OPT=2 . init.sh
       shell: bash
       working-directory: aries-vcr-issuer-controller
     - name: build-aries-vcr-issuer
