@@ -1,0 +1,25 @@
+name: "Install s2i"
+description: "Install s2i"
+author: "iancostanzo@gmail.com"
+runs:
+  using: "composite"
+  steps:
+    - name: download s2i release
+      run: curl -s https://api.github.com/repos/openshift/source-to-image/releases/latest | grep browser_download_url | grep linux-amd64 | cut -d '"' -f 4 | wget -qi -
+      shell: bash
+      working-directory: aries-vcr/tmp/s2i/
+    - name: unpack s2i release
+      run: tar xvf source-to-image*.gz
+      shell: bash
+      working-directory: aries-vcr/tmp/s2i/
+    - name: install s2i release
+      run: mv s2i /usr/local/bin
+      shell: bash
+      working-directory: aries-vcr/s2i
+    - name: test s2i release
+      run: s2i version
+      shell: bash
+      working-directory: aries-vcr
+branding:
+  icon: "cloud-lightning"
+  color: "blue"
