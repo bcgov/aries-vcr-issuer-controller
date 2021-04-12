@@ -5,7 +5,7 @@ runs:
   using: "composite"
   steps:
     - name: download s2i release
-      run: curl -s https://github.com/openshift/source-to-image/releases/download/v1.3.1/source-to-image-v1.3.1-a5a77147-linux-amd64.tar.gz
+      run: wget -qi https://github.com/openshift/source-to-image/releases/download/v1.3.1/source-to-image-v1.3.1-a5a77147-linux-amd64.tar.gz
       shell: bash
     - name: unpack s2i release
       run: tar xvf source-to-image*.gz
