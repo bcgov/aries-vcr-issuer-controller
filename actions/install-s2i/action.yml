@@ -5,13 +5,17 @@ runs:
   using: "composite"
   steps:
     - name: download s2i release
-      run: wget -q https://github.com/openshift/source-to-image/releases/download/v1.3.1/source-to-image-v1.3.1-a5a77147-linux-amd64.tar.gz
+      run: |
+        wget -q https://github.com/openshift/source-to-image/releases/download/v1.3.1/source-to-image-v1.3.1-a5a77147-linux-amd64.tar.gz
       shell: bash
     - name: unpack s2i release
       run: tar xvf source-to-image*.gz
       shell: bash
     - name: install s2i release
-      run: mv s2i /usr/local/bin
+      run: |
+        mkdir -p $GITHUB_WORKSPACE/bin
+        mv s2i $GITHUB_WORKSPACE/bin
+        echo "::add-path::$GITHUB_WORKSPACE/bin"
       shell: bash
     - name: test s2i release
       run: s2i version
