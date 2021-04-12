@@ -5,14 +5,14 @@ runs:
   using: "composite"
   steps:
     - name: checkout-von-network
-      run: git clone https://github.com/bcgov/von-network.git
+      run: git clone https://github.com/ianco/von-network.git
       shell: bash
     - name: build-von-network
       run: ./manage build
       shell: bash
       working-directory: von-network
     - name: run-von-network
-      run: ./manage start
+      run: ./manage start --wait
       shell: bash
       working-directory: von-network
 branding:
