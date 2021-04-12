@@ -17,6 +17,8 @@ jobs:
           path: aries-vcr-issuer-controller
       - name: run-von-network
         uses: ./aries-vcr-issuer-controller/actions/run-von-network
+      - name: run-aries-vcr
+        uses: ./aries-vcr-issuer-controller/actions/run-aries-vcr
       - name: run-aries-vcr-issuer-tests
         uses: ./aries-vcr-issuer-controller/actions/run-issuer-tests
         continue-on-error: false
