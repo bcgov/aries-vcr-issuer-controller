@@ -32,35 +32,35 @@ runs:
     - name: initialize-environment
       run: ORG_TITLE=${{ inputs.ORG_TITLE }} MY_ORG=${{ inputs.MY_ORG }} MY_PERMIT=${{ inputs.MY_PERMIT }} MY_DEPLOY_OPT=2 . init.sh
       shell: bash
-      working-directory: aries-vcr-issuer-agent
+      working-directory: aries-vcr-issuer-controller
     - name: build-aries-vcr-issuer
       run: ./manage build
       shell: bash
-      working-directory: aries-vcr-issuer-agent/docker
+      working-directory: aries-vcr-issuer-controller/docker
     - name: run-aries-vcr-issuer
       run: ./manage start
       shell: bash
-      working-directory: aries-vcr-issuer-agent/docker
+      working-directory: aries-vcr-issuer-controller/docker
     - name: setup-test-environment
       run: pip install -r requirements.txt
       shell: bash
-      working-directory: aries-vcr-issuer-agent/issuer_pipeline
+      working-directory: aries-vcr-issuer-controller/issuer_pipeline
     - name: initialize-issuer-database
       run: ./run-step.sh von_pipeline/create.py
       shell: bash
-      working-directory: aries-vcr-issuer-agent/scripts
+      working-directory: aries-vcr-issuer-controller/scripts
     - name: generate-credentials
       run: INIT_SEED=${{ inputs.INIT_SEED }} TOPIC_COUNT=${{ inputs.TOPIC_COUNT }} ./run-step.sh von_pipeline/generate-creds.py
       shell: bash
-      working-directory: aries-vcr-issuer-agent/scripts
+      working-directory: aries-vcr-issuer-controller/scripts
     - name: submit-credentials
       run: ./run-step.sh von_pipeline/submit-creds.py
       shell: bash
-      working-directory: aries-vcr-issuer-agent/scripts
+      working-directory: aries-vcr-issuer-controller/scripts
     - name: test-aries-vcr-apis
       run: TOB_URL_PREFIX=${{ inputs.TOB_URL_PREFIX }} python detect_api_changes.py
       shell: bash
-      working-directory: aries-vcr-issuer-agent/von_pipeline/tests
+      working-directory: aries-vcr-issuer-controller/von_pipeline/tests
 branding:
   icon: "mic"
   color: "purple"
