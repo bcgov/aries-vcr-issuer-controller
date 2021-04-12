@@ -19,6 +19,8 @@ jobs:
         uses: ./aries-vcr-issuer-controller/actions/run-von-network
       - name: install-s2i
         uses: ./aries-vcr-issuer-controller/actions/install-s2i
+        env:
+          ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
       - name: run-aries-vcr
         uses: ./aries-vcr-issuer-controller/actions/run-aries-vcr
       - name: run-aries-vcr-issuer-tests
