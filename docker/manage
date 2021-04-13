@@ -6,6 +6,9 @@ set -e
 
 SCRIPT_HOME="$( cd "$( dirname "$0" )" && pwd )"
 
+export CONTROLLER_TIMEOUT="${CONTROLLER_TIMEOUT:-60}"
+export CONTROLLER_URL_CONFIG="${CONTROLLER_URL_CONFIG}"
+
 # =================================================================================================================
 # Usage:
 # -----------------------------------------------------------------------------------------------------------------
@@ -23,6 +26,13 @@ usage() {
 
   up  - Creates the application container from the built images
         and starts the services based on the docker-compose.yml file.
+        You can include a '--wait' parameter which will wait until the ledger is active
+        When using the '--logs' option, use ctrl-c to exit logging. Use "down" or "stop" to stop the run.
+        Examples:
+        $0 start
+        $0 start --logs
+        $0 start --wait --logs
+
   start - Same as up
 
   logs - Display the logs from the docker compose run (ctrl-c to exit).
@@ -61,6 +71,12 @@ configureEnvironment () {
     case "$arg" in
       *=*)
         export ${arg}
+        ;;
+      --logs)
+        TAIL_LOGS=1
+        ;;
+      --wait)
+        WAIT_FOR_CONTROLLER=1
         ;;
     esac
   done
@@ -155,7 +171,13 @@ getStartupParams() {
       *=*)
         # Skip it
         ;;
-     -*)
+      --logs)
+        # Skip it
+        ;;
+      --wait)
+        # Skip it
+        ;;
+      -*)
         ARGS+=" $arg";;
       *)
         CONTAINERS+=" $arg";;
@@ -167,6 +189,70 @@ getStartupParams() {
   fi
 
   echo ${ARGS} ${CONTAINERS}
+}
+
+function logs() {
+  (
+    local OPTIND
+    local unset _force
+    local unset no_tail
+    while getopts ":f-:" FLAG; do
+      case $FLAG in
+        f ) local _force=1 ;;
+        - ) 
+            case ${OPTARG} in
+                "no-tail"*) no_tail=1
+              ;;
+            esac
+      esac
+    done
+    shift $((OPTIND-1))
+
+    log_args=()
+    (( no_tail != 1 )) && log_args+=( '-f' )
+    if [ ! -z "${TAIL_LOGS}" ] || [ ! -z "${_force}" ]; then
+      docker-compose \
+        --log-level ERROR logs \
+         "${log_args[@]}" "$@"
+    fi
+  )
+}
+
+pingIssuerController(){
+  issuer_controller_url=${1}
+
+  # ping ledger web browser for genesis txns
+  local rtnCd=$(curl -s --write-out '%{http_code}' --output /dev/null ${issuer_controller_url}/readiness)
+  if (( ${rtnCd} == 200 )); then
+    return 0
+  else
+    return 1
+  fi
+}
+
+function wait_for_issuer_controller() {
+  (
+    # if flag is set, wait for ledger to activate before continuing
+    local rtnCd=0
+    if [ ! -z "${WAIT_FOR_CONTROLLER}" ]; then
+      # Wait for ledger server to start ...
+      local startTime=${SECONDS}
+      # use global LEDGER_URL
+      local ISSUER_CONTROLLER_URL="${CONTROLLER_URL_CONFIG:-http://localhost:5000}"
+      printf "waiting for ISSUER CONTROLLER to start"
+      while ! pingIssuerController "$ISSUER_CONTROLLER_URL"; do
+        printf "."
+        local duration=$(($SECONDS - $startTime))
+        if (( ${duration} >= ${CONTROLLER_TIMEOUT} )); then
+          echo "\nThe ISSUER CONTROLLER service failed to start within ${duration} seconds.\n"
+          rtnCd=1
+          break
+        fi
+        sleep 1
+      done
+    fi
+    return ${rtnCd}
+  )
 }
 
 build() {
@@ -194,7 +280,8 @@ case "$COMMAND" in
     _startupParams=$(getStartupParams $@)
     configureEnvironment $@
     docker-compose up -d ${_startupParams}
-    docker-compose logs -f
+    wait_for_issuer_controller
+    logs
     ;;
   logs)
     configureEnvironment $@

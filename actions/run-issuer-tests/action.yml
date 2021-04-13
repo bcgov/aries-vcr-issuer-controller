@@ -38,7 +38,7 @@ runs:
       shell: bash
       working-directory: aries-vcr-issuer-controller/docker
     - name: run-aries-vcr-issuer
-      run: ./manage start myorg-controller myorg-agent myorg-wallet-db
+      run: ./manage start --wait myorg-controller myorg-agent myorg-wallet-db
       shell: bash
       working-directory: aries-vcr-issuer-controller/docker
     - name: setup-test-environment
