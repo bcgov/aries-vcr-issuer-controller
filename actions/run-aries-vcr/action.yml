@@ -8,11 +8,11 @@ runs:
       run: git clone https://github.com/ianco/aries-vcr.git
       shell: bash
     - name: build-aries-vcr
-      run: ./manage build
+      run: ./manage build vcr-api vcr-agent vcr-solr vcr-db wallet-db
       shell: bash
       working-directory: aries-vcr/docker
     - name: run-aries-vcr
-      run: ./manage start --wait
+      run: ./manage start --wait vcr-api vcr-agent vcr-solr vcr-db wallet-db
       shell: bash
       working-directory: aries-vcr/docker
 branding:
