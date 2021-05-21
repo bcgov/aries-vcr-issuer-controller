@@ -6,7 +6,7 @@ set -e
 
 SCRIPT_HOME="$( cd "$( dirname "$0" )" && pwd )"
 
-export CONTROLLER_TIMEOUT="${CONTROLLER_TIMEOUT:-60}"
+export CONTROLLER_TIMEOUT="${CONTROLLER_TIMEOUT:-120}"
 export CONTROLLER_URL_CONFIG="${CONTROLLER_URL_CONFIG}"
 
 # =================================================================================================================
@@ -245,6 +245,7 @@ function wait_for_issuer_controller() {
         local duration=$(($SECONDS - $startTime))
         if (( ${duration} >= ${CONTROLLER_TIMEOUT} )); then
           echo "\nThe ISSUER CONTROLLER service failed to start within ${duration} seconds.\n"
+          docker-compose logs
           rtnCd=1
           break
         fi
