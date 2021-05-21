@@ -11,7 +11,7 @@ def config(filename='database.ini', section='postgresql'):
         db['port'] = os.environ.get('EVENT_PROC_DB_PORT', '5444')
         db['database'] = os.environ.get('EVENT_PROC_DB_DATABASE', 'pipeline_db')
         db['user'] = os.environ.get('EVENT_PROC_DB_USER', 'pipeline_db')
-        db['password'] = os.environ.get('EVENT_PROC_DB_PASSWORD', '')
+        db['password'] = os.environ.get('EVENT_PROC_DB_PASSWORD', 'pipeline_db_pwd')
     else:
         raise Exception('Section {0} not a valid database'.format(section))
  

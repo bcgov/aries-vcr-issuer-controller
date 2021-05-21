@@ -34,11 +34,11 @@ runs:
       shell: bash
       working-directory: aries-vcr-issuer-controller
     - name: build-aries-vcr-issuer
-      run: ./manage build myorg-controller myorg-agent myorg-wallet-db
+      run: ./manage build myorg-controller myorg-agent myorg-wallet-db myorg-pipeline-db
       shell: bash
       working-directory: aries-vcr-issuer-controller/docker
     - name: run-aries-vcr-issuer
-      run: ./manage start --wait myorg-controller myorg-agent myorg-wallet-db
+      run: ./manage start --wait myorg-controller myorg-agent myorg-wallet-db myorg-pipeline-db
       shell: bash
       working-directory: aries-vcr-issuer-controller/docker
     - name: setup-test-environment
@@ -48,19 +48,19 @@ runs:
     - name: initialize-issuer-database
       run: ./run-step.sh von_pipeline/create.py
       shell: bash
-      working-directory: aries-vcr-issuer-controller/scripts
+      working-directory: aries-vcr-issuer-controller/issuer_pipeline/scripts
     - name: generate-credentials
       run: INIT_SEED=${{ inputs.INIT_SEED }} TOPIC_COUNT=${{ inputs.TOPIC_COUNT }} ./run-step.sh von_pipeline/generate-creds.py
       shell: bash
-      working-directory: aries-vcr-issuer-controller/scripts
+      working-directory: aries-vcr-issuer-controller/issuer_pipeline/scripts
     - name: submit-credentials
       run: ./run-step.sh von_pipeline/submit-creds.py
       shell: bash
-      working-directory: aries-vcr-issuer-controller/scripts
+      working-directory: aries-vcr-issuer-controller/issuer_pipeline/scripts
     - name: test-aries-vcr-apis
       run: TOB_URL_PREFIX=${{ inputs.TOB_URL_PREFIX }} python detect_api_changes.py
       shell: bash
-      working-directory: aries-vcr-issuer-controller/von_pipeline/tests
+      working-directory: aries-vcr-issuer-controller/issuer_pipeline/von_pipeline/tests
 branding:
   icon: "mic"
   color: "purple"
