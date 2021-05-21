@@ -5,7 +5,7 @@ runs:
   using: "composite"
   steps:
     - name: checkout-aries-vcr
-      run: git clone https://github.com/ianco/aries-vcr.git
+      run: git clone https://github.com/bcgov/aries-vcr.git
       shell: bash
     - name: build-aries-vcr
       run: ./manage build
