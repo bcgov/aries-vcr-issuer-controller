@@ -133,7 +133,9 @@ configureEnvironment () {
   export POSTGRESQL_WALLET_PORT="5432"
   export POSTGRESQL_ADMIN_USER="postgres"
   export POSTGRESQL_ADMIN_PASSWORD="mysecretpassword"
-  export WALLET_SEED_VONX=${WALLET_SEED_VONX:-"myorg_issuer_0000000000000000001"}
+  export WALLET_SEED_VONX=$(echo `openssl rand -base64 40 | tr -d /=+ | cut -c -32`)
+  #export WALLET_SEED_VONX=${WALLET_SEED_VONX:-"myorg_issuer_0000000000000000001"}
+  echo "starting with seed ${WALLET_SEED_VONX}"
 
   # myorg-pipeline
   export COMPOSE_PROJECT_NAME=${COMPOSE_PROJECT_NAME:-"vonx"}
