@@ -2,6 +2,10 @@ name: "Run Aries VCR Issuer Tests"
 description: "Run the Aries VCR Issuer submit credentials and test Aries VCR api endpoints"
 author: "iancostanzo@gmail.com"
 inputs:
+  LEDGER_URL:
+    description: "URL location of von-network web server"
+    required: false
+    default: ""
   ORG_TITLE:
     description: "Issuer organization name"
     required: false
@@ -38,7 +42,7 @@ runs:
       shell: bash
       working-directory: aries-vcr-issuer-controller/docker
     - name: run-aries-vcr-issuer
-      run: ./manage start --wait myorg-controller myorg-agent myorg-wallet-db myorg-pipeline-db
+      run: LEDGER_URL="${{ inputs.LEDGER_URL }}" ./manage start --wait myorg-controller myorg-agent myorg-wallet-db myorg-pipeline-db
       shell: bash
       working-directory: aries-vcr-issuer-controller/docker
     - name: setup-test-environment

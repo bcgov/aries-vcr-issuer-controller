@@ -15,14 +15,18 @@ jobs:
         uses: actions/checkout@v2
         with:
           path: aries-vcr-issuer-controller
-      - name: run-von-network
-        uses: ./aries-vcr-issuer-controller/actions/run-von-network
+      #- name: run-von-network
+      #  uses: ./aries-vcr-issuer-controller/actions/run-von-network
       - name: install-s2i
         uses: ./aries-vcr-issuer-controller/actions/install-s2i
         env:
           ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
       - name: run-aries-vcr
         uses: ./aries-vcr-issuer-controller/actions/run-aries-vcr
+        with:
+          LEDGER_URL: "http://dev.bcovrin.vonx.io"
       - name: run-aries-vcr-issuer-tests
         uses: ./aries-vcr-issuer-controller/actions/run-issuer-tests
+        with:
+          LEDGER_URL: "http://dev.bcovrin.vonx.io"
         continue-on-error: false
