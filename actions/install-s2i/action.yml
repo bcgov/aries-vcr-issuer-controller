@@ -1,0 +1,25 @@
+name: "Install s2i"
+description: "Install s2i"
+author: "iancostanzo@gmail.com"
+runs:
+  using: "composite"
+  steps:
+    - name: download s2i release
+      run: |
+        wget -q https://github.com/openshift/source-to-image/releases/download/v1.3.1/source-to-image-v1.3.1-a5a77147-linux-amd64.tar.gz
+      shell: bash
+    - name: unpack s2i release
+      run: tar xvf source-to-image*.gz
+      shell: bash
+    - name: install s2i release
+      run: |
+        mkdir -p $GITHUB_WORKSPACE/bin
+        mv s2i $GITHUB_WORKSPACE/bin
+        echo "::add-path::$GITHUB_WORKSPACE/bin"
+      shell: bash
+    - name: test s2i release
+      run: s2i version
+      shell: bash
+branding:
+  icon: "cloud-lightning"
+  color: "blue"

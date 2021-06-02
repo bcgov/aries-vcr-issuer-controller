@@ -1,0 +1,25 @@
+name: "Run aries-vcr"
+description: "Build and run Aries-vcr (vanilla version)"
+author: "iancostanzo@gmail.com"
+inputs:
+  LEDGER_URL:
+    description: "URL location of von-network web server"
+    required: false
+    default: ""
+runs:
+  using: "composite"
+  steps:
+    - name: checkout-aries-vcr
+      run: git clone https://github.com/bcgov/aries-vcr.git
+      shell: bash
+    - name: build-aries-vcr
+      run: ./manage build
+      shell: bash
+      working-directory: aries-vcr/docker
+    - name: run-aries-vcr
+      run: LEDGER_URL="${{ inputs.LEDGER_URL }}" ./manage start --wait vcr-api vcr-agent vcr-solr vcr-db wallet-db
+      shell: bash
+      working-directory: aries-vcr/docker
+branding:
+  icon: "cloud-lightning"
+  color: "blue"

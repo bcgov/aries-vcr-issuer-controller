@@ -3,6 +3,9 @@
 echo This script initializes some config data a run of a new VON Issuer/Verifier Agent.
 echo Please answer the following questions and we will get things all set up for you.
 
+echo Alternately you can pass in all configurations via environment parameters.
+echo '(e.g. ORG_TITLE="Ian Company" MY_ORG=ian-co MY_PERMIT=ian-permit MY_DEPLOY_OPT=2 . init.sh)'
+
 while [[ -z "$ORG_TITLE" ]]; do
 	read -p 'Please provide a descriptive title for your permit-issuing organization (e.g. City of Victoria): ' ORG_TITLE
 done
@@ -20,64 +23,68 @@ echo ""
 # Generate the seed from MY_ORG, making sure it is 32 characters long
 export MY_SEED=`echo ${MY_ORG}_00000000000000000000000000000000 | cut -c 1-32`
 
-echo How will you be the VON Issuer/Verifier Agent:
-echo
-DEPLOY_OPTS=("Using Play with Docker in your browser"
-			 "Using docker on your own machine - with local von-network and TheOrgBook instances"
-			 "Some other way")
+while [[ -z "$MY_DEPLOY_OPT" ]]; do
+    echo How will you be the VON Issuer/Verifier Agent:
+    echo
+    DEPLOY_OPTS=("Using Play with Docker in your browser"
+    			 "Using docker on your own machine - with local von-network and TheOrgBook instances"
+    			 "Some other way")
+    select example in "${DEPLOY_OPTS[@]}"; do
+        MY_DEPLOY_OPT=$REPLY
+        break
+    done
+done
 
 # Determine the example to expand and expand it
-select example in "${DEPLOY_OPTS[@]}"; do
-    case $REPLY in
-        1 ) 
-            if [ $PWD_HOST_FQDN == "labs.play-with-docker.com" ]
-              then
-                export ETH_CONFIG="eth1"
-              elif [ $PWD_HOST_FQDN == "play-with-docker.vonx.io" ]
-              then
-                export ETH_CONFIG="eth0"
-              else
-                export ETH_CONFIG="eth0"
-              fi
-            myhost=`ifconfig ${ETH_CONFIG} | grep inet | cut -d':' -f2 | cut -d' ' -f1 | sed 's/\./\-/g'`
-            export ENDPOINT_HOST="ip${myhost}-${SESSION_ID}-5001.direct.${PWD_HOST_FQDN}"
-            export APPLICATION_URL=http://${ENDPOINT_HOST}
-            export LEDGER=http://greenlight.bcovrin.vonx.io
-            export LEDGER_URL=http://greenlight.bcovrin.vonx.io
-            export GENESIS_URL=${LEDGER}/genesis
-            __TOBAPIURL=https://demo-api.orgbook.gov.bc.ca/api/v2
-            __TOBAPPURL=https://demo.orgbook.gov.bc.ca/en/home
+case $MY_DEPLOY_OPT in
+    1 ) 
+        if [ $PWD_HOST_FQDN == "labs.play-with-docker.com" ]
+          then
+            export ETH_CONFIG="eth1"
+          elif [ $PWD_HOST_FQDN == "play-with-docker.vonx.io" ]
+          then
+            export ETH_CONFIG="eth0"
+          else
+            export ETH_CONFIG="eth0"
+          fi
+        myhost=`ifconfig ${ETH_CONFIG} | grep inet | cut -d':' -f2 | cut -d' ' -f1 | sed 's/\./\-/g'`
+        export ENDPOINT_HOST="ip${myhost}-${SESSION_ID}-5001.direct.${PWD_HOST_FQDN}"
+        export APPLICATION_URL=http://${ENDPOINT_HOST}
+        export LEDGER=http://greenlight.bcovrin.vonx.io
+        export LEDGER_URL=http://greenlight.bcovrin.vonx.io
+        export GENESIS_URL=${LEDGER}/genesis
+        __TOBAPIURL=https://demo-api.orgbook.gov.bc.ca/api/v2
+        __TOBAPPURL=https://demo.orgbook.gov.bc.ca/en/home
 
-            break;;
-        2 ) 
-            unset ENDPOINT_HOST
-            export LEDGER=http://localhost:9000
-            unset LEDGER_URL
-            export GENESIS_URL=${LEDGER}/genesis
-            __TOBAPIURL=http://tob-api:8080/api/v2
-            __TOBAPPURL=http://localhost:8080
+        ;;
+    2 ) 
+        unset ENDPOINT_HOST
+        export LEDGER=http://localhost:9000
+        unset LEDGER_URL
+        export GENESIS_URL=${LEDGER}/genesis
+        __TOBAPIURL=http://tob-api:8080/api/v2
+        __TOBAPPURL=http://localhost:8080
 
-            # Adjustments to files for local execution
-            sed -i.bak "s/#local//g" docker/docker-compose.yml
-            sed -i.bak "s/ INDY_GENESIS_URL/ #INDY_GENESIS_URL/" issuer_controller/config/settings.yml
-            # sed -i.bak "s/ AUTO_REGISTER_DID/ #AUTO_REGISTER_DID/" issuer_controller/config/settings.yml
-            find docker issuer_controller -name "*.bak" -type f|xargs rm -f
+        # Adjustments to files for local execution
+        sed -i.bak "s/#local//g" docker/docker-compose.yml
+        sed -i.bak "s/ INDY_GENESIS_URL/ #INDY_GENESIS_URL/" issuer_controller/config/settings.yml
+        # sed -i.bak "s/ AUTO_REGISTER_DID/ #AUTO_REGISTER_DID/" issuer_controller/config/settings.yml
+        find docker issuer_controller -name "*.bak" -type f|xargs rm -f
 
-            break;;
-        3 ) 
-            read -p "Enter the agent host you are using (e.g. localhost:5001): " __AGENTHOST
-            export ENDPOINT_HOST=${__AGENTHOST}
-            read -p "Enter the URL of the ledger you are using: " __LEDGER
-            export LEDGER=${__LEDGER}
-            export LEDGER_URL=${__LEDGER}
-            export GENESIS_URL=${LEDGER}/genesis
-            __TOBAPIURL=Update-With-OrgBook-API-URL
-            __TOBAPPURL=Update-With-OrgBook-Application-URL
-            echo NOTE: TheOrgBook API and Application URLs must be updated in issuer_controller/config/settings.yml
+        ;;
+    3 ) 
+        read -p "Enter the agent host you are using (e.g. localhost:5001): " __AGENTHOST
+        export ENDPOINT_HOST=${__AGENTHOST}
+        read -p "Enter the URL of the ledger you are using: " __LEDGER
+        export LEDGER=${__LEDGER}
+        export LEDGER_URL=${__LEDGER}
+        export GENESIS_URL=${LEDGER}/genesis
+        __TOBAPIURL=Update-With-OrgBook-API-URL
+        __TOBAPPURL=Update-With-OrgBook-Application-URL
+        echo NOTE: TheOrgBook API and Application URLs must be updated in issuer_controller/config/settings.yml
 
-            break;;
-    esac
-done
+        ;;
+esac
 echo ""
 
 # OK - time to make all the substitutions...

@@ -177,7 +177,6 @@ def register_issuer_with_orgbook(connection_id):
         )
         response.raise_for_status()
         response.json()
-        print("Registered issuer: ", issuer_name)
 
     synced[connection_id] = True
     print("Connection {} is synchronized".format(connection_id))

@@ -348,7 +348,6 @@ class EventProcessor:
             if "duplicate key value violates unique constraint" in stre and "cl_hash_index" in stre:
                 print("Hash exception, skipping duplicate credential for corp:", cred_type, cred_id, e)
                 cur.execute("rollback to savepoint save_" + cred_type)
-                #print(cred_json)
                 return 0
             else:
                 print(traceback.print_exc())
@@ -377,7 +376,7 @@ class EventProcessor:
 
 
     def random_string(self, N):
-        return ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits + ' ') for _ in range(N))
+        return ''.join(random.choice(string.ascii_uppercase + string.digits + ' ') for _ in range(N))
 
 
     def generate_relationship_credential(self, topic_name, topic_value, related_topic_name, related_topic_value, relationship, cred):
@@ -389,7 +388,7 @@ class EventProcessor:
             elif attr_name == 'relationship' or attr_name == 'relationship_description':
                 attr_value = relationship
             elif value == '$UUID':
-                attr_value = str(uuid.uuid4())
+                attr_value = str(uuid.UUID(int=random.getrandbits(128), version=4))
             elif value == '$Name':
                 attr_value = 'Random Name ' + self.random_string(10)
             elif value == '$Text':
@@ -405,7 +404,7 @@ class EventProcessor:
                 attr_value = value
             cred['attributes'][attr_name] = attr_value
 
-        cred['id'] = str(uuid.uuid4())
+        cred['id'] = str(uuid.UUID(int=random.getrandbits(128), version=4))
         cred['cred_type'] = cred['schema'].replace('.', '').replace('-', '').replace('-', '')
 
         return cred
@@ -436,7 +435,7 @@ class EventProcessor:
                         if attr_name == topic_name:
                             attr_value = topic_value
                         elif value == '$UUID':
-                            attr_value = str(uuid.uuid4())
+                            attr_value = str(uuid.UUID(int=random.getrandbits(128), version=4))
                         elif value == '$Name':
                             attr_value = 'Random Name ' + self.random_string(10)
                         elif value == '$Text':
@@ -452,8 +451,10 @@ class EventProcessor:
                             attr_value = value
                         cred['attributes'][attr_name] = attr_value
 
-                    cred['id'] = str(uuid.uuid4())
+                    cred['id'] = str(uuid.UUID(int=random.getrandbits(128), version=4))
                     cred['cred_type'] = cred['schema'].replace('.', '').replace('-', '').replace('-', '')
+                    if "registration" in cred['schema']:
+                        print('"' + topic_value + '","' + cred['schema'] + '","' + cred['attributes']['entity_type'] + '","' + cred['attributes']['entity_name'] + '"')
 
                     creds.append(cred)
 
@@ -465,7 +466,7 @@ class EventProcessor:
     # main entry point for data processing and credential generation job
     # this is just a "faux" method that creates some dummy credentials
     # in real life would pull data from a source DB
-    def process_event_queue(self):
+    def process_event_queue(self, seed=None, topic_count=GEN_TOPIC_COUNT):
         """
         Generate some sample credentials, based on a template like:
         sample_creds_template = [
@@ -506,17 +507,22 @@ class EventProcessor:
             }
         ]
         """
+        if seed:
+            random.seed(seed)
         topic_name = 'corp_num'
         with open ("./gen-data.json", "r") as myfile:
             sample_creds_template_str = myfile.read().replace('\n', '')
         sample_creds_template = json.loads(sample_creds_template_str)
 
         # generate and save some dummy credentials
+        print('# TAG:entity_type # Different company types')
+        print('"topic_id","topic_type","entity_type","entity_name"')
         count = 0
-        for i in range(GEN_TOPIC_COUNT//5):
+        for i in range(topic_count//5):
             topics = []
             for j in range(5):
-                topics.append(str(uuid.uuid4()))
+                topic_id = str(uuid.UUID(int=random.getrandbits(128), version=4))
+                topics.append(topic_id)
             creds = self.generate_credential(topic_name, sample_creds_template, topics)
             count = count + len(creds)
         print("Generated cred count = ", count)

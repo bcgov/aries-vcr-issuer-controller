@@ -217,9 +217,9 @@ To submit credentials, use Postman (or similar, based on your local configuratio
 For example:
 
 ```bash
-curl -H 'Content-Type: application/json' -X 'POST' http://localhost:5000/issue-credential -d @-
+curl -H 'Content-Type: application/json' -X 'POST' http://localhost:5000/issue-credential -d @- << EOF
 <paste contents of the above file here>
-<CTRL-D>
+EOF
 ```
 
 This should return the ID numbers for the updated credentials, for example:
