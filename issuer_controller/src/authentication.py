@@ -53,7 +53,10 @@ def validate_token(*args, **kwargs):
                 for jwk in oidc_jwks["keys"]:
                     if jwk["kid"] == kid:
                         public_key = jwk
-                        algorithms = [jwk["alg"]]
+                        if "alg" in jwk:
+                            algorithms = [jwk["alg"]]
+                        else:
+                            algorithms = ["RS256"]
                 jwt.decode(
                     token,
                     public_key,
