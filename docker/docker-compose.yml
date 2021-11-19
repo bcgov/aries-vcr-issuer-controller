@@ -9,6 +9,7 @@ services:
       WEB_BASE_HREF: ${WEB_BASE_HREF:-/}
       WEB_HOST_NAME: ${WEB_HOST_NAME:-0.0.0.0}
       WEB_HOST_PORT: ${WEB_HOST_PORT:-8080}
+      WEB_HTTP_PORT: ${WEB_HTTP_PORT:-5001}
       WEB_HOST_TLS: ${WEB_HOST_TLS:-off}
       AGENT_HOST: ${AGENT_HOST:-controller}
       AGENT_PORT: ${AGENT_PORT:-8000}
@@ -17,7 +18,7 @@ services:
     networks:
       - myorg
     ports:
-      - ${WEB_HTTP_PORT:-5000}:${WEB_HOST_PORT:-8080}
+      - ${WEB_HTTP_PORT:-5001}:${WEB_HOST_PORT:-8080}
     volumes:
       - caddyx-data:/root/.caddy
       - caddyx-logs:/srv/logs
@@ -96,7 +97,7 @@ services:
       - AGENT_ADMIN_PORT=${AGENT_ADMIN_PORT}
       - AGENT_NAME=${AGENT_NAME}
     networks:
-#local      - orgbook
+      - orgbook
       - myorg
     ports:
       - ${AGENT_HTTP_IN_PORT}:${AGENT_HTTP_IN_PORT}
@@ -178,7 +179,7 @@ services:
       - MARA_DB_USER=${MARA_DB_USER:-mara_db}
       - MARA_DB_PASSWORD=${MARA_DB_PASSWORD:-mara_db_pwd}
     networks:
-#local      - orgbook
+      - orgbook
       - myorg
     ports:
       - 5050:5000
@@ -214,6 +215,6 @@ volumes:
 
 networks:
   myorg:
-#local  orgbook:
-#local    external:
-#local      name: vcr_vcr
+  orgbook:
+    external:
+      name: vcr_vcr
