@@ -18,6 +18,12 @@ issuers:
     - description: The my-registration credential issued by my-organization
       schema: my-registration.my-organization
       issuer_url: $ENDPOINT_URL/my-organization/my-registration
+      details:
+        label_en: Registration
+        highlighted_attributes:
+          - entity_name
+        credential_title:
+          - corp_num
       credential:
         effective_date:
           input: effective_date
@@ -153,6 +159,8 @@ issuers:
       issuer_url: $ENDPOINT_URL/my-organization/my-relationship
       depends_on:
       - greenlight_registration
+      details:
+        label_en: Relationship
       credential:
         effective_date:
           input: effective_date
@@ -259,6 +267,10 @@ issuers:
       issuer_url: $ENDPOINT_URL/my-organization/my-permit
       depends_on:
       - greenlight_registration
+      details:
+        label_en: Permit
+        credential_title:
+          - permit_id
       credential:
         effective_date:
           input: effective_date
