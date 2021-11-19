@@ -324,6 +324,8 @@ def assemble_credential_type_spec(config: dict, schema_attrs: dict) -> dict:
         ctype["highlighted_attributes"] = highlighted_attributes
     if credential_title:
         ctype["credential_title"] = credential_title
+    if config.get("labels"):
+        ctype["labels"] = config.get("labels")
     topics = (
         config["topic"]
         if isinstance(config["topic"], list)
@@ -344,9 +346,6 @@ def assemble_credential_type_spec(config: dict, schema_attrs: dict) -> dict:
                 config_topic, "label", None, deflang
             )
         ctype["topic"].append(cred_topic)
-    ctype["labels"] = {}
-    for k in labels:
-        ctype["labels"][k] = labels[k]
     ctype["endpoints"] = {}
     for k in urls:
         ctype["endpoints"][k] = urls[k]

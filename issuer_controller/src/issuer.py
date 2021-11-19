@@ -156,6 +156,7 @@ def register_issuer_with_orgbook(connection_id):
             }
             credential_type["attributes"] = schema_info["attributes"]
             labels = config.extract_translated(schema_info, "label", schema_name, "en")
+            print("labels:", labels)
             if labels:
                 ctype_config["labels"] = labels
             ctype_config.update(credential_type)
