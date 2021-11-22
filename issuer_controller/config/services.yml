@@ -22,8 +22,7 @@ issuers:
         label_en: Registration
         highlighted_attributes:
           - entity_name
-        credential_title:
-          - corp_num
+        credential_title: corp_num
       credential:
         effective_date:
           input: effective_date
@@ -269,8 +268,7 @@ issuers:
       - greenlight_registration
       details:
         label_en: Permit
-        credential_title:
-          - permit_id
+        credential_title: permit_id
       credential:
         effective_date:
           input: effective_date
