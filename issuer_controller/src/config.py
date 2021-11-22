@@ -19,6 +19,7 @@
 Methods for loading and working with our standard YAML-based configuration files
 """
 
+import json
 import base64
 import logging
 import os
@@ -300,6 +301,10 @@ def assemble_credential_type_spec(config: dict, schema_attrs: dict) -> dict:
     urls = extract_translated(config, "url", config.get("issuer_url"), deflang)
     logo_b64 = encode_logo_image(config, config_root)
 
+    details = config.get("details", {})
+    highlighted_attributes = details.get("highlighted_attributes")
+    credential_title = details.get("credential_title")
+
     claim_labels = {}
     claim_descriptions = {}
     for k, v in schema_attrs.items():
@@ -315,6 +320,12 @@ def assemble_credential_type_spec(config: dict, schema_attrs: dict) -> dict:
         "topic": [],
         "logo_b64": logo_b64,
     }
+    if highlighted_attributes:
+        ctype["highlighted_attributes"] = highlighted_attributes
+    if credential_title:
+        ctype["credential_title"] = credential_title
+    if config.get("labels"):
+        ctype["labels"] = config.get("labels")
     topics = (
         config["topic"]
         if isinstance(config["topic"], list)
@@ -335,9 +346,6 @@ def assemble_credential_type_spec(config: dict, schema_attrs: dict) -> dict:
                 config_topic, "label", None, deflang
             )
         ctype["topic"].append(cred_topic)
-    ctype["labels"] = {}
-    for k in labels:
-        ctype["labels"][k] = labels[k]
     ctype["endpoints"] = {}
     for k in urls:
         ctype["endpoints"][k] = urls[k]

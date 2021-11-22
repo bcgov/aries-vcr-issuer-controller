@@ -155,6 +155,18 @@ def register_issuer_with_orgbook(connection_id):
                 ],
             }
             credential_type["attributes"] = schema_info["attributes"]
+            labels = config.extract_translated(schema_info, "label", schema_name, "en")
+            descriptions = config.extract_translated(schema_info, "description", schema_name, "en")
+            if labels or descriptions:
+                ctype_config["labels"] = {"translations": {}}
+                for key in labels:
+                    if key not in ctype_config["labels"]["translations"]:
+                        ctype_config["labels"]["translations"][key] = {}
+                    ctype_config["labels"]["translations"][key]["label"] = labels[key]
+                for key in descriptions:
+                    if key not in ctype_config["labels"]["translations"]:
+                        ctype_config["labels"]["translations"][key] = {}
+                    ctype_config["labels"]["translations"][key]["description"] = descriptions[key]
             ctype_config.update(credential_type)
             ctype = config.assemble_credential_type_spec(
                 ctype_config, schema_info.get("attributes")
