@@ -6,6 +6,7 @@ This folder contains the files used to configure a VON issuer/verifier agent. If
 
 - [VON Issuer/Verifier Agent Configuration](#von-issuerverifier-agent-configuration)
   - [Summary: The Configuration Files](#summary-the-configuration-files)
+  - [Changes for Schema Localization](#changes-for-schema-localization)
   - [File: schemas.yml](#file-schemasyml)
   - [File: settings.yml](#file-settingsyml)
   - [File: routes.yml](#file-routesyml)
@@ -24,6 +25,30 @@ The following is a brief summary of the purpose of each of the VON issuer/verifi
 
 The sections that follow detail the contents and usage of each file.
 
+## Changes for Schema Localization
+
+The following fields were added to support localized (language-specific) schema information:
+
+Added to schemas.yml:
+
+```YAML
+  label_en: ...
+  description_en: ...
+```
+
+Added to services.yml:
+
+```YAML
+    credential_types:
+      ...
+      details:
+        highlighted_attributes:
+          - ...
+        credential_title: ...
+```
+
+These fields are described below, and [here](https://github.com/bcgov/aries-vcr/blob/master/docs/Schema-changes.md).
+
 ## File: [schemas.yml](schemas.yml)
 
 The following is a simple `schemas.yml` file with a single credential having a single atttribute.
@@ -31,6 +56,8 @@ The following is a simple `schemas.yml` file with a single credential having a s
 ``` YAML
 - name: my-permit.my-organization.ca
   version: '1.0.2'
+  label_en: my-permit
+  description_en: my-permit issued by my-organization
   attributes:
     - corp_num
     - legal_name
@@ -41,7 +68,7 @@ Pretty simple!  The following are notes about the example file above and `schema
 - The elements `name`, `version` and the `attributes` list (e.g. `corp_name` in the above example) correspond exactly to those same elements in a Hyperledger Indy schema. If the Indy schema structure evolves, the VON schema structure in this file will likely evolve to match.
 - The sub-elements within each `attribute` (`label_en`, etc.) are used in VON,they do not flow to the Hyperledger Indy schema.
 - The "_en" fields are localized (in this case for English). You can pass additional fields with different suffixes for other languages (e.g. "_fr") to enable localized presentation in OrgBook.
-
+- `label_en` and `description_en` provide language-specific values to display in the UI (additional languages can also be included)
 
   On startup, the VON issuer/verifier agent reads the `schemas.yml` file and looks in its wallet for the corresponding credential definitions and schemata. If it does not find them, the agent publishes them to the ledger. 
   - **NOTE**: VON issuer/verifier agent currently assumes that the agent itself will always publish the schema to the ledger. **TO DO** Confirm this.
@@ -225,6 +252,11 @@ issuers:
     - description: Permit
       schema: my-permit.my-organization.ca
       issuer_url: http://localhost:5001/my-organization/my-permit
+      details:
+        label_en: Registration
+        highlighted_attributes:
+          - permit_id
+        credential_title: permit_id
       depends_on:
         - greenlight_registration
         - pst_number
@@ -260,6 +292,8 @@ The `credential_types` structure is repeated for each credential issued by the a
   - An example of the use of cardinality can be [seen here](https://github.com/bcgov/von-bc-registries-agent/blob/686c82c4274b2b2dca7f12922ecb947491665822/bcreg-x/config/services.yml#L228). In this example, the cardinality is on the topic (attribute `registration_id`) and the `address_type` attribute. Example:
     - If two credentials were issued for the same organization (same `registration_id`) and both had `Headquarters` as the `address_type` value, OrgBook would assume the latter was a reissued credential and would deactivate the earlier one, keeping it for historical purposes.
     - However, if one credential had an `address_type` of `Headquarters` and the other `Mailing`, both credentials would be considered `active`.
+- the `credential_title` identifies an attribute within the credential to display as the credential title
+- the `highlighted_fields` allows the issuer to specify attributes that will be highlighted in the OrgBook display
 
 The final section of the `credential_types` structure are the mappings, an example of which follows below.
 
