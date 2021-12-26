@@ -47,7 +47,7 @@ Added to services.yml:
         credential_title: ...
 ```
 
-These fields are described below, and [here](https://github.com/bcgov/aries-vcr/blob/master/docs/Schema-changes.md).
+These fields are described below, and [here](https://github.com/bcgov/aries-vcr/blob/main/docs/Schema-changes.md).
 
 ## File: [schemas.yml](schemas.yml)
 
