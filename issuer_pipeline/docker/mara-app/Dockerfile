@@ -1,4 +1,4 @@
-FROM ubuntu:16.04
+FROM ubuntu:18.04
 
 # mara-base section
 ARG python_version=3.8
@@ -11,8 +11,8 @@ RUN apt-get update -y \
                 coreutils \
                 graphviz \
                 software-properties-common \
-                python-software-properties \
-                postgresql-client
+                postgresql-client \
+                rsync
 RUN add-apt-repository ppa:deadsnakes/ppa
 RUN apt-get update -y \
     && apt-get install -y \
@@ -20,8 +20,7 @@ RUN apt-get update -y \
                 python$python_version-dev \
                 python$python_version-venv \
                 python-psycopg2 \
-                libpq-dev \
-                curl
+                libpq-dev
 
 # ========================================================================================================
 # Install go-crond (from https://github.com/BCDevOps/go-crond)
@@ -37,8 +36,8 @@ RUN apt-get update -y \
 # --------------------------------------------------------------------------------------------------------
 ARG SOURCE_REPO=BCDevOps
 ARG GOCROND_VERSION=0.6.2
-RUN curl https://github.com/$SOURCE_REPO/go-crond/releases/download/$GOCROND_VERSION/go-crond-64-linux -s -L -o /usr/local/bin/go-crond
-RUN chmod ug+x /usr/local/bin/go-crond
+ADD https://github.com/$SOURCE_REPO/go-crond/releases/download/$GOCROND_VERSION/go-crond-64-linux /usr/bin/go-crond
+RUN chmod ug+x /usr/bin/go-crond
 # ========================================================================================================
 
 # mara-app section - this is specific to our use of mara
@@ -74,7 +73,7 @@ RUN make install-packages
 # pin previous version of sqlalchemy_utils work avoid bug in 0.36.8
 RUN pip install sqlalchemy==1.3.23
 RUN pip install sqlalchemy_utils==0.36.7
- 
+
 # Set ownership and permissions
 # Set scripts as executable (make files and python files do not have to be marked)
 # Make /etc/passwd writable for the root group so an entry can be created for an OpenShift assigned user account.
