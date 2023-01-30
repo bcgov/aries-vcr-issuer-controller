@@ -12,8 +12,10 @@ from flask import jsonify
 
 from src import config
 
+LEDGER_URL = os.environ.get("LEDGER_URL")
+
 AGENT_ADMIN_API_KEY = os.environ.get("AGENT_ADMIN_API_KEY")
-ADMIN_REQUEST_HEADERS = {"Content-Type": "application/json"}
+ADMIN_REQUEST_HEADERS = {"Content-Type": "application/json", "Accept": "application/json"}
 if AGENT_ADMIN_API_KEY is not None and 0 < len(AGENT_ADMIN_API_KEY):
     ADMIN_REQUEST_HEADERS["x-api-key"] = AGENT_ADMIN_API_KEY
 
@@ -21,6 +23,9 @@ TOB_ADMIN_API_KEY = os.environ.get("TOB_ADMIN_API_KEY")
 TOB_REQUEST_HEADERS = {}
 if TOB_ADMIN_API_KEY is not None and 0 < len(TOB_ADMIN_API_KEY):
     TOB_REQUEST_HEADERS = {"x-api-key": TOB_ADMIN_API_KEY}
+
+INNKEEPER_HEADERS = ADMIN_REQUEST_HEADERS.copy()
+ISSUER_HEADERS = ADMIN_REQUEST_HEADERS.copy()
 
 TRACE_EVENTS = os.getenv("TRACE_EVENTS", "True").lower() == "true"
 TRACE_LABEL = os.getenv("TRACE_LABEL", "bcreg.controller")
@@ -54,6 +59,113 @@ synced = {}
 MAX_RETRIES = 3
 
 
+def init_traction_wallet(ENV):
+    agent_admin_url = ENV.get("AGENT_ADMIN_URL")
+
+    # create a sub-wallet for our issuer, using traction API's
+    # get the innkeeper wallet info and token
+    admin_tenant_id = ENV.get("TRACTION_INNKEEPER_TENANT_ID")
+    admin_wallet_key = ENV.get("TRACTION_INNKEEPER_WALLET_KEY")
+
+    # POST /multitenancy/wallet/628473c8-2ef1-45e1-99b0-f303fe8e0da5/token {wallet_key} returns token
+    # get innkeeper token
+    data = {
+        "wallet_key": admin_wallet_key,
+    }
+    res = requests.post(
+        f"{agent_admin_url}/multitenancy/tenant/{admin_tenant_id}/token", json=data
+    )
+    innkeeper_token = res.json()["token"]
+
+    # as tenant, request a reservation
+    # POST /multitenancy/reservations returns reservation id
+    reservation_name = "orgbook_res"
+    data = {
+        "contact_email": "issuer@mail.com",
+        "contact_name": reservation_name,
+        "contact_phone": "123-555-5555",
+        "tenant_name": reservation_name,
+        "tenant_reason": "Issue credentials to OrgBook",
+    }
+    res = requests.post(f"{agent_admin_url}/multitenancy/reservations", json=data)
+    reservation_id = res.json()["reservation_id"]
+
+    # as innkeeper, approve the reservation
+    # POST /innkeeper/reservations/e92e1faa-a4bf-4c08-ac74-37f6be52e70d/approve returns reservation_pwd
+    data = {
+        "state_notes": "go for it",
+    }
+    INNKEEPER_HEADERS["Authorization"] = f"Bearer {innkeeper_token}"
+    res = requests.put(
+        f"{agent_admin_url}/innkeeper/reservations/{reservation_id}/approve",
+        headers=INNKEEPER_HEADERS,
+        json=data,
+    )
+    reservation_pwd = res.json()["reservation_pwd"]
+
+    # as tenant, get a token
+    # POST /multitenancy/reservations/e92e1faa-a4bf-4c08-ac74-37f6be52e70d/check-in with reservation_pwd, returns token
+    data = {
+        "reservation_pwd": reservation_pwd,
+    }
+    res = requests.post(
+        f"{agent_admin_url}/multitenancy/reservations/{reservation_id}/check-in", json=data
+    )
+    reservation_result = res.json()
+    issr_token = reservation_result["token"]
+    ISSUER_HEADERS["Authorization"] = f"Bearer {issr_token}"
+
+    # setup wehooks for the tenant (these next 2 calls essentially bypass "traction")
+    # get the tenant's wallet id
+    res = requests.get(
+        f"{agent_admin_url}/multitenancy/wallets?wallet_name={reservation_name}",
+        headers=ADMIN_REQUEST_HEADERS,
+    )
+    resp = res.json()
+    wallet_id = resp["results"][0]["wallet_id"]
+    # update webhook - PUT /multitenancy/wallet/{wallet_id}
+    webhook_url = ENV.get("WEBHOOK_URL")
+    data = {
+        "wallet_dispatch_type": "default",
+        "wallet_webhook_urls": [
+            webhook_url
+        ]
+    }
+    res = requests.put(
+        f"{agent_admin_url}/multitenancy/wallet/{wallet_id}",
+        headers=ADMIN_REQUEST_HEADERS,
+        json=data,
+    )
+
+    # create a public DID for our tenant/issuer
+    # POST /wallet/did/create returns did, verkey
+    data = {"method": "sov", "options": {"key_type": "ed25519"}}
+    res = requests.post(
+        f"{agent_admin_url}/wallet/did/create", headers=ISSUER_HEADERS, json=data
+    )
+    wallet_did_create_result = res.json()["result"]
+    wallet_create_did = wallet_did_create_result["did"]
+    wallet_create_verkey = wallet_did_create_result["verkey"]
+
+    # POST ${LEDGER_URL}/register with did, verkey, alias
+    data = {"did": wallet_create_did, "verkey": wallet_create_verkey, "alias": "orgbook_issuer", "role": "ENDORSER"}
+    res = requests.post(
+        f"{LEDGER_URL}/register", headers={"Content-Type": "application/json", "Accept": "application/json"}, json=data
+    )
+    resp = res.json()
+    # wait for ledger to sync
+    time.sleep(3)
+
+    # POST /wallet/did/public with did
+    res = requests.post(
+        f"{agent_admin_url}/wallet/did/public?did={wallet_create_did}", headers=ISSUER_HEADERS
+    )
+
+    # store innkeeper and tenant info globally
+
+    pass
+
+
 def agent_post_with_retry(url, payload, headers=None):
     retries = 0
     while True:
@@ -82,14 +194,14 @@ def agent_schemas_cred_defs(agent_admin_url):
     # get loaded cred defs and schemas
     response = requests.get(
         agent_admin_url + "/schemas/created",
-        headers=ADMIN_REQUEST_HEADERS,
+        headers=ISSUER_HEADERS,
     )
     response.raise_for_status()
     schemas = response.json()["schema_ids"]
     for schema_id in schemas:
         response = requests.get(
             agent_admin_url + "/schemas/" + schema_id,
-            headers=ADMIN_REQUEST_HEADERS,
+            headers=ISSUER_HEADERS,
         )
         response.raise_for_status()
         schema = response.json()["schema"]
@@ -102,14 +214,14 @@ def agent_schemas_cred_defs(agent_admin_url):
 
     response = requests.get(
         agent_admin_url + "/credential-definitions/created",
-        headers=ADMIN_REQUEST_HEADERS,
+        headers=ISSUER_HEADERS,
     )
     response.raise_for_status()
     cred_defs = response.json()["credential_definition_ids"]
     for cred_def_id in cred_defs:
         response = requests.get(
             agent_admin_url + "/credential-definitions/" + cred_def_id,
-            headers=ADMIN_REQUEST_HEADERS,
+            headers=ISSUER_HEADERS,
         )
         response.raise_for_status()
         cred_def = response.json()["credential_definition"]
@@ -185,10 +297,11 @@ def register_issuer_with_orgbook(connection_id):
         response = requests.post(
             agent_admin_url + "/issuer_registration/send",
             json.dumps(issuer_request),
-            headers=ADMIN_REQUEST_HEADERS,
+            headers=ISSUER_HEADERS,
         )
         response.raise_for_status()
-        response.json()
+        resp = response.json()
+
 
     synced[connection_id] = True
     print("Connection {} is synchronized".format(connection_id))
@@ -218,14 +331,15 @@ class StartupProcessingThread(threading.Thread):
             )
         app_config["AGENT_ADMIN_URL"] = agent_admin_url
 
+        init_traction_wallet(self.ENV)
+
         # get public DID from our agent
         response = requests.get(
             agent_admin_url + "/wallet/did/public",
-            headers=ADMIN_REQUEST_HEADERS,
+            headers=ISSUER_HEADERS,
         )
         result = response.json()
         did = result["result"]
-        LOGGER.info("Fetched DID from agent: %s", did)
         app_config["DID"] = did["did"]
 
         # determine pre-registered schemas and cred defs
@@ -258,7 +372,7 @@ class StartupProcessingThread(threading.Thread):
                 response = agent_post_with_retry(
                     agent_admin_url + "/schemas",
                     json.dumps(schema_request),
-                    headers=ADMIN_REQUEST_HEADERS,
+                    headers=ISSUER_HEADERS,
                 )
                 response.raise_for_status()
                 schema_id = response.json()
@@ -278,7 +392,7 @@ class StartupProcessingThread(threading.Thread):
                 response = agent_post_with_retry(
                     agent_admin_url + "/credential-definitions",
                     json.dumps(cred_def_request),
-                    headers=ADMIN_REQUEST_HEADERS,
+                    headers=ISSUER_HEADERS,
                 )
                 response.raise_for_status()
                 credential_definition_id = response.json()
@@ -301,7 +415,7 @@ class StartupProcessingThread(threading.Thread):
         # check if we have a TOB connection
         response = requests.get(
             agent_admin_url + "/connections?alias=" + tob_connection_params["alias"],
-            headers=ADMIN_REQUEST_HEADERS,
+            headers=ISSUER_HEADERS,
         )
         response.raise_for_status()
         connections = response.json()["results"]
@@ -335,7 +449,7 @@ class StartupProcessingThread(threading.Thread):
                     + "/connections/receive-invitation?alias="
                     + tob_connection_params["alias"],
                     json.dumps(invitation["invitation"]),
-                    headers=ADMIN_REQUEST_HEADERS,
+                    headers=ISSUER_HEADERS,
                 )
                 response.raise_for_status()
                 tob_connection = response.json()
@@ -923,7 +1037,7 @@ def handle_send_credential(cred_input):
             credential_definition_id,
             cred_offer,
             agent_admin_url + "/issue-credential/send",
-            ADMIN_REQUEST_HEADERS,
+            ISSUER_HEADERS,
         )
         thread.start()
         thread.join()

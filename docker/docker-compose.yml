@@ -55,6 +55,7 @@ services:
       AGENT_ADMIN_URL: http://myorg-agent:${AGENT_ADMIN_PORT}
       AGENT_ADMIN_API_KEY: ${AGENT_ADMIN_API_KEY}
       WEBHOOK_PORT: ${WEBHOOK_PORT}
+      WEBHOOK_URL: ${WEBHOOK_URL}
       TOB_CONNECTION_NAME: ${TOB_CONNECTION_NAME}
       TOB_AGENT_ADMIN_URL: ${TOB_AGENT_ADMIN_URL}
       TOB_ADMIN_API_KEY: ${TOB_ADMIN_API_KEY}
@@ -64,6 +65,9 @@ services:
       ACK_ERROR_PCT: ${ACK_ERROR_PCT}
       OIDC_JWKS_URI: ${OIDC_JWKS_URI}
       CONTROLLER_API_KEY: ${CONTROLLER_API_KEY}
+      TRACTION_INNKEEPER_TENANT_ID: ${TRACTION_INNKEEPER_TENANT_ID}
+      TRACTION_INNKEEPER_WALLET_NAME: ${TRACTION_INNKEEPER_WALLET_NAME}
+      TRACTION_INNKEEPER_WALLET_KEY: ${TRACTION_INNKEEPER_WALLET_KEY}
     networks:
       - myorg
     ports:
@@ -75,11 +79,11 @@ services:
     entrypoint: >
       /bin/bash -c "
         echo sleeping ...;
-        sleep 15;
+        sleep 35;
         ./docker-entrypoint.sh;"
 
   myorg-agent:
-    image: vcr-agent
+    image: traction-local:acapy
     environment:
       - LEDGER_URL=${LEDGER_URL}
       - WALLET_TYPE=${WALLET_TYPE}
@@ -96,6 +100,18 @@ services:
       - AGENT_WS_IN_PORT=${AGENT_WS_IN_PORT}
       - AGENT_ADMIN_PORT=${AGENT_ADMIN_PORT}
       - AGENT_NAME=${AGENT_NAME}
+      - TRACTION_INNKEEPER_TENANT_ID=${TRACTION_INNKEEPER_TENANT_ID}
+      - TRACTION_INNKEEPER_WALLET_NAME=${TRACTION_INNKEEPER_WALLET_NAME}
+      - TRACTION_INNKEEPER_WALLET_KEY=${TRACTION_INNKEEPER_WALLET_KEY}
+      - TRACTION_INNKEEPER_PRINT_KEY=${TRACTION_INNKEEPER_PRINT_KEY}
+      - TRACTION_INNKEEPER_PRINT_TOKEN=${TRACTION_INNKEEPER_PRINT_TOKEN}
+      - TRACTION_INNKEEPER_RESERVATION_EXPIRY_MINUTES=${TRACTION_INNKEEPER_RESERVATION_EXPIRY_MINUTES}
+      - TRACTION_MULTITENANT_MANAGER_CLASS=${TRACTION_MULTITENANT_MANAGER_CLASS}
+      - TRACTION_MULTITENANT_ALWAYS_CHECK_PROVIDED_WALLET_KEY=${TRACTION_MULTITENANT_ALWAYS_CHECK_PROVIDED_WALLET_KEY}
+      - TRACTION_MULTITENANT_ERRORS_UNNNEEDED_KEY=${TRACTION_MULTITENANT_ERRORS_UNNNEEDED_KEY}
+      - TRACTION_MULTITENANT_TOKENEXPIRY_UNITS=${TRACTION_MULTITENANT_TOKENEXPIRY_UNITS}
+      - TRACTION_MULTITENANT_TOKENEXPIRY_AMOUNT=${TRACTION_MULTITENANT_TOKENEXPIRY_AMOUNT}
+      - JWT_SECRET=${JWT_SECRET}
     networks:
       - orgbook
       - myorg
@@ -108,8 +124,7 @@ services:
     entrypoint: /bin/bash
     command: [
         "-c",
-        "curl -d '{\"seed\":\"${WALLET_SEED_VONX}\", \"role\":\"TRUST_ANCHOR\", \"alias\":\"${AGENT_NAME}\"}' -X POST ${LEDGER_URL}/register; \
-        sleep 5; \
+        "sleep 5; \
         aca-py start \
         --inbound-transport http '0.0.0.0' ${AGENT_HTTP_IN_PORT} \
         --inbound-transport ws '0.0.0.0' ${AGENT_WS_IN_PORT} \
@@ -126,17 +141,34 @@ services:
         --auto-respond-credential-request \
         --auto-verify-presentation \
         --auto-provision \
-        --wallet-type 'indy' \
+        --wallet-type 'askar' \
         --wallet-name 'icat_agent_wallet' \
         --wallet-key '${WALLET_ENCRYPTION_KEY}' \
         --wallet-storage-type '${WALLET_TYPE}' \
         --wallet-storage-config '{\"url\":\"${POSTGRESQL_WALLET_HOST}:${POSTGRESQL_WALLET_PORT}\",\"max_connections\":5}' \
         --wallet-storage-creds '{\"account\":\"${POSTGRESQL_USER}\",\"password\":\"${POSTGRESQL_PASSWORD}\",\"admin_account\":\"postgres\",\"admin_password\":\"${POSTGRESQL_ADMIN_PASSWORD}\"}' \
-        --seed '${WALLET_SEED_VONX}' \
         --admin '0.0.0.0' ${AGENT_ADMIN_PORT} \
         --${AGENT_ADMIN_MODE} \
         --label ${AGENT_NAME} \
-        --plugin indy_catalyst_issuer_registration",
+        --multitenant \
+        --multitenant-admin \
+        --jwt-secret \"${JWT_SECRET}\" \
+        --plugin indy_catalyst_issuer_registration \
+        --plugin traction_plugins.multitenant_provider.v1_0 \
+        --plugin-config-value multitenant_provider.manager.class_name=${TRACTION_MULTITENANT_MANAGER_CLASS} \
+        --plugin-config-value multitenant_provider.manager.always_check_provided_wallet_key=${TRACTION_MULTITENANT_ALWAYS_CHECK_PROVIDED_WALLET_KEY} \
+        --plugin-config-value multitenant_provider.errors.on_unneeded_wallet_key=${TRACTION_MULTITENANT_ERRORS_UNNNEEDED_KEY} \
+        --plugin-config-value multitenant_provider.token_expiry.units=${TRACTION_MULTITENANT_TOKENEXPIRY_UNITS} \
+        --plugin-config-value multitenant_provider.token_expiry.amount=${TRACTION_MULTITENANT_TOKENEXPIRY_AMOUNT} \
+        --plugin traction_plugins.basicmessage_storage.v1_0 \
+        --plugin traction_plugins.traction_innkeeper.v1_0 \
+        --plugin-config-value traction_innkeeper.innkeeper_wallet.tenant_id=${TRACTION_INNKEEPER_TENANT_ID} \
+        --plugin-config-value traction_innkeeper.innkeeper_wallet.wallet_name=${TRACTION_INNKEEPER_WALLET_NAME} \
+        --plugin-config-value traction_innkeeper.innkeeper_wallet.wallet_key=${TRACTION_INNKEEPER_WALLET_KEY} \
+        --plugin-config-value traction_innkeeper.innkeeper_wallet.print_key=${TRACTION_INNKEEPER_PRINT_KEY} \
+        --plugin-config-value traction_innkeeper.innkeeper_wallet.print_token=${TRACTION_INNKEEPER_PRINT_TOKEN} \
+        --plugin-config-value traction_innkeeper.reservation.expiry_minutes=${TRACTION_INNKEEPER_RESERVATION_EXPIRY_MINUTES} \
+        "
       ]
 
   myorg-wallet-db:

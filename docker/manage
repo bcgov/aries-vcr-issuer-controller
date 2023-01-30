@@ -101,6 +101,22 @@ configureEnvironment () {
   export TRACE_MSG_PCT=${TRACE_MSG_PCT:-0}
   export ACK_ERROR_PCT=${ACK_ERROR_PCT:-0}
 
+  # traction settings
+  export TRACTION_INNKEEPER_TENANT_ID=innkeeper
+  export TRACTION_INNKEEPER_WALLET_NAME=traction_innkeeper
+  export TRACTION_INNKEEPER_WALLET_KEY=change-me
+  export TRACTION_INNKEEPER_PRINT_KEY=true
+  export TRACTION_INNKEEPER_PRINT_TOKEN=true
+  export TRACTION_INNKEEPER_RESERVATION_EXPIRY_MINUTES=480
+
+  export TRACTION_MULTITENANT_MANAGER_CLASS=traction_plugins.multitenant_provider.v1_0.manager.AskarMultitokenMultitenantManager
+  export TRACTION_MULTITENANT_ALWAYS_CHECK_PROVIDED_WALLET_KEY=true
+  export TRACTION_MULTITENANT_ERRORS_UNNNEEDED_KEY=false
+  export TRACTION_MULTITENANT_TOKENEXPIRY_UNITS=days
+  export TRACTION_MULTITENANT_TOKENEXPIRY_AMOUNT=1
+
+  export JWT_SECRET=very-secret-secret
+
   # myorg-agent
   export AGENT_ADMIN_PORT=8034
   export TOB_AGENT_ADMIN_PORT=8024

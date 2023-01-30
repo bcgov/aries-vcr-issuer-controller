@@ -112,6 +112,16 @@ def agent_callback(topic):
     """
     Main callback for aries agent.  Dispatches calls based on the supplied topic.
     """
+
+    # handle callbacks for our tenant agent only
+    # get header "x-wallet-id"
+    wallet_id = request.headers.get('x-wallet-id')
+    if not wallet_id:
+        response = jsonify({})
+        return response
+
+    # TODO validate the wallet_id (right now we just have 1 so if the header is there assume it's ok)
+
     start_time = time.perf_counter()
     method = "agent_callback." + topic
 
