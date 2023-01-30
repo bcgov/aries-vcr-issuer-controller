@@ -73,7 +73,9 @@ def init_traction_wallet(ENV):
         "wallet_key": admin_wallet_key,
     }
     res = requests.post(
-        f"{agent_admin_url}/multitenancy/tenant/{admin_tenant_id}/token", json=data
+        f"{agent_admin_url}/multitenancy/tenant/{admin_tenant_id}/token",
+        headers=ADMIN_REQUEST_HEADERS,
+        json=data
     )
     innkeeper_token = res.json()["token"]
 
@@ -87,7 +89,11 @@ def init_traction_wallet(ENV):
         "tenant_name": reservation_name,
         "tenant_reason": "Issue credentials to OrgBook",
     }
-    res = requests.post(f"{agent_admin_url}/multitenancy/reservations", json=data)
+    res = requests.post(
+        f"{agent_admin_url}/multitenancy/reservations",
+        headers=ADMIN_REQUEST_HEADERS,
+        json=data
+    )
     reservation_id = res.json()["reservation_id"]
 
     # as innkeeper, approve the reservation
@@ -109,7 +115,9 @@ def init_traction_wallet(ENV):
         "reservation_pwd": reservation_pwd,
     }
     res = requests.post(
-        f"{agent_admin_url}/multitenancy/reservations/{reservation_id}/check-in", json=data
+        f"{agent_admin_url}/multitenancy/reservations/{reservation_id}/check-in",
+        headers=ADMIN_REQUEST_HEADERS,
+        json=data
     )
     reservation_result = res.json()
     issr_token = reservation_result["token"]
@@ -141,7 +149,9 @@ def init_traction_wallet(ENV):
     # POST /wallet/did/create returns did, verkey
     data = {"method": "sov", "options": {"key_type": "ed25519"}}
     res = requests.post(
-        f"{agent_admin_url}/wallet/did/create", headers=ISSUER_HEADERS, json=data
+        f"{agent_admin_url}/wallet/did/create",
+        headers=ISSUER_HEADERS,
+        json=data,
     )
     wallet_did_create_result = res.json()["result"]
     wallet_create_did = wallet_did_create_result["did"]
@@ -150,7 +160,9 @@ def init_traction_wallet(ENV):
     # POST ${LEDGER_URL}/register with did, verkey, alias
     data = {"did": wallet_create_did, "verkey": wallet_create_verkey, "alias": "orgbook_issuer", "role": "ENDORSER"}
     res = requests.post(
-        f"{LEDGER_URL}/register", headers={"Content-Type": "application/json", "Accept": "application/json"}, json=data
+        f"{LEDGER_URL}/register",
+        headers={"Content-Type": "application/json", "Accept": "application/json"},
+        json=data,
     )
     resp = res.json()
     # wait for ledger to sync
@@ -158,7 +170,8 @@ def init_traction_wallet(ENV):
 
     # POST /wallet/did/public with did
     res = requests.post(
-        f"{agent_admin_url}/wallet/did/public?did={wallet_create_did}", headers=ISSUER_HEADERS
+        f"{agent_admin_url}/wallet/did/public?did={wallet_create_did}",
+        headers=ISSUER_HEADERS,
     )
 
     # store innkeeper and tenant info globally
