@@ -59,7 +59,7 @@ if [ -z "$CMD" ]; then
   generate_passwd_file
   make
   source .venv/bin/activate
-  CMD="flask run --host=${HOST_IP} --port=${HOST_PORT} --with-threads --reload --eager-loading"
+  CMD="flask run --host=${HOST_IP} --port=${HOST_PORT} --with-threads --reload"
 fi
 
 echo "Starting server ..."
