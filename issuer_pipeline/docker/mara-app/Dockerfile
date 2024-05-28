@@ -19,6 +19,7 @@ RUN apt-get update -y \
                 python$python_version \
                 python$python_version-dev \
                 python$python_version-venv \
+                python3-venv \
                 python-psycopg2 \
                 libpq-dev
 
