@@ -145,6 +145,7 @@ configureEnvironment () {
   export APPLICATION_URL=${APPLICATION_URL-http://localhost:${WEB_HTTP_PORT:-5000}}
   export ENDPOINT_URL=http://${ENDPOINT_HOST-$DOCKERHOST:${WEB_HTTP_PORT:-5001}}
   export VONX_API_URL=http://myorg-controller:${WEBHOOK_PORT}
+  export ISSUE_CRED_VERSION=${ISSUE_CRED_VERSION:-"V10"}
 
   # myorg-controller
   # specify this as anything other than "true" to force manual connection to the TOB agent
