@@ -1,5 +1,5 @@
 # pin version of flask to avoid bug in mara-app build
-flask==2.2.5
+flask==2.3.3
 
 # mara
 -e git+https://github.com/mara/mara-app.git@1.5.1#egg=mara-app
