@@ -160,6 +160,7 @@ services:
     environment:
       - WEBHOOK_PORT=${WEBHOOK_PORT}
       - VONX_API_URL=${VONX_API_URL:-http://myorg-controller:8000}
+      - ISSUE_CRED_VERSION=${ISSUE_CRED_VERSION:-V20}
       # [pipeline data source (directory)]
       #- EAO_MDB_DB_HOST=${EAO_MDB_DB_HOST:-mongo}
       #- EAO_MDB_DB_PORT=${EAO_MDB_DB_PORT:-27017}

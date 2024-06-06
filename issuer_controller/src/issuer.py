@@ -659,6 +659,10 @@ def get_credential_response(cred_exch_id):
 TOPIC_CONNECTIONS = "connections"
 TOPIC_CONNECTIONS_ACTIVITY = "connections_actvity"
 TOPIC_CREDENTIALS = "issue_credential"
+TOPIC_CREDENTIALS_V20 = "issue_credential_v2_0"
+TOPIC_CREDENTIALS_V20_INDY = "issue_credential_v2_0_indy"
+TOPIC_PRESENTATIONS = "handle_present_proof"
+TOPIC_PRESENTATIONS_V20 = "present_proof_v2_0"
 TOPIC_PRESENTATIONS = "presentations"
 TOPIC_GET_ACTIVE_MENU = "get-active-menu"
 TOPIC_PERFORM_MENU_ACTION = "perform-menu-action"
@@ -694,7 +698,7 @@ def handle_credentials(state, message):
         )
     else:
         pass
-    if state == "credential_acked":
+    if state == "credential_acked" or state == "done":
         # raise 10% errors
         do_error = random.randint(1, 100)
         if do_error <= ACK_ERROR_PCT:
@@ -711,7 +715,38 @@ def handle_credentials(state, message):
     return jsonify({"message": state})
 
 
+def handle_credentials_v20(state, message):
+    start_time = time.perf_counter()
+    method = "Handle callback:" + state
+    log_timing_event(method, message, start_time, None, False)
+
+    if "thread_id" in message:
+        set_credential_thread_id(
+            message["cred_ex_id"], message["thread_id"]
+        )
+    else:
+        pass
+    if state == "credential_acked" or state == "done":
+        # raise 10% errors
+        #do_error = random.randint(1, 100)
+        #if do_error <= 10:
+        #    raise Exception("Fake exception to test error handling: " + message["thread_id"])
+        response = {"success": True, "result": message["cred_ex_id"]}
+        add_credential_response(message["cred_ex_id"], response)
+
+    end_time = time.perf_counter()
+    processing_time = end_time - start_time
+    log_timing_event(method, message, start_time, end_time, True, outcome=str(state))
+
+    return jsonify({"message": "state"})
+
+
 def handle_presentations(state, message):
+    # TODO auto-respond to proof requests
+    return jsonify({"message": state})
+
+
+def handle_presentations_v20(state, message):
     # TODO auto-respond to proof requests
     return jsonify({"message": state})
 
@@ -763,9 +798,16 @@ class SendCredentialThread(threading.Thread):
             )
             response.raise_for_status()
             cred_data = response.json()
+            credential_exchange_id = None
             if "credential_exchange_id" in cred_data:
+                credential_exchange_id = cred_data["credential_exchange_id"]
                 result_available = add_credential_request(
                     cred_data["credential_exchange_id"]
+                )
+            elif "cred_ex_id" in cred_data:
+                credential_exchange_id = cred_data["cred_ex_id"]
+                result_available = add_credential_request(
+                    cred_data["cred_ex_id"]
                 )
             else:
                 raise Exception(json.dumps(cred_data))
@@ -775,12 +817,12 @@ class SendCredentialThread(threading.Thread):
                 MAX_CRED_RESPONSE_TIMEOUT
             ):
                 add_credential_timeout_report(
-                    cred_data["credential_exchange_id"], cred_data["thread_id"]
+                    credential_exchange_id, cred_data["thread_id"]
                 )
                 LOGGER.error(
                     "Got credential TIMEOUT: %s %s %s",
                     cred_data["thread_id"],
-                    cred_data["credential_exchange_id"],
+                    credential_exchange_id,
                     cred_data["connection_id"],
                 )
                 end_time = time.perf_counter()
@@ -791,7 +833,7 @@ class SendCredentialThread(threading.Thread):
                     False,
                     data={
                         "thread_id": cred_data["thread_id"],
-                        "credential_exchange_id": cred_data["credential_exchange_id"],
+                        "credential_exchange_id": credential_exchange_id,
                         "Error": "Timeout",
                         "elapsed_time": (end_time - start_time),
                     },
@@ -807,7 +849,7 @@ class SendCredentialThread(threading.Thread):
 
             # there should be some form of response available
             self.cred_response = get_credential_response(
-                cred_data["credential_exchange_id"]
+                credential_exchange_id
             )
 
         except Exception as exc:
@@ -818,11 +860,11 @@ class SendCredentialThread(threading.Thread):
             outcome = str(exc)
             if cred_data:
                 add_credential_exception_report(
-                    cred_data["credential_exchange_id"], exc
+                    credential_exchange_id, exc
                 )
                 data = {
                     "thread_id": cred_data["thread_id"],
-                    "credential_exchange_id": cred_data["credential_exchange_id"],
+                    "credential_exchange_id": credential_exchange_id,
                     "Error": str(exc),
                     "elapsed_time": (end_time - start_time),
                 }
@@ -933,5 +975,102 @@ def handle_send_credential(cred_input):
     processing_time = time.perf_counter() - start_time
     print(">>> Processed", processed_count, "credentials in", processing_time)
     print("   ", processing_time / processed_count, "seconds per credential")
+
+    return jsonify(cred_responses)
+
+
+def handle_send_credential_v20(cred_input):
+    """
+    # other sample data
+    sample_credentials = [
+        {
+            "schema": "ian-registration.ian-ville",
+            "version": "1.0.0",
+            "attributes": {
+                "corp_num": "ABC12345",
+                "registration_date": "2018-01-01", 
+                "entity_name": "Ima Permit",
+                "entity_name_effective": "2018-01-01", 
+                "entity_status": "ACT", 
+                "entity_status_effective": "2019-01-01",
+                "entity_type": "ABC", 
+                "registered_jurisdiction": "BC", 
+                "effective_date": "2019-01-01",
+                "expiry_date": ""
+            }
+        },
+        {
+            "schema": "ian-permit.ian-ville",
+            "version": "1.0.0",
+            "attributes": {
+                "permit_id": str(uuid.uuid4()),
+                "entity_name": "Ima Permit",
+                "corp_num": "ABC12345",
+                "permit_issued_date": "2018-01-01", 
+                "permit_type": "ABC", 
+                "permit_status": "OK", 
+                "effective_date": "2019-01-01"
+            }
+        }
+    ]
+    """
+    # construct and send the credential
+    global app_config
+
+    agent_admin_url = app_config["AGENT_ADMIN_URL"]
+
+    start_time = time.perf_counter()
+    processing_time = 0
+    processed_count = 0
+
+    # let's send a credential!
+    cred_responses = []
+    for credential in cred_input:
+        cred_def_key = "CRED_DEF_" + credential["schema"] + "_" + credential["version"]
+        credential_definition_id = app_config["schemas"][cred_def_key]
+
+        credential_attributes = []
+        for attribute in credential["attributes"]:
+            credential_attributes.append({
+                "name": attribute,
+                "value": credential["attributes"][attribute]
+                })
+        cred_offer = {
+          "credential_preview": {
+            "@type": "issue-credential/2.0/credential-preview",
+            "attributes": credential_attributes
+          },
+          "filter": {
+            "indy": {
+                  "schema_id": app_config["schemas"][
+                            "SCHEMA_" + credential["schema"] + "_" + credential["version"]
+                        ],
+                  "schema_name": credential["schema"],
+                  "issuer_did": app_config["DID"],
+                  "schema_version": credential["version"],
+                  "schema_issuer_did": app_config["DID"],
+                  "cred_def_id": credential_definition_id,
+            }
+          },
+          "comment": "",
+          "connection_id": app_config["TOB_CONNECTION"],
+        }
+        do_trace = random.randint(1, 100)
+        if do_trace <= TRACE_MSG_PCT:
+            cred_offer["trace"] = True
+        thread = SendCredentialThread(
+            credential_definition_id,
+            cred_offer,
+            agent_admin_url + "/issue-credential-2.0/send",
+            ADMIN_REQUEST_HEADERS,
+        )
+        thread.start()
+        thread.join()
+        cred_responses.append(thread.cred_response)
+        processed_count = processed_count + 1
+
+    processing_time = time.perf_counter() - start_time
+    print(">>> Processed", processed_count, "credentials in", processing_time)
+    print("   ", processing_time/processed_count, "seconds per credential")
 
     return jsonify(cred_responses)

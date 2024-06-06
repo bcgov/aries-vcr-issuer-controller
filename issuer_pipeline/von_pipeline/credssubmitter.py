@@ -30,6 +30,10 @@ from von_pipeline.config import config
 
 AGENT_URL = os.environ.get('VONX_API_URL', 'http://localhost:5000')
 
+ISSUE_CRED_VERSION = os.getenv('ISSUE_CRED_VERSION', 'V10')
+if not ISSUE_CRED_VERSION in ['V10', 'V20']:
+    raise Exception(f"Unsupported Issue Credential version: {ISSUE_CRED_VERSION}")
+
 CREDS_BATCH_SIZE = 3000
 CREDS_REQUEST_SIZE = 5     # use 1 because it's more likely to trigger deadlocks
 MAX_CREDS_REQUESTS = 16
@@ -48,25 +52,22 @@ async def submit_cred_batch(http_client, creds):
                 'Credentials could not be processed: {}'.format(await response.text())
             )
         result_json = await response.json()
-        #print('Response from von-x:\n{}\n'.format(result_json))
         return result_json
     except Exception as exc:
         print(exc)
         raise 
 
-async def submit_cred(http_client, attrs, schema, version):
+async def submit_cred_batch_v20(http_client, creds):
     try:
         response = await http_client.post(
-            '{}/issue-credential'.format(AGENT_URL),
-            params={'schema': schema, 'version': version},
-            json=attrs
+            '{}/issue-credential-v20'.format(AGENT_URL),
+            json=creds
         )
         if response.status != 200:
             raise RuntimeError(
-                'Credential could not be processed: {}'.format(await response.text())
+                'Credentials could not be processed: {}'.format(await response.text())
             )
         result_json = await response.json()
-        #print('Response from von-x:\n{}\n'.format(result_json))
         return result_json
     except Exception as exc:
         print(exc)
@@ -93,14 +94,10 @@ async def post_credentials(http_client, conn, credentials):
     cur2 = None
     results = None
     try:
-        #print('=============')
-        #print(post_creds)
-        #print('=============')
-        # old code for submitting one credential at a time
-        # result_json = await submit_cred(http_client, credential['CREDENTIAL_JSON'], credential['SCHEMA_NAME'], credential['SCHEMA_VERSION'])
-        results = await submit_cred_batch(http_client, post_creds)
-
-        #print("Posted = ", len(credentials), ", results = ", len(results))
+        if ISSUE_CRED_VERSION == "V20":
+            results = await submit_cred_batch_v20(http_client,post_creds)
+        else:
+            results = await submit_cred_batch(http_client, post_creds)
 
         for i in range(len(credentials)):
             credential = credentials[i]

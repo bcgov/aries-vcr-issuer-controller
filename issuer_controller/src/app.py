@@ -106,6 +106,32 @@ def submit_credential():
     return response
 
 
+@app.route('/issue-credential-v20', methods=['POST'])
+def submit_credential_v20():
+    """
+    Exposed method to proxy credential issuance requests.
+    """
+    if not issuer.tob_connection_synced():
+        abort(503, "Connection not yet synced")
+
+    start_time = time.perf_counter()
+    method = 'submit_credential_v20.batch'
+
+    if not request.json:
+        end_time = time.perf_counter()
+        issuer.log_timing_method(method, start_time, end_time, False)
+        abort(400)
+
+    cred_input = request.json
+
+    response = issuer.handle_send_credential_v20(cred_input)
+
+    end_time = time.perf_counter()
+    issuer.log_timing_method(method, start_time, end_time, True)
+
+    return response
+
+
 @app.route("/api/agentcb/topic/<topic>/", methods=["POST"])
 @authentication.api_key_required
 def agent_callback(topic):
@@ -141,12 +167,26 @@ def agent_callback(topic):
         else:
             response = jsonify({})
 
+    elif topic == issuer.TOPIC_CREDENTIALS_V20 or topic == issuer.TOPIC_CREDENTIALS_V20_INDY:
+        if "state" in message:
+            method = method + '.' + message["state"]
+            response =  issuer.handle_credentials_v20(message["state"], message)
+        else:
+            response =  jsonify({})
+
     elif topic == issuer.TOPIC_PRESENTATIONS:
         if "state" in message:
             method = method + "." + message["state"]
             response = issuer.handle_presentations(message["state"], message)
         else:
             response = jsonify({})
+
+    elif topic == issuer.TOPIC_PRESENTATIONS_V20:
+        if "state" in message:
+            method = method + '.' + message["state"]
+            response =  issuer.handle_presentations_v20(message["state"], message)
+        else:
+            response =  jsonify({})
 
     elif topic == issuer.TOPIC_GET_ACTIVE_MENU:
         response = issuer.handle_get_active_menu(message)
