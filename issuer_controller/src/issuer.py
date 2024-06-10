@@ -324,7 +324,13 @@ class StartupProcessingThread(threading.Thread):
                     "agent_admin_url"
                 ]
                 response = requests.post(
-                    tob_agent_admin_url + "/connections/create-invitation",
+                    tob_agent_admin_url + "/out-of-band/create-invitation"
+                    + "?auto_accept=true&use_existing_connection=true",
+                    json.dumps({
+                        "handshake_protocols": [
+                            "https://didcomm.org/didexchange/1.0"
+                        ]
+                    }),
                     headers=TOB_REQUEST_HEADERS,
                 )
                 response.raise_for_status()
@@ -332,8 +338,9 @@ class StartupProcessingThread(threading.Thread):
 
                 response = requests.post(
                     agent_admin_url
-                    + "/connections/receive-invitation?alias="
-                    + tob_connection_params["alias"],
+                    + "/out-of-band/receive-invitation?alias="
+                    + tob_connection_params["alias"]
+                    + "&auto_accept=true&use_existing_connection=true",
                     json.dumps(invitation["invitation"]),
                     headers=ADMIN_REQUEST_HEADERS,
                 )
