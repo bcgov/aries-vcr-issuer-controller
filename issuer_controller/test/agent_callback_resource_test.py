@@ -28,16 +28,7 @@ def test_agent_callback_TOPIC_CONNECTIONS_empty(test_client):
     get_data = json.loads(get_resp.data.decode())
     assert get_data == {}
 
-def test_agent_callback_TOPIC_CONNECTIONS_ACTIVITY_empty(test_client):
-    data = {
-        "test":"value"
-    }
-    get_resp = test_client.post(f'/api/agentcb/topic/'+issuer.TOPIC_CONNECTIONS_ACTIVITY+'/', json=data)
-    assert get_resp.status_code == 200
-    get_data = json.loads(get_resp.data.decode())
-    assert get_data == {}
 
-    
 def test_agent_callback_TOPIC_CREDENTIALS_empty(test_client):
     data = {
         "test":"value"

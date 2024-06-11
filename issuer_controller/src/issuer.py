@@ -664,7 +664,6 @@ def get_credential_response(cred_exch_id):
 
 
 TOPIC_CONNECTIONS = "connections"
-TOPIC_CONNECTIONS_ACTIVITY = "connections_actvity"
 TOPIC_CREDENTIALS = "issue_credential"
 TOPIC_CREDENTIALS_V20 = "issue_credential_v2_0"
 TOPIC_CREDENTIALS_V20_INDY = "issue_credential_v2_0_indy"

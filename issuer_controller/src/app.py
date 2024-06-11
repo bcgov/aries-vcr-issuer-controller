@@ -157,9 +157,6 @@ def agent_callback(topic):
         else:
             response = jsonify({})
 
-    elif topic == issuer.TOPIC_CONNECTIONS_ACTIVITY:
-        response = jsonify({})
-
     elif topic == issuer.TOPIC_CREDENTIALS:
         if "state" in message:
             method = method + "." + message["state"]
